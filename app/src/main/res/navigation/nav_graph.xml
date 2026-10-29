@@ -11,11 +11,11 @@
         android:label="@string/title_albums"
         tools:layout="@layout/album_fragment">
         <action
-            android:id="@+id/action_albumFragment_to_commentFragment"
-            app:destination="@id/commentFragment" />
-        <action
             android:id="@+id/action_albumFragment_to_collectorFragment"
             app:destination="@id/collectorFragment" />
+        <action
+            android:id="@+id/action_albumFragment_to_albumDetailFragment"
+            app:destination="@id/albumDetailFragment" />
     </fragment>
 
     <fragment
@@ -28,11 +28,13 @@
             app:destination="@id/albumFragment" />
     </fragment>
 
+
     <fragment
-        android:id="@+id/commentFragment"
-        android:name="com.example.vinyls_application.ui.CommentFragment"
-        android:label="@string/title_comments"
-        tools:layout="@layout/comment_fragment">
+        android:id="@+id/albumDetailFragment"
+        android:name="com.example.vinyls_application.ui.AlbumDetailFragment"
+        android:label="@string/title_album_detail"
+        tools:layout="@layout/album_detail_fragment">
+
         <argument
             android:name="albumId"
             app:argType="integer" />

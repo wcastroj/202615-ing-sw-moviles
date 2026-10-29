@@ -20,4 +20,5 @@
     <string name="title_albums">Albums</string>
     <string name="title_collectors">Coleccionistas</string>
     <string name="title_comments">Comentarios del álbum</string>
+    <string name="title_album_detail">Detalle del Álbum</string>
 </resources>
