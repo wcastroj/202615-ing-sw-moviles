@@ -5,6 +5,7 @@
 *.dex
 *.class
 
+gradle/gradle-daemon-jvm.properties
 .gradle/
 /build/
 */build/
@@ -26,6 +27,7 @@ local.properties
 .idea/modules.xml
 .idea/navEditor.xml
 .idea/deploymentTargetSelector.xml
+.idea/misc.xml
 
 .externalNativeBuild/
 .cxx/
