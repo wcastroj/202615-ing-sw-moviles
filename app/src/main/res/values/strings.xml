@@ -21,4 +21,10 @@
     <string name="title_collectors">Coleccionistas</string>
     <string name="title_comments">Comentarios del álbum</string>
     <string name="title_album_detail">Detalle del Álbum</string>
+    <string name="catalog_card_action_default">Explorar →</string>
+    <string name="navigation_home">Inicio</string>
+    <string name="navigation_albums">Álbumes</string>
+    <string name="navigation_artists">Artistas</string>
+    <string name="header_home">Vivo Sonika</string>
+    <string name="header_return">Volver</string>
 </resources>

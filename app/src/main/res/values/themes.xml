@@ -37,4 +37,12 @@
         <item name="android:paddingLeft">12dp</item>
         <item name="android:paddingRight">12dp</item>
     </style>
+  
+    <style name="NavigationWidget.Text" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="NavigationWidget.TextActive" parent="NavigationWidget.Text">
+        <item name="android:textStyle">bold</item>
+    </style>
 </resources>
