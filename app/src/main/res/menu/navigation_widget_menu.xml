@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Item ids must match destination ids in nav_graph.xml so setupWithNavController can route them -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@id/albumFragment"
+        android:icon="@drawable/ic_home"
+        android:title="@string/navigation_home" />
+    <item
+        android:id="@+id/navigation_albums"
+        android:icon="@drawable/ic_library_music"
+        android:title="@string/navigation_albums" />
+    <item
+        android:id="@+id/navigation_artists"
+        android:icon="@drawable/ic_explore"
+        android:title="@string/navigation_artists" />
+</menu>

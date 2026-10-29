@@ -22,4 +22,11 @@
     <style name="RoundedImageView">
         <item name="cornerSize">16dp</item>
     </style>
+    <style name="NavigationWidget.Text" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="NavigationWidget.TextActive" parent="NavigationWidget.Text">
+        <item name="android:textStyle">bold</item>
+    </style>
 </resources>
