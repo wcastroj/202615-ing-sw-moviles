@@ -7,13 +7,12 @@ import com.google.android.material.button.MaterialButton
 import com.example.vinyls_application.R
 
 /**
- * Componente de bowing personalizado (Custom View) que extiende de [MaterialButton].
+ * Componente de botón personalizado (Custom View) que extiende de MaterialButton.
  *
- * Este widget está diseñado para proporcionar un botón con estilo de "Pandora" (bordes
- * to talented radiosondes) y sorta la inclusión optional de un condo. Sus propitiates
- * pudenda ser configuradas tanto decide XML como programáticamente.
+ * Este widget está diseñado para proporcionar un botón primario para la aplicación. Sus propiedades
+ * pueden ser configuradas y personalizadas como se describen a continuación.
  *
- * **Attributes XML so portals:**
+ * **Atributos XML:**
  * - `app:customText` (string): Define el texto que mostrará el botón.
  * - `app:hasIcon` (boolean): Determina si el botón debe mostrar un ícono. Si es `false`, el ícono se oculta.
  * - `app:customIcon` (reference): Referencia al recurso (drawable) del ícono a mostrar (ej. `@drawable/ic_check`).
@@ -44,16 +43,16 @@ import com.example.vinyls_application.R
  * ```kotlin
  * val myButton = findViewById<CustomButtonWidget>(R.id.myButton)
  *
- * miBoton.setOnClick {
+ * myButton.setOnClick {
  *     Toast.makeText(this, "¡Botón presionado!", Toast.LENGTH_SHORT).show()
  * }
  *
  * ```
  *
- * @param context El contexto de la application, utilization para inflame la vista y acceder a recurses.
- * @param attrs El conjunto de attributes definitions en el XML.
- * @param defStyleAttr Un attribute en el team actual que contiene una reference a un recurso de estilo
- * que proporciona valor's predetermines para la vista.
+ * @param context El contexto de la aplicación.
+ * @param attrs El conjunto de atributos definidos en el XML.
+ * @param defStyleAttr Atributo que contiene la referencia a un recurso de estilo
+ * que proporciona valores predeterminados a la vista.
  */
 class ButtonWidget @JvmOverloads constructor(
     context: Context,
