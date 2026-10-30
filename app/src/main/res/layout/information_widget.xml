@@ -24,7 +24,7 @@
             android:contentDescription="@null"
             android:padding="20dp"
             android:scaleType="fitCenter"
-            tools:src="@drawable/Sin_album" />
+            tools:src="@drawable/sinalbum" />
     </com.google.android.material.card.MaterialCardView>
 
     <!-- TITLE -->
