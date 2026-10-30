@@ -49,54 +49,11 @@
             android:visibility="gone"
             tools:visibility="gone">
 
-            <!-- Icon Container -->
-            <FrameLayout
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:background="@drawable/bg_circle_icon"
-                android:elevation="4dp">
-
-                <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_signal_off"
-                    app:tint="#7C3AED" />
-            </FrameLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:gravity="center"
-                android:text="¡Ups! Algo se\ndesafinó en la señal"
-                android:textColor="#111111"
-                android:textSize="22sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:gravity="center"
-                android:text="Algo inesperado ha ocurrido.\nIntenta más tarde."
-                android:textColor="#757575"
-                android:textSize="14sp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnRetry"
+            <!-- InformationWidget -->
+            <com.example.vinyls_application.ui.widgets.InformationWidget
+                android:id="@+id/errorInformationWidget"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:layout_marginTop="36dp"
-                android:backgroundTint="#7C3AED"
-                android:text="Volver a Inicio"
-                android:textAllCaps="false"
-                android:textColor="@android:color/white"
-                android:textSize="16sp"
-                app:cornerRadius="26dp"
-                app:icon="@drawable/ic_home"
-                app:iconGravity="textStart"
-                app:iconTint="@android:color/white" />
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
 
