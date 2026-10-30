@@ -24,13 +24,14 @@ import com.example.vinyls_application.databinding.SummaryCardWidgetBinding
  *
  * **Ejemplo de uso en Kotlin:**
  * ```kotlin
- * val summaryCard = findViewById<SummaryCardWidget>(R.id.summaryCard)
- * 
- * summaryCard.setContent(
- *     id = "100",
- *     title = "Heartbreak Avenue",
- *     subtitle = "3:45"
- * )
+ * override fun onViewCrated(...) {
+ *  // ...
+ *  binding.summaryCard.setContent(
+ *       id = "100",
+ *       title = "Heartbreak Avenue",
+ *       subtitle = "3:45"
+ *  )
+ * }
  * ```
  *
  * @param context El contexto de la aplicación.
