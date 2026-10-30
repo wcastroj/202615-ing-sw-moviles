@@ -18,7 +18,7 @@ import com.example.vinyls_application.models.Comment
 import com.example.vinyls_application.models.Performer
 import com.example.vinyls_application.models.Track
 
-class NetworkServiceAdapter constructor(context: Context) {
+class NetworkServiceAdapter constructor(context: Context, queue: RequestQueue? = null) {
     companion object{
         const val BASE_URL= "https://backvynils-q6yc.onrender.com/"
         var instance: NetworkServiceAdapter? = null
@@ -28,10 +28,70 @@ class NetworkServiceAdapter constructor(context: Context) {
                     instance = it
                 }
             }
+
+        fun parseAlbumDetail(response: String): AlbumDetail {
+            val resp = JSONObject(response)
+            val tracks = mutableListOf<Track>()
+            val tracksJson = resp.getJSONArray("tracks")
+
+            for (i in 0 until tracksJson.length()) {
+                val t = tracksJson.getJSONObject(i)
+                tracks.add(
+                    Track(
+                        trackId = t.getInt("id"),
+                        name = t.getString("name"),
+                        duration = t.getString("duration")
+                    )
+                )
+            }
+
+            val performers = mutableListOf<Performer>()
+            val performersJson = resp.getJSONArray("performers")
+            for (i in 0 until performersJson.length()) {
+                val p = performersJson.getJSONObject(i)
+                performers.add(
+                    Performer(
+                        id = p.getInt("id"),
+                        name = p.getString("name"),
+                        image = p.getString("image"),
+                        description = p.getString("description"),
+                        birthDate = if (p.has("birthDate")) p.getString("birthDate") else null,
+                        creationDate = if (p.has("creationDate")) p.getString("creationDate") else null
+                    )
+                )
+            }
+            val comments = mutableListOf<Comment>()
+            val commentsJson = resp.getJSONArray("comments")
+
+            for (i in 0 until commentsJson.length()) {
+                val c = commentsJson.getJSONObject(i)
+                comments.add(
+                    Comment(
+                        commentId = c.getInt("id"),
+                        description = c.getString("description"),
+                        rating = c.getString("rating")
+                    )
+                )
+            }
+
+            val albumDetail = AlbumDetail(
+                albumId = resp.getInt("id"),
+                name = resp.getString("name"),
+                cover = resp.getString("cover"),
+                releaseDate = resp.getString("releaseDate"),
+                description = resp.getString("description"),
+                genre = resp.getString("genre"),
+                recordLabel = resp.getString("recordLabel"),
+                tracks = tracks,
+                performers = performers,
+                comments = comments
+            )
+            return albumDetail
+        }
     }
     private val requestQueue: RequestQueue by lazy {
         // applicationContext keeps you from leaking the Activity or BroadcastReceiver if someone passes one in.
-        Volley.newRequestQueue(context.applicationContext)
+        queue ?: Volley.newRequestQueue(context.applicationContext)
     }
     fun getAlbums( onComplete:(resp:List<Album>)->Unit , onError: (error:VolleyError)->Unit){
         requestQueue.add(getRequest("albums",
@@ -52,63 +112,7 @@ class NetworkServiceAdapter constructor(context: Context) {
     fun getAlbumDetail( id: Int, onComplete:(resp: AlbumDetail)-> Unit, onError: (error: VolleyError)->Unit){
         requestQueue.add(getRequest("albums/$id",
             { response ->
-                val resp = JSONObject(response)
-                val tracks = mutableListOf<Track>()
-                val tracksJson = resp.getJSONArray("tracks")
-
-                for (i in 0 until tracksJson.length()) {
-                    val t = tracksJson.getJSONObject(i)
-                    tracks.add(
-                        Track(
-                            trackId = t.getInt("id"),
-                            name = t.getString("name"),
-                            duration = t.getString("duration")
-                        )
-                    )
-                }
-
-                val performers = mutableListOf<Performer>()
-                val performersJson = resp.getJSONArray("performers")
-                for (i in 0 until performersJson.length()) {
-                    val p = performersJson.getJSONObject(i)
-                    performers.add(
-                        Performer(
-                            id = p.getInt("id"),
-                            name = p.getString("name"),
-                            image = p.getString("image"),
-                            description = p.getString("description"),
-                            birthDate = if (p.has("birthDate")) p.getString("birthDate") else null,
-                            creationDate = if (p.has("creationDate")) p.getString("creationDate") else null
-                        )
-                    )
-                }
-                val comments = mutableListOf<Comment>()
-                val commentsJson = resp.getJSONArray("comments")
-
-                for (i in 0 until commentsJson.length()) {
-                    val c = commentsJson.getJSONObject(i)
-                    comments.add(
-                        Comment(
-                            commentId = c.getInt("id"),
-                            description = c.getString("description"),
-                            rating = c.getString("rating")
-                        )
-                    )
-                }
-
-                val albumDetail = AlbumDetail(
-                    albumId = resp.getInt("id"),
-                    name = resp.getString("name"),
-                    cover = resp.getString("cover"),
-                    releaseDate = resp.getString("releaseDate"),
-                    description = resp.getString("description"),
-                    genre = resp.getString("genre"),
-                    recordLabel = resp.getString("recordLabel"),
-                    tracks = tracks,
-                    performers = performers,
-                    comments = comments
-                )
-                onComplete(albumDetail)
+                onComplete(parseAlbumDetail(response))
             }, {
                 onError(it)
             }
