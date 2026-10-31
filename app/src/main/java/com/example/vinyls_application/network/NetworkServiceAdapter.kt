@@ -32,6 +32,33 @@ class NetworkServiceAdapter constructor(context: Context, queue: RequestQueue? =
                 }
             }
 
+        fun parseAlbums(response: String): List<Album> {
+            val resp = JSONArray(response)
+            val albums = mutableListOf<Album>()
+
+            if (resp.length() == 0) {
+                return albums as List<Album>
+            }
+
+            for (i in 0 until resp.length()) {
+                val album = resp.getJSONObject(i)
+
+                albums.add(
+                    Album(
+                        albumId = album.getInt("id"),
+                        cover = album.getString("cover"),
+                        name = album.getString("name"),
+                        genre = album.getString("genre"),
+                        recordLabel = album.getString("recordLabel"),
+                        releaseDate = album.getString("releaseDate"),
+                        description = album.getString("description")
+                    )
+                )
+            }
+
+            return albums as ArrayList<Album>
+        }
+
         fun parseAlbumDetail(response: String): AlbumDetail {
             val resp = JSONObject(response)
             val tracks = mutableListOf<Track>()
@@ -99,13 +126,7 @@ class NetworkServiceAdapter constructor(context: Context, queue: RequestQueue? =
     fun getAlbums( onComplete:(resp:List<Album>)->Unit , onError: (error:VolleyError)->Unit){
         requestQueue.add(getRequest("albums",
             { response ->
-                val resp = JSONArray(response)
-                val list = mutableListOf<Album>()
-                for (i in 0  until resp.length()) {
-                    val item = resp.getJSONObject(i)
-                    list.add(i, Album(albumId = item.getInt("id"),name = item.getString("name"), cover = item.getString("cover"), recordLabel = item.getString("recordLabel"), releaseDate = item.getString("releaseDate"), genre = item.getString("genre"), description = item.getString("description")))
-                }
-                onComplete(list)
+                onComplete(parseAlbums(response))
             },
             {
                 onError(it)
