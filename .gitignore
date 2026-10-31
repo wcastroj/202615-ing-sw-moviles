@@ -5,7 +5,7 @@
 *.dex
 *.class
 
-gradle/gradle-daemon-jvm.properties
+
 .gradle/
 /build/
 */build/
@@ -17,7 +17,8 @@ local.properties
 *.hprof
 
 *.iml
-.idea/
+.idea/*
+!.idea/codeStyles/
 .kotlin/
 
 .externalNativeBuild/
