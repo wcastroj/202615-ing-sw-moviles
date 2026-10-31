@@ -49,6 +49,12 @@ class AlbumFragment : Fragment() {
             iconRes = R.drawable.ic_signal_off
         )
 
+        binding.emptyInformationWidget.setContent(
+            title = "No se encontraron álbumes",
+            description = "Por ahora no hay álbumes disponibles",
+            iconRes = R.drawable.sinalbum
+        )
+
         // Acción temporal de reintento al hacer clic en el widget
         binding.errorInformationWidget.setOnClickListener {
             binding.layoutError.visibility = View.GONE
@@ -66,9 +72,13 @@ class AlbumFragment : Fragment() {
         viewModel.albums.observe(viewLifecycleOwner, Observer<List<Album>> { list ->
             list.apply {
                 viewModelAdapter!!.Albums = this
+                binding.layoutError.visibility = View.GONE
                 if (this.isNotEmpty()) {
                     binding.layoutContent.visibility = View.VISIBLE
-                    binding.layoutError.visibility = View.GONE
+                    binding.layoutEmpty.visibility = View.GONE
+                } else {
+                    binding.layoutContent.visibility = View.GONE
+                    binding.layoutEmpty.visibility = View.VISIBLE
                 }
             }
         })
@@ -86,6 +96,7 @@ class AlbumFragment : Fragment() {
     private fun onNetworkError() {
         if (!viewModel.isNetworkErrorShown.value!!) {
             binding.layoutContent.visibility = View.GONE
+            binding.layoutEmpty.visibility = View.GONE
             binding.layoutError.visibility = View.VISIBLE
             Toast.makeText(activity, "Network Error", Toast.LENGTH_LONG).show()
             viewModel.onNetworkErrorShown()
