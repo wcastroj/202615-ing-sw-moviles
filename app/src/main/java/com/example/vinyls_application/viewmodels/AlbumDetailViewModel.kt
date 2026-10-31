@@ -42,6 +42,12 @@ class AlbumDetailViewModel(application: Application, private val albumId: Int) :
     fun onNetworkErrorShown() {
         _isNetworkErrorShown.value = true
     }
+
+    // Se reinicia isNetworkErrorShown para que el error se vuelva a mostrar si el reintento falla
+    fun retry() {
+        _isNetworkErrorShown.value = false
+        refreshDataFromNetwork()
+    }
     class Factory(val app: Application, val albumId: Int) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(AlbumDetailViewModel::class.java)) {
