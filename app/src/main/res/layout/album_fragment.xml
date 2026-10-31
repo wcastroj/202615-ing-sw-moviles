@@ -38,6 +38,25 @@
 
         </LinearLayout>
 
+        <!-- ================= EMPTY VIEW (No se encontraron álbumes) ================= -->
+        <LinearLayout
+            android:id="@+id/layoutEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:visibility="gone"
+            tools:visibility="gone">
+
+            <!-- InformationWidget -->
+            <com.example.vinyls_application.ui.widgets.InformationWidget
+                android:id="@+id/emptyInformationWidget"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
         <!-- ================= ERROR VIEW (¡Ups! Algo se desafinó...) ================= -->
         <LinearLayout
             android:id="@+id/layoutError"
