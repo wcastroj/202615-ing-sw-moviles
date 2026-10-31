@@ -4,10 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
+import com.example.vinyls_application.R
 import com.example.vinyls_application.databinding.AlbumDetailFragmentBinding
 import com.example.vinyls_application.models.AlbumDetail
 import com.example.vinyls_application.ui.widgets.CommentItem
@@ -37,6 +39,18 @@ class AlbumDetailFragment : Fragment() {
             this,
             AlbumDetailViewModel.Factory(requireActivity().application, albumId)
         )[AlbumDetailViewModel::class.java]
+
+        binding.errorInformationWidget.setContent(
+            title = "¡Ups! Algo se\ndesafinó en la señal",
+            description = "Algo inesperado ha ocurrido.\nIntenta más tarde.",
+            iconRes = R.drawable.ic_signal_off
+        )
+
+        binding.errorInformationWidget.setOnClickListener {
+            binding.layoutError.visibility = View.GONE
+            binding.layoutContent.visibility = View.VISIBLE
+            viewModel.retry()
+        }
 
         viewModel.album.observe(viewLifecycleOwner, Observer<AlbumDetail> { albumDetail ->
             albumDetail.apply {
@@ -72,16 +86,28 @@ class AlbumDetailFragment : Fragment() {
                 val comments = this.comments
                 for (i in 0 until comments.size) {
                     val comment = comments[i]
-                    val newComment = CommentItem(rating = comment.rating.toInt(), comment = comment.description)
+                    val newComment = CommentItem(rating = comment.rating.toIntOrNull() ?: 0, comment = comment.description)
                     listComment.add(newComment)
                 }
                 binding.commentsList.setComments(listComment)
             }
+        })
+        viewModel.eventNetworkError.observe(viewLifecycleOwner, Observer<Boolean> { isNetworkError ->
+            if (isNetworkError) onNetworkError()
         })
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun onNetworkError() {
+        if (!viewModel.isNetworkErrorShown.value!!) {
+            binding.layoutContent.visibility = View.GONE
+            binding.layoutError.visibility = View.VISIBLE
+            Toast.makeText(requireContext(), "Error de red", Toast.LENGTH_LONG).show()
+            viewModel.onNetworkErrorShown()
+        }
     }
 }
