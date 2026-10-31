@@ -20,7 +20,7 @@ import com.example.vinyls_application.models.Track
 
 class NetworkServiceAdapter constructor(context: Context, queue: RequestQueue? = null) {
     companion object{
-        const val BASE_URL= "https://backvynils-q6yc.onrender.com/"
+        const val BASE_URL= "http://10.0.2.2:3000/"
         var instance: NetworkServiceAdapter? = null
         fun getInstance(context: Context) =
             instance ?: synchronized(this) {
