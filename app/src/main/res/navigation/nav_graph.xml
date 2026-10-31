@@ -8,14 +8,14 @@
     <fragment
         android:id="@+id/albumFragment"
         android:name="com.example.vinyls_application.ui.AlbumFragment"
-        android:label="@string/header_home"
+        android:label="@string/title_albums"
         tools:layout="@layout/album_fragment">
-        <action
-            android:id="@+id/action_albumFragment_to_detailFragment"
-            app:destination="@id/albumDetailFragment" />
         <action
             android:id="@+id/action_albumFragment_to_collectorFragment"
             app:destination="@id/collectorFragment" />
+        <action
+            android:id="@+id/action_albumFragment_to_albumDetailFragment"
+            app:destination="@id/albumDetailFragment" />
     </fragment>
 
     <fragment

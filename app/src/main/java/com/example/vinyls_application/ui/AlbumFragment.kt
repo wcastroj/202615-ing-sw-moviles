@@ -29,60 +29,40 @@ class AlbumFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
+    ): View? {
         _binding = AlbumFragmentBinding.inflate(inflater, container, false)
+        val view = binding.root
         viewModelAdapter = AlbumsAdapter()
-        return binding.root
+        return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
         recyclerView = binding.albumsRv
         recyclerView.layoutManager = GridLayoutManager(context, 2)
         recyclerView.adapter = viewModelAdapter
 
-        // Configuramos tu InformationWidget con el título, descripción e icono
-        binding.errorInformationWidget.setContent(
-            title = "¡Ups! Algo se\ndesafinó en la señal",
-            description = "Algo inesperado ha ocurrido.\nIntenta más tarde.",
-            iconRes = R.drawable.ic_signal_off
-        )
-
-        binding.emptyInformationWidget.setContent(
-            title = "No se encontraron álbumes",
-            description = "Por ahora no hay álbumes disponibles",
-            iconRes = R.drawable.sinalbum
-        )
-
-        // Acción temporal de reintento al hacer clic en el widget
-        binding.errorInformationWidget.setOnClickListener {
+        binding.btnRetry.setOnClickListener {
             binding.layoutError.visibility = View.GONE
             binding.layoutContent.visibility = View.VISIBLE
         }
+    }
 
-        // Inicialización del ViewModel
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
         val activity = requireNotNull(this.activity) {
-            "You can only access the viewModel after onViewCreated()"
+            "You can only access the viewModel after onActivityCreated()"
         }
         activity.actionBar?.title = getString(R.string.title_albums)
-
-        viewModel = ViewModelProvider(this, AlbumViewModel.Factory(activity.application))[AlbumViewModel::class.java]
-
-        viewModel.albums.observe(viewLifecycleOwner, Observer<List<Album>> { list ->
-            list.apply {
+        viewModel = ViewModelProvider(this, AlbumViewModel.Factory(activity.application)).get(AlbumViewModel::class.java)
+        viewModel.albums.observe(viewLifecycleOwner, Observer<List<Album>> {
+            it.apply {
                 viewModelAdapter!!.Albums = this
-                binding.layoutError.visibility = View.GONE
                 if (this.isNotEmpty()) {
                     binding.layoutContent.visibility = View.VISIBLE
-                    binding.layoutEmpty.visibility = View.GONE
-                } else {
-                    binding.layoutContent.visibility = View.GONE
-                    binding.layoutEmpty.visibility = View.VISIBLE
+                    binding.layoutError.visibility = View.GONE
                 }
             }
         })
-
         viewModel.eventNetworkError.observe(viewLifecycleOwner, Observer<Boolean> { isNetworkError ->
             if (isNetworkError) onNetworkError()
         })
@@ -96,7 +76,6 @@ class AlbumFragment : Fragment() {
     private fun onNetworkError() {
         if (!viewModel.isNetworkErrorShown.value!!) {
             binding.layoutContent.visibility = View.GONE
-            binding.layoutEmpty.visibility = View.GONE
             binding.layoutError.visibility = View.VISIBLE
             Toast.makeText(activity, "Network Error", Toast.LENGTH_LONG).show()
             viewModel.onNetworkErrorShown()
