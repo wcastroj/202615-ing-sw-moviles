@@ -2,6 +2,7 @@ package com.example.vinyls_application.network
 
 import android.content.Context
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.Response
@@ -20,7 +21,9 @@ import com.example.vinyls_application.models.Track
 
 class NetworkServiceAdapter constructor(context: Context, queue: RequestQueue? = null) {
     companion object{
-        const val BASE_URL= "https://backvynils-q6yc.onrender.com/"
+        // var (no const) para que las pruebas E2E puedan apuntar a un MockWebServer
+        @VisibleForTesting
+        var BASE_URL = "http://https://backvynils-q6yc.onrender.com/"
         var instance: NetworkServiceAdapter? = null
         fun getInstance(context: Context) =
             instance ?: synchronized(this) {
