@@ -1,4 +1,4 @@
-package com.example.vinyls_application
+package com.example.vinyls_application.e2e
 
 import android.content.Context
 import androidx.recyclerview.widget.RecyclerView
@@ -18,6 +18,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.android.volley.toolbox.Volley
+import com.example.vinyls_application.R
 import com.example.vinyls_application.network.NetworkServiceAdapter
 import com.example.vinyls_application.ui.MainActivity
 import com.example.vinyls_application.utils.VolleyIdlingResource
@@ -33,6 +34,7 @@ import org.junit.runner.RunWith
 
 @LargeTest
 @RunWith(AndroidJUnit4::class)
+
 class AlbumDetailE2ETest {
 
     private lateinit var idlingResource: VolleyIdlingResource
@@ -40,29 +42,15 @@ class AlbumDetailE2ETest {
     private lateinit var server: MockWebServer
     private lateinit var originalBaseUrl: String
 
-    // Si es true, el servidor falso responde 500 al pedir el detalle (lo usa pe006)
-    private var detailFails = false
-
-    // Datos falsos: la lista de álbumes
+    // Datos falsos para pe006: la lista de álbumes
     private val albumsJson = """
         [{"id":100,"name":"Buscando América","cover":"http://localhost/cover.jpg","releaseDate":"1984-08-01T00:00:00.000Z",
           "description":"Primer álbum de Rubén Blades y Seis del Solar.","genre":"Salsa","recordLabel":"Elektra"}]
     """.trimIndent()
 
-    // Datos falsos: el detalle del álbum 100, con canciones, artista y comentario
-    private val albumDetailJson = """
-        {"id":100,"name":"Buscando América","cover":"http://localhost/cover.jpg","releaseDate":"1984-08-01T00:00:00.000Z",
-         "description":"Primer álbum de Rubén Blades y Seis del Solar.","genre":"Salsa","recordLabel":"Elektra",
-         "tracks":[{"id":100,"name":"Decisiones","duration":"5:05"},
-                   {"id":101,"name":"Desapariciones","duration":"6:29"}],
-         "performers":[{"id":100,"name":"Rubén Blades Bellido de Luna","image":"",
-                        "description":"Cantante y compositor panameño.","birthDate":"1948-07-16T00:00:00.000Z"}],
-         "comments":[{"id":100,"description":"The most relevant album of Ruben Blades","rating":5}]}
-    """.trimIndent()
-
     @Before
     fun setUp() {
-        // 1. Servidor falso: responde según la ruta que pida la app
+        // 1. Servidor falso, solo lo usa pe006: la lista responde bien y el detalle responde 500
         server = MockWebServer()
         server.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
@@ -72,15 +60,7 @@ class AlbumDetailE2ETest {
                         .addHeader("Content-Type", "application/json; charset=utf-8")
                         .setBody(albumsJson)
 
-                    "/albums/100" ->
-                        if (detailFails) {
-                            MockResponse().setResponseCode(500)
-                        } else {
-                            MockResponse()
-                                .setResponseCode(200)
-                                .addHeader("Content-Type", "application/json; charset=utf-8")
-                                .setBody(albumDetailJson)
-                        }
+                    "/albums/100" -> MockResponse().setResponseCode(500)
 
                     else -> MockResponse().setResponseCode(404)
                 }
@@ -88,9 +68,8 @@ class AlbumDetailE2ETest {
         }
         server.start()
 
-        // 2. Apuntar la app al servidor falso (guardando la URL real para restaurarla)
+        // 2. Guardar la URL del backend real; pe004 y pe005 la usan tal cual
         originalBaseUrl = NetworkServiceAdapter.BASE_URL
-        NetworkServiceAdapter.BASE_URL = server.url("/").toString()
 
         // 3. Cola de Volley vigilada por el IdlingResource
         val context = ApplicationProvider.getApplicationContext<Context>()
@@ -180,10 +159,12 @@ class AlbumDetailE2ETest {
 
     @Test
     fun pe006_AlbumDetailErrorShowsMessageAndReturnsToList() {
-        // Paso 1: el servidor falso responderá 500 al pedir el detalle
-        detailFails = true
+        // Paso 1: apuntar la app al servidor falso (lista OK, detalle 500) y volver a abrirla
+        NetworkServiceAdapter.BASE_URL = server.url("/").toString()
+        scenario.close()
+        scenario = ActivityScenario.launch(MainActivity::class.java)
 
-        // Paso 2: la lista muestra el álbum
+        // Paso 2: la lista muestra el álbum del servidor falso
         onView(withText("Buscando América")).check(matches(isDisplayed()))
 
         // Paso 3: abrir el álbum; el detalle falla
