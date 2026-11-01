@@ -49,6 +49,7 @@ class AlbumsAdapter : RecyclerView.Adapter<AlbumsAdapter.AlbumViewHolder>(){
             it.onAction = goToDetail
         }
         holder.viewDataBinding.root.setOnClickListener(goToDetail)
+        holder.itemView.setTag(R.id.tag_album_id, album.albumId)
     }
 
     override fun getItemCount(): Int {
