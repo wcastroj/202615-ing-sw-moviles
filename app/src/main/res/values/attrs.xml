@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="customText" format="string" />
+    <attr name="hasIcon" format="boolean" />
+    <attr name="customIcon" format="reference" />
+
+    <declare-styleable name="ButtonWidget">
+        <attr name="customText" />
+        <attr name="hasIcon" />
+        <attr name="customIcon" />
+    </declare-styleable>
+</resources>
