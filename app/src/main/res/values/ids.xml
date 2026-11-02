@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Clave del tag con el id del álbum en cada tarjeta de la lista (lo leen las pruebas E2E) -->
+    <item name="tag_album_id" type="id" />
+</resources>
