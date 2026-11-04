@@ -1,10 +1,9 @@
 name: Build APK
 
-# TODO: change the trigger to push to main branch when ready for production
 on:
-  pull_request:
+  push:
     branches:
-      - develop
+      - release
   workflow_dispatch:
 
 jobs:
@@ -32,7 +31,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: "Vivo_Sonika_v${{ github.run_number  }}"
+          name: "Vivo_Sonika_release_${{ github.run_number  }}"
           path: app/build/outputs/apk/debug/*.apk
           retention-days: 14
           if-no-files-found: error
