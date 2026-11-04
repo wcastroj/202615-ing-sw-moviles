@@ -26,13 +26,13 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Build Debug APK
+      - name: Build APK
         run: ./gradlew assembleDebug -PBACKEND_URL="${{ vars.BACKEND_URL }}" --stacktrace
 
-      - name: Upload Debug APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-${{ github.ref_name }}-${{ github.sha }}
+          name: app-${{ github.run_number  }}
           path: app/build/outputs/apk/debug/*.apk
           retention-days: 14
           if-no-files-found: error

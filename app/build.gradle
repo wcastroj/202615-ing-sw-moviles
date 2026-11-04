@@ -8,7 +8,6 @@ plugins {
 android {
     namespace "com.example.vinyls_application"
     compileSdk 34
-    buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "com.example.vinyls_jetpack_application"
