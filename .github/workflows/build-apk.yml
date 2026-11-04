@@ -32,7 +32,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-${{ github.run_number  }}
+          name: "Vivo_Sonika_v${{ github.run_number  }}"
           path: app/build/outputs/apk/debug/*.apk
           retention-days: 14
           if-no-files-found: error

@@ -68,7 +68,13 @@ android {
             }
         }
     }
+    applicationVariants.all { variant ->
+            variant.outputs.all {
+                outputFileName = "Vivo_Sonika_${variant.name.capitalize()}_v${variant.versionName}.apk"
+            }
+    }
 }
+
 
 dependencies {
 
