@@ -1,5 +1,6 @@
 name: Build APK
 
+# TODO: change the trigger to push to main branch when ready for production
 on:
   pull_request:
     branches:
