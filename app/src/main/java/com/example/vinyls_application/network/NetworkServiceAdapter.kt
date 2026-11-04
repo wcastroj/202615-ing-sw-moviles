@@ -21,9 +21,8 @@ import com.example.vinyls_application.models.Track
 
 class NetworkServiceAdapter constructor(context: Context, queue: RequestQueue? = null) {
     companion object{
-        // var (no const) para que las pruebas E2E puedan apuntar a un MockWebServer
         @VisibleForTesting
-        var BASE_URL = "https://backvynils-q6yc.onrender.com/"
+        var BASE_URL = com.example.vinyls_application.BuildConfig.BACKEND_URL
         var instance: NetworkServiceAdapter? = null
         fun getInstance(context: Context) =
             instance ?: synchronized(this) {
