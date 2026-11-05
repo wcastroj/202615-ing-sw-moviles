@@ -8,11 +8,14 @@ import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.ServerError
 import com.android.volley.VolleyError
+import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.example.vinyls_application.models.AlbumDetail
 import com.example.vinyls_application.network.NetworkServiceAdapter
+import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -129,6 +132,39 @@ class AlbumDetailRepositoryTest {
         assertNull(result)
     }
 
+    @Test
+    fun post_comment_responde_200_y_invoca_onComplete() {
+        var completed = false
+        repository.postComment(100, "Excelente álbum", 5, { completed = true }, { error = it })
+
+        val captor = ArgumentCaptor.forClass(JsonObjectRequest::class.java)
+        verify(requestQueue).add(captor.capture())
+        val request = captor.value
+
+        assertEquals(Request.Method.POST, request.method)
+        assertEquals(NetworkServiceAdapter.BASE_URL + "albums/100/comments", request.url)
+
+        deliverJsonResponse(request, JSONObject("""{"id": 1, "description": "Excelente álbum", "rating": "5"}"""))
+
+        assertTrue(completed)
+        assertNull(error)
+    }
+
+    @Test
+    fun post_comment_responde_error_y_entrega_error() {
+        var completed = false
+        repository.postComment(100, "Excelente álbum", 5, { completed = true }, { error = it })
+
+        val captor = ArgumentCaptor.forClass(JsonObjectRequest::class.java)
+        verify(requestQueue).add(captor.capture())
+        val request = captor.value
+
+        request.deliverError(ServerError(networkResponse(500)))
+
+        assertTrue(error is ServerError)
+        assertFalse(completed)
+    }
+
     private fun capturedRequest(): StringRequest {
         val captor = ArgumentCaptor.forClass(StringRequest::class.java)
         verify(requestQueue).add(captor.capture())
@@ -140,6 +176,19 @@ class AlbumDetailRepositoryTest {
         StringRequest::class.java.getDeclaredMethod("deliverResponse", String::class.java)
             .apply { isAccessible = true }
             .invoke(request, response)
+    }
+
+    private fun deliverJsonResponse(request: JsonObjectRequest, response: JSONObject) {
+        var clazz: Class<*>? = request.javaClass
+        while (clazz != null) {
+            val method = clazz.declaredMethods.firstOrNull { it.name == "deliverResponse" }
+            if (method != null) {
+                method.isAccessible = true
+                method.invoke(request, response)
+                return
+            }
+            clazz = clazz.superclass
+        }
     }
 
     private fun networkResponse(statusCode: Int) =

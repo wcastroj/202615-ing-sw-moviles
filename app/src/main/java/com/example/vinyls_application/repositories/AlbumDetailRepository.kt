@@ -15,4 +15,24 @@ class AlbumDetailRepository (val application: Application) {
             onError(it)
         })
     }
+
+    fun postComment(
+        albumId: Int,
+        comment: String,
+        rating: Int,
+        onComplete: () -> Unit,
+        onError: (VolleyError) -> Unit
+    ) {
+        NetworkServiceAdapter.getInstance(application).postComment(
+            albumId,
+            comment,
+            rating,
+            {
+                onComplete()
+            },
+            { error ->
+                onError(error)
+            }
+        )
+    }
 }

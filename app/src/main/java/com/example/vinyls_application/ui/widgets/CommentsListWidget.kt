@@ -27,21 +27,19 @@ class CommentsListWidget @JvmOverloads constructor(
     init {
         orientation = VERTICAL
 
-        // Título "Comentarios"
         title.text = context.getString(R.string.comments_title)
         title.setTextColor("#1C1B1F".toColorInt())
         title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
         title.setTypeface(title.typeface, Typeface.BOLD)
         addView(title)
 
-        // Contenedor donde van las tarjetas
         container.orientation = VERTICAL
         addView(container, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
     }
 
     fun setComments(comments: List<CommentItem>) {
         container.removeAllViews()
-        title.isVisible = comments.isNotEmpty()
+        title.isVisible = false
 
         val spacing = (12 * resources.displayMetrics.density).toInt()
 
