@@ -7,9 +7,8 @@
     android:background="@drawable/bg_app_transversal"
     tools:context=".ui.MainActivity">
 
-    <include
+    <com.example.vinyls_application.ui.widgets.HeaderWidget
         android:id="@+id/headerWidget"
-        layout="@layout/header_widget"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
@@ -29,9 +28,8 @@
         app:layout_constraintTop_toBottomOf="@+id/headerWidget"
         app:navGraph="@navigation/nav_graph" />
 
-    <include
+    <com.example.vinyls_application.ui.widgets.NavigationWidget
         android:id="@+id/navigationWidget"
-        layout="@layout/navigation_widget"
         android:layout_width="0dp"
         android:layout_height="60dp"
         android:layout_marginStart="12dp"

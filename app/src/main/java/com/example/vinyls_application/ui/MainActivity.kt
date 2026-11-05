@@ -2,12 +2,9 @@ package com.example.vinyls_application.ui
 
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupWithNavController
 import com.example.vinyls_application.R
 import com.example.vinyls_application.databinding.ActivityMainBinding
 
@@ -34,13 +31,15 @@ class MainActivity : AppCompatActivity() {
         // Make sure actions in the ActionBar get propagated to the NavController
 Log.d("act", navController.toString())
         // Keep the HeaderWidget in sync with the current destination
-        binding.headerWidget.onReturn = View.OnClickListener { navController.navigateUp() }
+        binding.headerWidget.setOnReturnClickListener { navController.navigateUp() }
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            binding.headerWidget.header = destination.label?.toString()
-            binding.headerWidget.hasReturn = destination.id !in topLevelDestinations
+            binding.headerWidget.setContent(
+                header = destination.label?.toString(),
+                hasReturn = destination.id !in topLevelDestinations
+            )
         }
         // Bind the bottom NavigationWidget to the NavController
-        binding.navigationWidget.root.setupWithNavController(navController)
+        binding.navigationWidget.setupWithNavController(navController)
 
     }
 

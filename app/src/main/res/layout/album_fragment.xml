@@ -28,13 +28,14 @@
                 android:textSize="24sp"
                 android:textStyle="bold" />
 
-            <androidx.recyclerview.widget.RecyclerView
+            <!-- CatalogListWidget (cuadrícula de CatalogCardWidget) -->
+            <com.example.vinyls_application.ui.widgets.CatalogListWidget
                 android:id="@+id/albumsRv"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                app:spanCount="2"
-                tools:listitem="@layout/catalog_card_widget" />
+                tools:listitem="@layout/catalog_card_widget"
+                tools:spanCount="2"
+                tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager" />
 
         </LinearLayout>
 
