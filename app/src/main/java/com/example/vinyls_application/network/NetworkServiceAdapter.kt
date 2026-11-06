@@ -17,7 +17,10 @@ import com.example.vinyls_application.models.AlbumDetail
 import com.example.vinyls_application.models.Collector
 import com.example.vinyls_application.models.Comment
 import com.example.vinyls_application.models.Performer
+import com.example.vinyls_application.models.PerformerType
 import com.example.vinyls_application.models.Track
+import kotlin.Int
+import kotlin.String
 
 class NetworkServiceAdapter constructor(context: Context, queue: RequestQueue? = null) {
     companion object{
@@ -57,6 +60,56 @@ class NetworkServiceAdapter constructor(context: Context, queue: RequestQueue? =
 
             return albums as ArrayList<Album>
         }
+        fun parseBands(response: String): List<Performer> {
+            val resp = JSONArray(response)
+            val performers = mutableListOf<Performer>()
+
+            if (resp.length() == 0) {
+                return performers as List<Performer>
+            }
+
+            for (i in 0 until resp.length()) {
+                val performer = resp.getJSONObject(i)
+
+                performers.add(
+                    Performer(
+                        id = performer.getInt("id"),
+                        name = performer.getString("name"),
+                        image = performer.getString("image"),
+                        description = performer.getString("description"),
+                        type = PerformerType.BAND,
+                        creationDate = performer.getString("creationDate")
+                    )
+                )
+            }
+
+            return performers as ArrayList<Performer>
+        }
+        fun parseMusicians(response: String): List<Performer> {
+            val resp = JSONArray(response)
+            val performers = mutableListOf<Performer>()
+
+            if (resp.length() == 0) {
+                return performers as List<Performer>
+            }
+
+            for (i in 0 until resp.length()) {
+                val performer = resp.getJSONObject(i)
+
+                performers.add(
+                    Performer(
+                        id = performer.getInt("id"),
+                        name = performer.getString("name"),
+                        image = performer.getString("image"),
+                        description = performer.getString("description"),
+                        type = PerformerType.MUSICIAN,
+                        birthDate = performer.getString("birthDate")
+                    )
+                )
+            }
+
+            return performers as ArrayList<Performer>
+        }
 
         fun parseAlbumDetail(response: String): AlbumDetail {
             val resp = JSONObject(response)
@@ -84,6 +137,8 @@ class NetworkServiceAdapter constructor(context: Context, queue: RequestQueue? =
                         name = p.getString("name"),
                         image = p.getString("image"),
                         description = p.getString("description"),
+                        // Los performers de un álbum vienen mezclados: los músicos traen birthDate
+                        type = if (p.has("birthDate")) PerformerType.MUSICIAN else PerformerType.BAND,
                         birthDate = if (p.has("birthDate")) p.getString("birthDate") else null,
                         creationDate = if (p.has("creationDate")) p.getString("creationDate") else null
                     )
@@ -141,6 +196,25 @@ class NetworkServiceAdapter constructor(context: Context, queue: RequestQueue? =
             }
 
         ))
+    }
+
+    fun getBands(onComplete:(resp:List<Performer>)->Unit, onError: (error:VolleyError)->Unit){
+        requestQueue.add(getRequest("bands",
+            { response ->
+                onComplete(parseBands(response))
+            },
+            {
+                onError(it)
+            }))
+    }
+    fun getMusicians(onComplete:(resp:List<Performer>)->Unit, onError: (error:VolleyError)->Unit){
+        requestQueue.add(getRequest("musicians",
+            { response ->
+                onComplete(parseMusicians(response))
+            },
+            {
+                onError(it)
+            }))
     }
 
     fun postComment(

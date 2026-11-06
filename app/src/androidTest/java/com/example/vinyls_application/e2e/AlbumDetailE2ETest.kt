@@ -27,6 +27,7 @@ import com.example.vinyls_application.R
 import com.example.vinyls_application.models.AlbumDetail
 import com.example.vinyls_application.models.Comment
 import com.example.vinyls_application.models.Performer
+import com.example.vinyls_application.models.PerformerType
 import com.example.vinyls_application.models.Track
 import com.example.vinyls_application.network.NetworkServiceAdapter
 import com.example.vinyls_application.ui.MainActivity
@@ -209,7 +210,8 @@ class AlbumDetailE2ETest {
             },
             performers = (0 until performersJson.length()).map { i ->
                 val p = performersJson.getJSONObject(i)
-                Performer(id = p.getInt("id"), name = p.getString("name"), image = p.getString("image"), description = p.getString("description"))
+                Performer(id = p.getInt("id"), name = p.getString("name"), image = p.getString("image"), description = p.getString("description"),
+                    type = if (p.has("birthDate")) PerformerType.MUSICIAN else PerformerType.BAND)
             },
             comments = (0 until commentsJson.length()).map { i ->
                 val c = commentsJson.getJSONObject(i)

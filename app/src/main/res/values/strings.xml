@@ -28,6 +28,11 @@
     <string name="header_home">Vivo Sonika</string>
     <string name="header_return">Volver</string>
     <string name="comments_title">Comentarios</string>
+    <string name="title_performers">Artistas</string>
+    <string name="performer_type_musician">Músico</string>
+    <string name="performer_type_band">Banda</string>
+    <string name="performers_empty_title">No se encontraron artistas</string>
+    <string name="performers_empty_description">Por ahora no hay artistas disponibles</string>
     <string name="add_comment_rating_label">Tu Calificación:</string>
     <string name="add_comment_placeholder">Escribe tu opinión o reseña sobre este álbum...</string>
     <string name="add_comment_submit_button">Publicar Comentario</string>
