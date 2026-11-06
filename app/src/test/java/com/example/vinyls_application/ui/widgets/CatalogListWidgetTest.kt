@@ -5,6 +5,7 @@ import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.test.core.app.ApplicationProvider
 import com.example.vinyls_application.R
 import com.google.android.material.button.MaterialButton
@@ -91,6 +92,37 @@ class CatalogListWidgetTest {
     @Test
     fun test_CatalogListWidget_ActionButtonClick_InvokesListenerWithItem() {
         var clickedItem: CatalogItem? = null
+        listWidget.setOnItemClickListener { clickedItem = it }
+        listWidget.setItems(items)
+        layoutWidget()
+
+        listWidget.findViewHolderForAdapterPosition(1)!!.itemView
+            .findViewById<MaterialButton>(R.id.btnAction)
+            .performClick()
+
+        assertEquals(items[1], clickedItem)
+    }
+
+    @Test
+    fun test_CatalogListWidget_ListMode_UsesLinearLayoutAndRows() {
+        listWidget.mode = CatalogListWidget.Mode.LIST
+        listWidget.setItems(items)
+        layoutWidget()
+
+        val layoutManager = listWidget.layoutManager
+        assertTrue(layoutManager is LinearLayoutManager && layoutManager !is GridLayoutManager)
+
+        val firstRow = listWidget.findViewHolderForAdapterPosition(0)!!.itemView
+        assertTrue(firstRow is CatalogRowWidget)
+        assertEquals("Buscando América", firstRow.findViewById<TextView>(R.id.txtTitle).text.toString())
+        assertEquals("Salsa", firstRow.findViewById<TextView>(R.id.txtSubtitle).text.toString())
+        assertEquals("Elektra", firstRow.findViewById<TextView>(R.id.txtDetail).text.toString())
+    }
+
+    @Test
+    fun test_CatalogListWidget_ListMode_ActionButtonClick_InvokesListenerWithItem() {
+        var clickedItem: CatalogItem? = null
+        listWidget.mode = CatalogListWidget.Mode.LIST
         listWidget.setOnItemClickListener { clickedItem = it }
         listWidget.setItems(items)
         layoutWidget()
