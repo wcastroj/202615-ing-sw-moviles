@@ -39,4 +39,5 @@
     <string name="add_comment_rating_error">Por favor selecciona una calificación entre 1 y 5.</string>
     <string name="add_comment_text_error">El comentario debe tener más de 1 carácter.</string>
     <string name="add_comment_success">Comentario publicado exitosamente</string>
+    <string name="related_albums_title">Álbumes relacionados</string>
 </resources>
