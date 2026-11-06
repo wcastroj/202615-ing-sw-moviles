@@ -25,11 +25,19 @@ class AlbumDetailViewModel(application: Application, private val albumId: Int) :
     val isNetworkErrorShown: LiveData<Boolean>
         get() = _isNetworkErrorShown
 
+    private val _isLoading = MutableLiveData<Boolean>(false)
+    val isLoading: LiveData<Boolean>
+        get() = _isLoading
+
+    private val _commentPostedSuccess = MutableLiveData<Boolean>(false)
+    val commentPostedSuccess: LiveData<Boolean>
+        get() = _commentPostedSuccess
+
     init {
         refreshDataFromNetwork()
     }
 
-    private fun refreshDataFromNetwork() {
+    fun refreshDataFromNetwork() {
         albumRepository.refreshData(albumId,{
             _album.postValue(it)
             _eventNetworkError.value = false
@@ -37,6 +45,30 @@ class AlbumDetailViewModel(application: Application, private val albumId: Int) :
         },{
             _eventNetworkError.value = true
         })
+    }
+
+    fun addComment(comment: String, rating: Int) {
+        _isLoading.value = true
+        albumRepository.postComment(
+            albumId,
+            comment,
+            rating,
+            {
+                _isLoading.postValue(false)
+                _commentPostedSuccess.postValue(true)
+                _eventNetworkError.postValue(false)
+                _isNetworkErrorShown.postValue(false)
+                refreshDataFromNetwork()
+            },
+            {
+                _isLoading.postValue(false)
+                _eventNetworkError.postValue(true)
+            }
+        )
+    }
+
+    fun onCommentPostedSuccessHandled() {
+        _commentPostedSuccess.value = false
     }
 
     fun onNetworkErrorShown() {
