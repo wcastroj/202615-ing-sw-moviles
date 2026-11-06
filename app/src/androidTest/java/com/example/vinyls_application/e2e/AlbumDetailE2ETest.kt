@@ -108,6 +108,8 @@ class AlbumDetailE2ETest {
 
     @Test
     fun pe004_OpenAlbumDetailAndBackToList() {
+        onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
+        onView(withId(R.id.cardVisitor)).perform(click())
         // Paso 1: la lista de álbumes se ve
         onView(withId(R.id.albumsRv)).check(matches(isDisplayed()))
 
@@ -129,6 +131,8 @@ class AlbumDetailE2ETest {
 
     @Test
     fun pe005_AlbumDetailShowAllInformation() {
+        onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
+        onView(withId(R.id.cardVisitor)).perform(click())
         // Paso 1: la lista de álbumes se ve y tiene al menos una tarjeta
         onView(withId(R.id.albumsRv)).check(matches(allOf(isDisplayed(), hasMinimumChildCount(1))))
 
@@ -226,6 +230,8 @@ class AlbumDetailE2ETest {
         NetworkServiceAdapter.BASE_URL = server.url("/").toString()
         scenario.close()
         scenario = ActivityScenario.launch(MainActivity::class.java)
+        onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
+        onView(withId(R.id.cardVisitor)).perform(click())
 
         // Paso 2: la lista muestra el álbum del servidor falso
         onView(withText("Buscando América")).check(matches(isDisplayed()))

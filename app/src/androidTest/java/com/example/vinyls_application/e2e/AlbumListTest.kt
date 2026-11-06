@@ -3,6 +3,7 @@ package com.example.vinyls_application.e2e
 import android.os.SystemClock
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.Visibility
 import androidx.test.espresso.matcher.ViewMatchers.hasDescendant
@@ -70,6 +71,8 @@ class AlbumListTest {
         assertTrue("El backend no tiene álbumes en ${NetworkServiceAdapter.BASE_URL}", albums.length() > 0)
 
         launchApp()
+        onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
+        onView(withId(R.id.cardVisitor)).perform(click())
 
         waitUntil(timeoutMs = 30_000) { onView(withId(R.id.albumsRv)).check(matches(hasMinimumChildCount(1))) }
         onView(withId(R.id.txtHeader)).check(matches(withText(R.string.header_home)))
@@ -89,6 +92,8 @@ class AlbumListTest {
         givenAlbumsResponse(MockResponse().setResponseCode(200).setBody("[]"))
 
         launchApp()
+        onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
+        onView(withId(R.id.cardVisitor)).perform(click())
 
         waitUntil { onView(withId(R.id.layoutEmpty)).check(matches(isDisplayed())) }
         onView(withText("No se encontraron álbumes")).check(matches(isDisplayed()))
@@ -104,7 +109,8 @@ class AlbumListTest {
         server.shutdown()
 
         launchApp()
-
+        onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
+        onView(withId(R.id.cardVisitor)).perform(click())
         waitUntil { onView(withId(R.id.layoutError)).check(matches(isDisplayed())) }
         onView(withText("¡Ups! Algo se\ndesafinó en la señal")).check(matches(isDisplayed()))
         onView(withId(R.id.layoutContent)).check(matches(withEffectiveVisibility(Visibility.GONE)))
