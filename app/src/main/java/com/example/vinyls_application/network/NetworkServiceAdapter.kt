@@ -1,7 +1,6 @@
 package com.example.vinyls_application.network
 
 import android.content.Context
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.volley.Request
 import com.android.volley.RequestQueue
@@ -14,9 +13,12 @@ import org.json.JSONArray
 import org.json.JSONObject
 import com.example.vinyls_application.models.Album
 import com.example.vinyls_application.models.AlbumDetail
-import com.example.vinyls_application.models.Collector
+import com.example.vinyls_application.models.Band
 import com.example.vinyls_application.models.Comment
+import com.example.vinyls_application.models.Musician
 import com.example.vinyls_application.models.Performer
+import com.example.vinyls_application.models.PerformerBase
+import com.example.vinyls_application.models.PerformerPrize
 import com.example.vinyls_application.models.PerformerType
 import com.example.vinyls_application.models.Track
 import kotlin.Int
@@ -172,11 +174,68 @@ class NetworkServiceAdapter constructor(context: Context, queue: RequestQueue? =
             )
             return albumDetail
         }
+
+        fun parsePerformer(response: String): PerformerBase {
+            val performer = JSONObject(response)
+
+            val id = performer.getInt("id")
+            val name = performer.getString("name")
+            val image = performer.getString("image")
+            val description = performer.getString("description")
+
+            val albums = parseAlbums(performer.getJSONArray("albums").toString())
+            val prizes = parsePrizes(performer.getJSONArray("performerPrizes"))
+
+            return if (performer.has("creationDate")) {
+                Band(
+                    id = id,
+                    name = name,
+                    image = image,
+                    description = description,
+                    albums = albums,
+                    performerPrizes = prizes,
+                    creationDate = performer.getString("creationDate")
+                )
+            } else {
+                Musician(
+                    id = id,
+                    name = name,
+                    image = image,
+                    description = description,
+                    albums = albums,
+                    performerPrizes = prizes,
+                    birthDate = performer.getString("birthDate")
+                )
+            }
+        }
+
+        private fun parsePrizes(resp: JSONArray): List<PerformerPrize> {
+            val prizes = mutableListOf<PerformerPrize>()
+
+            if (resp.length() == 0) {
+                return prizes as List<PerformerPrize>
+            }
+
+            for (i in 0 until resp.length()) {
+                val prize = resp.getJSONObject(i)
+
+                prizes.add(
+                    PerformerPrize(
+                        id = prize.getInt("id"),
+                        premiationDate = prize.getString("premiationDate"),
+                    )
+                )
+            }
+
+            return prizes as ArrayList<PerformerPrize>
+        }
     }
+
     private val requestQueue: RequestQueue by lazy {
         // applicationContext keeps you from leaking the Activity or BroadcastReceiver if someone passes one in.
         queue ?: Volley.newRequestQueue(context.applicationContext)
     }
+
     fun getAlbums( onComplete:(resp:List<Album>)->Unit , onError: (error:VolleyError)->Unit){
         requestQueue.add(getRequest("albums",
             { response ->
@@ -237,6 +296,26 @@ class NetworkServiceAdapter constructor(context: Context, queue: RequestQueue? =
                 postParams,
                 { response ->
                     onComplete(response)
+                },
+                { error ->
+                    onError(error)
+                }
+            )
+        )
+    }
+
+    fun getPerformer(
+        id: Int,
+        type: PerformerType,
+        onComplete: (resp: PerformerBase) -> Unit,
+        onError: (error: VolleyError) -> Unit
+    ) {
+        val path = if (type == PerformerType.BAND) "bands/$id" else "musicians/$id"
+        requestQueue.add(
+            getRequest(
+                path,
+                { response ->
+                    onComplete(parsePerformer(response))
                 },
                 { error ->
                     onError(error)
