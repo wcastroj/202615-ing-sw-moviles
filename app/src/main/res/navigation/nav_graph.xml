@@ -34,7 +34,13 @@
         android:id="@+id/navigation_artists"
         android:name="com.example.vinyls_application.ui.PerformerFragment"
         android:label="@string/header_home"
-        tools:layout="@layout/performer_fragment" />
+        tools:layout="@layout/performer_fragment">
+
+        <action
+            android:id="@+id/action_performerFragment_to_performerDetailFragment"
+            app:destination="@id/performerDetailFragment" />
+
+    </fragment>
 
     <fragment
         android:id="@+id/albumDetailFragment"
@@ -45,6 +51,20 @@
         <argument
             android:name="albumId"
             app:argType="integer" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/performerDetailFragment"
+        android:name="com.example.vinyls_application.ui.PerformerDetailFragment"
+        android:label="Detalle del Artista"
+        tools:layout="@layout/performer_detail_fragment">
+
+        <argument
+            android:name="id"
+            app:argType="integer" />
+        <argument
+            android:name="type"
+            app:argType="com.example.vinyls_application.models.PerformerType" />
     </fragment>
 
 </navigation>
