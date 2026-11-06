@@ -92,6 +92,23 @@ class AlbumDetailFragment : Fragment() {
                 binding.commentsList.setComments(listComment)
             }
         })
+
+        binding.addCommentWidget.onSubmitCommentListener = { rating, comment ->
+            viewModel.addComment(comment, rating)
+        }
+
+        viewModel.isLoading.observe(viewLifecycleOwner, Observer<Boolean> { isLoading ->
+            binding.addCommentWidget.setLoading(isLoading)
+        })
+
+        viewModel.commentPostedSuccess.observe(viewLifecycleOwner, Observer<Boolean> { isSuccess ->
+            if (isSuccess) {
+                binding.addCommentWidget.clearForm()
+                Toast.makeText(requireContext(), getString(R.string.add_comment_success), Toast.LENGTH_SHORT).show()
+                viewModel.onCommentPostedSuccessHandled()
+            }
+        })
+
         viewModel.eventNetworkError.observe(viewLifecycleOwner, Observer<Boolean> { isNetworkError ->
             if (isNetworkError) onNetworkError()
         })

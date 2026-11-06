@@ -143,7 +143,44 @@ class NetworkServiceAdapter constructor(context: Context, queue: RequestQueue? =
         ))
     }
 
+    fun postComment(
+        albumId: Int,
+        comment: String,
+        rating: Int,
+        onComplete: (resp: JSONObject) -> Unit,
+        onError: (error: VolleyError) -> Unit
+    ) {
+        val postParams = JSONObject()
+        postParams.put("description", comment)
+        postParams.put("rating", rating)
+        val collectorObj = JSONObject()
+        collectorObj.put("id", 100)
+        postParams.put("collector", collectorObj)
+
+        requestQueue.add(
+            postRequest(
+                "albums/$albumId/comments",
+                postParams,
+                { response ->
+                    onComplete(response)
+                },
+                { error ->
+                    onError(error)
+                }
+            )
+        )
+    }
+
     private fun getRequest(path:String, responseListener: Response.Listener<String>, errorListener: Response.ErrorListener): StringRequest {
         return StringRequest(Request.Method.GET, BASE_URL+path, responseListener,errorListener)
+    }
+
+    private fun postRequest(
+        path: String,
+        body: JSONObject,
+        responseListener: Response.Listener<JSONObject>,
+        errorListener: Response.ErrorListener
+    ): JsonObjectRequest {
+        return JsonObjectRequest(Request.Method.POST, BASE_URL + path, body, responseListener, errorListener)
     }
 }
