@@ -20,4 +20,12 @@
         <attr name="customText" />
         <attr name="isPrimary" />
     </declare-styleable>
+
+    <declare-styleable name="CatalogListWidget">
+        <!-- grid: cuadrícula de CatalogCardWidget (por defecto); list: lista de CatalogRowWidget -->
+        <attr name="catalogMode" format="enum">
+            <enum name="grid" value="0" />
+            <enum name="list" value="1" />
+        </attr>
+    </declare-styleable>
 </resources>

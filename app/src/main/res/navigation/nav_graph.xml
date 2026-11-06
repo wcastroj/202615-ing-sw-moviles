@@ -27,6 +27,13 @@
 
 
 
+    <!-- El id coincide con el ítem "Artistas" de navigation_widget_menu.xml para que la barra inferior navegue aquí -->
+    <fragment
+        android:id="@+id/navigation_artists"
+        android:name="com.example.vinyls_application.ui.PerformerFragment"
+        android:label="@string/header_home"
+        tools:layout="@layout/performer_fragment" />
+
     <fragment
         android:id="@+id/albumDetailFragment"
         android:name="com.example.vinyls_application.ui.AlbumDetailFragment"
