@@ -23,6 +23,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        if (savedInstanceState == null) {
+            getPreferences(MODE_PRIVATE).edit().clear().apply()
+        }
 
         // Get the navigation host fragment from this Activity
         val navHostFragment = supportFragmentManager
