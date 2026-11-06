@@ -48,9 +48,10 @@ class HeaderWidget @JvmOverloads constructor(
      * @param header Título a mostrar.
      * @param hasReturn `true` para mostrar el botón de regreso.
      */
-    fun setContent(header: String?, hasReturn: Boolean) {
+    fun setContent(header: String?, hasReturn: Boolean , hasLogo: Boolean) {
         binding.txtHeader.text = header
         binding.btnReturn.isVisible = hasReturn
+        binding.ivLogo.isVisible = hasLogo
     }
 
     /** Acción a ejecutar al pulsar el botón de regreso. */

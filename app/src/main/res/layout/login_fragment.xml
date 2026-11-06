@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    tools:context=".ui.LoginFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="24dp"
+        android:paddingBottom="32dp">
+
+        <!-- Main Title -->
+        <TextView
+            android:id="@+id/txtWelcomeTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Bienvenido a tu universo musical"
+            android:textColor="#1E1E1E"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+
+        <!-- Secondary Title -->
+        <TextView
+            android:id="@+id/txtWelcomeSubtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:lineSpacingExtra="4dp"
+            android:text="Selecciona cómo deseas ingresar a la plataforma y sincroniza tus emociones."
+            android:textColor="#5F5F6B"
+            android:textSize="15sp" />
+
+        <!-- Card Visitante -->
+        <com.example.vinyls_application.ui.widgets.RoleCardWidget
+            android:id="@+id/cardVisitor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:background="@drawable/bg_description"
+            android:elevation="2dp"
+            android:padding="20dp"
+            app:customIcon="@drawable/ic_headset"
+            app:roleTitle="Modo Visitante"
+            app:roleDescription="Explora y disfruta el catálogo de álbumes, descubre artistas y lee opiniones de coleccionistas."
+            app:customText="Ingresar como Visitante" />
+
+        <!-- Card Coleccionista -->
+        <com.example.vinyls_application.ui.widgets.RoleCardWidget
+            android:id="@+id/cardCollector"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_description"
+            android:elevation="2dp"
+            android:padding="20dp"
+            app:isPrimary="true"
+            app:customIcon="@drawable/ic_album"
+            app:roleTitle="Modo Coleccionista"
+            app:roleDescription="Gestiona álbumes, añade pistas, comparte reseñas e integra nuevos lanzamientos a los artistas."
+            app:customText="Ingresar como Coleccionista" />
+    </LinearLayout>
+</ScrollView>

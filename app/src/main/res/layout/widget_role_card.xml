@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout"
+    tools:orientation="horizontal"
+    tools:background="@drawable/bg_description"
+    tools:padding="20dp">
+
+    <!-- Image -->
+    <ImageView
+        android:id="@+id/ivRoleIcon"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:background="@drawable/bg_role_icon"
+        android:padding="16dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@null"
+        app:tint="#7C4DFF"
+        tools:src="@drawable/ic_headset" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="16dp"
+        android:orientation="vertical">
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/txtRoleTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#1E1E1E"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            tools:text="Modo Visitante" />
+
+        <!-- Paragraph -->
+        <TextView
+            android:id="@+id/txtRoleDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:lineSpacingExtra="4dp"
+            android:textColor="#5F5F6B"
+            android:textSize="14sp"
+            tools:text="Explora y disfruta el catálogo de álbumes, descubre artistas y lee opiniones de coleccionistas." />
+
+        <!-- Boton normal (Visitante) -->
+        <TextView
+            android:id="@+id/btnRoleEnter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:paddingVertical="6dp"
+            android:background="?attr/selectableItemBackground"
+            android:drawableEnd="@drawable/ic_login"
+            android:drawablePadding="10dp"
+            android:textColor="#1E1E1E"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:visibility="visible"
+            tools:visibility="visible"
+            tools:text="Ingresar como Visitante" />
+
+        <!-- Boton primario (Coleccionista) -->
+        <TextView
+            android:id="@+id/btnRoleEnterPrimary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="14dp"
+            android:background="@drawable/bg_role_button_primary"
+            android:drawableEnd="@drawable/ic_login"
+            android:drawableTint="#FFFFFF"
+            android:drawablePadding="10dp"
+            android:gravity="center"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:visibility="gone"
+            tools:text="Ingresar como Coleccionista" />
+    </LinearLayout>
+</merge>
