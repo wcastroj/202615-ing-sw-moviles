@@ -20,18 +20,9 @@ class CommentsListWidget @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) : LinearLayout(context, attrs) {
-
-    private val title = TextView(context)
     private val container = LinearLayout(context)
-
     init {
         orientation = VERTICAL
-
-        title.text = context.getString(R.string.comments_title)
-        title.setTextColor("#1C1B1F".toColorInt())
-        title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
-        title.setTypeface(title.typeface, Typeface.BOLD)
-        addView(title)
 
         container.orientation = VERTICAL
         addView(container, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
@@ -39,7 +30,6 @@ class CommentsListWidget @JvmOverloads constructor(
 
     fun setComments(comments: List<CommentItem>) {
         container.removeAllViews()
-        title.isVisible = false
 
         val spacing = (12 * resources.displayMetrics.density).toInt()
 

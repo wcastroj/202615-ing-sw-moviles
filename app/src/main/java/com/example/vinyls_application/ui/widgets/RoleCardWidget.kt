@@ -46,6 +46,7 @@ class RoleCardWidget @JvmOverloads constructor(
     }
 
     fun setOnEnterClickListener(listener: OnClickListener?) {
+        setOnClickListener(listener)
         binding.btnRoleEnter.setOnClickListener(listener)
         binding.btnRoleEnterPrimary.setOnClickListener(listener)
     }

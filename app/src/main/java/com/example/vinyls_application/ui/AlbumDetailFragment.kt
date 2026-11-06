@@ -1,10 +1,12 @@
 package com.example.vinyls_application.ui
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -12,6 +14,7 @@ import androidx.navigation.fragment.navArgs
 import com.example.vinyls_application.R
 import com.example.vinyls_application.databinding.AlbumDetailFragmentBinding
 import com.example.vinyls_application.models.AlbumDetail
+import com.example.vinyls_application.ui.LoginFragment.Companion.KEY_IS_COLLECTOR
 import com.example.vinyls_application.ui.widgets.CommentItem
 import com.example.vinyls_application.ui.widgets.SummaryItem
 import com.example.vinyls_application.viewmodels.AlbumDetailViewModel
@@ -22,6 +25,10 @@ class AlbumDetailFragment : Fragment() {
     private val binding get() = _binding!!
     private val args: AlbumDetailFragmentArgs by navArgs()
     private lateinit var viewModel: AlbumDetailViewModel
+
+
+
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,6 +41,9 @@ class AlbumDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE)
+        val isCollector = sharedPref.getBoolean(KEY_IS_COLLECTOR, false)
+
         val albumId = args.albumId
         viewModel = ViewModelProvider(
             this,
@@ -51,6 +61,10 @@ class AlbumDetailFragment : Fragment() {
             binding.layoutContent.visibility = View.VISIBLE
             viewModel.retry()
         }
+
+        binding.buttonAssociateTrack.isVisible = isCollector
+        binding.addCommentWidget.isVisible = isCollector
+
 
         viewModel.album.observe(viewLifecycleOwner, Observer<AlbumDetail> { albumDetail ->
             albumDetail.apply {
@@ -81,7 +95,6 @@ class AlbumDetailFragment : Fragment() {
                     )
                 }
                 binding.performersListWidget.setItems(performerItems)
-
                 val listComment = mutableListOf<CommentItem>()
                 val comments = this.comments
                 for (i in 0 until comments.size) {
@@ -90,7 +103,9 @@ class AlbumDetailFragment : Fragment() {
                     listComment.add(newComment)
                 }
                 binding.commentsList.setComments(listComment)
+                binding.titleComment.isVisible = isCollector || listComment.isNotEmpty()
             }
+
         })
 
         binding.addCommentWidget.onSubmitCommentListener = { rating, comment ->
@@ -112,6 +127,7 @@ class AlbumDetailFragment : Fragment() {
         viewModel.eventNetworkError.observe(viewLifecycleOwner, Observer<Boolean> { isNetworkError ->
             if (isNetworkError) onNetworkError()
         })
+
     }
 
     override fun onDestroyView() {
