@@ -67,6 +67,7 @@
 
         <!-- Comentarios -->
         <TextView
+            android:id = "@+id/titleComment"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/comments_title"

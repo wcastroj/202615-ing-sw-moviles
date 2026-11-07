@@ -45,6 +45,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.net.HttpURLConnection
 import java.net.URL
+import androidx.test.espresso.matcher.ViewMatchers.Visibility
+import androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility
 
 @LargeTest
 @RunWith(AndroidJUnit4::class)
@@ -108,6 +110,8 @@ class AlbumDetailE2ETest {
 
     @Test
     fun pe004_OpenAlbumDetailAndBackToList() {
+        onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
+        onView(withId(R.id.cardVisitor)).perform(click())
         // Paso 1: la lista de álbumes se ve
         onView(withId(R.id.albumsRv)).check(matches(isDisplayed()))
 
@@ -129,6 +133,8 @@ class AlbumDetailE2ETest {
 
     @Test
     fun pe005_AlbumDetailShowAllInformation() {
+        onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
+        onView(withId(R.id.cardVisitor)).perform(click())
         // Paso 1: la lista de álbumes se ve y tiene al menos una tarjeta
         onView(withId(R.id.albumsRv)).check(matches(allOf(isDisplayed(), hasMinimumChildCount(1))))
 
@@ -226,6 +232,8 @@ class AlbumDetailE2ETest {
         NetworkServiceAdapter.BASE_URL = server.url("/").toString()
         scenario.close()
         scenario = ActivityScenario.launch(MainActivity::class.java)
+        onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
+        onView(withId(R.id.cardVisitor)).perform(click())
 
         // Paso 2: la lista muestra el álbum del servidor falso
         onView(withText("Buscando América")).check(matches(isDisplayed()))
@@ -244,5 +252,44 @@ class AlbumDetailE2ETest {
         // Paso 6: se vuelve a la lista
         onView(withId(R.id.albumsRv)).check(matches(isDisplayed()))
         onView(withText("Buscando América")).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun login_AlbumDetailShowsElementsAsACollector() {
+        // Paso 1: entrar como coleccionista
+        onView(withId(R.id.cardCollector)).check(matches(isDisplayed()))
+        onView(withId(R.id.cardCollector)).perform(click())
+
+        // Paso 2: la lista de álbumes se ve y tiene al menos uno
+        onView(withId(R.id.albumsRv)).check(matches(allOf(isDisplayed(), hasMinimumChildCount(1))))
+
+        // Paso 3: abrir el primer álbum
+        onView(withId(R.id.albumsRv))
+            .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
+        onView(withId(R.id.detail_card)).check(matches(isDisplayed()))
+
+        // Paso 4: los elementos de coleccionista se ven
+        onView(withId(R.id.buttonAssociateTrack)).perform(scrollTo()).check(matches(isDisplayed()))
+        onView(withId(R.id.titleComment)).perform(scrollTo()).check(matches(isDisplayed()))
+        onView(withId(R.id.addCommentWidget)).perform(scrollTo()).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun login_AlbumDetailDoesNotShowCollectorElements() {
+        // Paso 1: entrar como visitante
+        onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
+        onView(withId(R.id.cardVisitor)).perform(click())
+
+        // Paso 2: la lista de álbumes se ve y tiene al menos uno
+        onView(withId(R.id.albumsRv)).check(matches(allOf(isDisplayed(), hasMinimumChildCount(1))))
+
+        // Paso 3: abrir el primer álbum
+        onView(withId(R.id.albumsRv))
+            .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
+        onView(withId(R.id.detail_card)).check(matches(isDisplayed()))
+
+        // Paso 4: los elementos de coleccionista están ocultos (GONE)
+        onView(withId(R.id.buttonAssociateTrack)).check(matches(withEffectiveVisibility(Visibility.GONE)))
+        onView(withId(R.id.addCommentWidget)).check(matches(withEffectiveVisibility(Visibility.GONE)))
     }
 }

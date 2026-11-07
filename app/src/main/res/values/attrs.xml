@@ -3,11 +3,22 @@
     <attr name="customText" format="string" />
     <attr name="hasIcon" format="boolean" />
     <attr name="customIcon" format="reference" />
+    <attr name="roleTitle" format="string" />
+    <attr name="roleDescription" format="string" />
+    <attr name="isPrimary" format="boolean" />
 
     <declare-styleable name="ButtonWidget">
         <attr name="customText" />
         <attr name="hasIcon" />
         <attr name="customIcon" />
+    </declare-styleable>
+
+    <declare-styleable name="RoleCardWidget">
+        <attr name="customIcon" />
+        <attr name="roleTitle" />
+        <attr name="roleDescription" />
+        <attr name="customText" />
+        <attr name="isPrimary" />
     </declare-styleable>
 
     <declare-styleable name="CatalogListWidget">

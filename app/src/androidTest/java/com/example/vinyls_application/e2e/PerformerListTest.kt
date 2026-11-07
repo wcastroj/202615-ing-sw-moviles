@@ -184,6 +184,8 @@ class PerformerListTest {
     /** Abre la app (inicia en el catálogo) y toca "Artistas" en la barra inferior. */
     private fun launchAppAndOpenArtists() {
         scenario = ActivityScenario.launch(MainActivity::class.java)
+        onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
+        onView(withId(R.id.cardVisitor)).perform(click())
         waitUntil { onView(withId(R.id.navigation_artists)).perform(click()) }
         // La pantalla de artistas ya está cargada cuando existe su título. Se busca por id porque
         // "Artistas" también es el texto del botón de la barra inferior, y no se exige que sea
