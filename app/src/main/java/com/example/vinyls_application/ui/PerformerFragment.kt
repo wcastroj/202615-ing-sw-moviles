@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.example.vinyls_application.R
 import com.example.vinyls_application.databinding.PerformerFragmentBinding
 import com.example.vinyls_application.models.Performer
@@ -23,6 +24,7 @@ class PerformerFragment : Fragment() {
     private var _binding: PerformerFragmentBinding? = null
     private val binding get() = _binding!!
     private lateinit var viewModel: PerformerViewModel
+    private var performerTypeMap: Map<Int, PerformerType> = emptyMap()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,8 +37,16 @@ class PerformerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.performersRv.setOnItemClickListener {
-            // TODO: navegar al detalle del artista cuando exista (HU de detalle de artista)
+        binding.performersRv.setOnItemClickListener { catalogItem ->
+            val type = performerTypeMap[catalogItem.id]
+            if (type != null) {
+                val action =
+                    PerformerFragmentDirections.actionPerformerFragmentToPerformerDetailFragment(
+                        id = catalogItem.id,
+                        type = type
+                    )
+                findNavController().navigate(action)
+            }
         }
 
         binding.errorInformationWidget.setContent(
@@ -66,6 +76,7 @@ class PerformerFragment : Fragment() {
         )[PerformerViewModel::class.java]
 
         viewModel.performers.observe(viewLifecycleOwner) { list ->
+            performerTypeMap = list.associate { it.id to it.type }
             binding.performersRv.setItems(list.map { it.toCatalogItem() })
             binding.layoutError.visibility = View.GONE
             if (list.isNotEmpty()) {
