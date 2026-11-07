@@ -7,13 +7,14 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.example.vinyls_application.R
 import com.example.vinyls_application.databinding.ActivityMainBinding
+import androidx.core.view.isVisible
 
 class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
 
     // Destinations reachable from the NavigationWidget: they don't show the return arrow
     private val topLevelDestinations = setOf(
-        R.id.albumFragment,
+        R.id.loginFragment,
         R.id.navigation_albums,
         R.id.navigation_artists
     )
@@ -22,6 +23,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        if (savedInstanceState == null) {
+            getPreferences(MODE_PRIVATE).edit().clear().apply()
+        }
 
         // Get the navigation host fragment from this Activity
         val navHostFragment = supportFragmentManager
@@ -35,8 +39,11 @@ Log.d("act", navController.toString())
         navController.addOnDestinationChangedListener { _, destination, _ ->
             binding.headerWidget.setContent(
                 header = destination.label?.toString(),
-                hasReturn = destination.id !in topLevelDestinations
+                hasReturn = destination.id !in topLevelDestinations,
+                hasLogo =  destination.id == R.id.loginFragment
+
             )
+            binding.navigationWidget.isVisible = destination.id != R.id.loginFragment
         }
         // Bind the bottom NavigationWidget to the NavController
         binding.navigationWidget.setupWithNavController(navController)

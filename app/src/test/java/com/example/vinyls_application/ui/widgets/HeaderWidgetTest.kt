@@ -14,6 +14,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import android.widget.ImageView
 
 @RunWith(RobolectricTestRunner::class)
 class HeaderWidgetTest {
@@ -57,5 +58,26 @@ class HeaderWidgetTest {
         header.findViewById<ImageButton>(R.id.btnReturn).performClick()
 
         assertTrue("El callback de regreso debería ejecutarse al hacer clic", returned)
+    }
+    @Test
+    fun test_HeaderWidget_SetContent_WithLogo() {
+        header.setContent(header = "Vivo Sonika", hasReturn = false, hasLogo = true)
+
+        assertEquals(View.VISIBLE, header.findViewById<ImageView>(R.id.ivLogo).visibility)
+        assertEquals(View.GONE, header.findViewById<ImageButton>(R.id.btnReturn).visibility)
+    }
+
+    @Test
+    fun test_HeaderWidget_SetContent_WithoutLogo() {
+        header.setContent(header = "Detalle del Álbum", hasReturn = true, hasLogo = false)
+
+        assertEquals(View.GONE, header.findViewById<ImageView>(R.id.ivLogo).visibility)
+    }
+
+    @Test
+    fun test_HeaderWidget_SetContent_LogoHiddenByDefault() {
+        header.setContent(header = "Inicio", hasReturn = false)
+
+        assertEquals(View.GONE, header.findViewById<ImageView>(R.id.ivLogo).visibility)
     }
 }
