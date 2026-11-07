@@ -40,6 +40,16 @@
                 android:nestedScrollingEnabled="false"
                 tools:listitem="@layout/summary_card_widget" />
 
+            <TextView
+                android:id="@+id/txtEmptyAlbums"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/performer_no_albums"
+                android:textColor="#79747E"
+                android:textSize="14sp"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>

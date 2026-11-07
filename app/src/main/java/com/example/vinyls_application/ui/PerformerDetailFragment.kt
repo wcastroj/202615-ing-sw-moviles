@@ -82,7 +82,14 @@ class PerformerDetailFragment : Fragment() {
                     description = description
                 )
 
-                albumsAdapter.albums = albums
+                if (albums.isEmpty()) {
+                    binding.rvRelatedAlbums.visibility = View.GONE
+                    binding.txtEmptyAlbums.visibility = View.VISIBLE
+                } else {
+                    binding.rvRelatedAlbums.visibility = View.VISIBLE
+                    binding.txtEmptyAlbums.visibility = View.GONE
+                    albumsAdapter.albums = albums
+                }
             }
         })
 
