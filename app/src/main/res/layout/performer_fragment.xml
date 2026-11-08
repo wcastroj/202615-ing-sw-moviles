@@ -29,16 +29,16 @@
                 android:textSize="24sp"
                 android:textStyle="bold" />
 
-            <!-- CatalogListWidget en modo lista (filas de CatalogRowWidget) -->
+            <!-- CatalogListWidget (cuadrícula de CatalogCardWidget, igual que el catálogo de álbumes) -->
             <com.example.vinyls_application.ui.widgets.CatalogListWidget
                 android:id="@+id/performersRv"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
                 android:paddingBottom="16dp"
-                app:catalogMode="list"
-                tools:listitem="@layout/catalog_row_widget"
-                tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+                tools:listitem="@layout/catalog_card_widget"
+                tools:spanCount="2"
+                tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager" />
 
         </LinearLayout>
 
