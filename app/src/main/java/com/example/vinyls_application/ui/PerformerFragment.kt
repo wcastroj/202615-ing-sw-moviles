@@ -17,8 +17,8 @@ import com.example.vinyls_application.ui.widgets.CatalogItem
 import com.example.vinyls_application.viewmodels.PerformerViewModel
 
 /**
- * Lista de artistas (bandas y músicos) usando [com.example.vinyls_application.ui.widgets.CatalogListWidget]
- * en modo lista.
+ * Catálogo de artistas (bandas y músicos) en cuadrícula usando
+ * [com.example.vinyls_application.ui.widgets.CatalogListWidget], igual que el catálogo de álbumes.
  */
 class PerformerFragment : Fragment() {
     private var _binding: PerformerFragmentBinding? = null
