@@ -7,6 +7,7 @@ import com.android.volley.NetworkResponse
 import com.android.volley.RequestQueue
 import com.android.volley.ServerError
 import com.android.volley.toolbox.StringRequest
+import com.example.vinyls_application.MainDispatcherRule
 import com.example.vinyls_application.models.PerformerType
 import com.example.vinyls_application.network.NetworkServiceAdapter
 import com.example.vinyls_application.repositories.PerformerRepository
@@ -17,6 +18,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -64,6 +66,10 @@ class PerformerViewModelTest {
         ]
     """.trimIndent()
 
+    // viewModelScope usa Dispatchers.Main: la regla lo cambia por un TestDispatcher
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
+
     private lateinit var requestQueue: RequestQueue
     private lateinit var viewModel: PerformerViewModel
 
@@ -71,8 +77,9 @@ class PerformerViewModelTest {
     fun setUp() {
         val application = ApplicationProvider.getApplicationContext<Application>()
         requestQueue = mock(RequestQueue::class.java)
-        NetworkServiceAdapter.instance = NetworkServiceAdapter(application, requestQueue)
-        // Al crearse, el ViewModel pide las bandas
+        NetworkServiceAdapter.instance =
+            NetworkServiceAdapter(application, requestQueue, mainDispatcherRule.testDispatcher)
+        // Al crearse, el ViewModel lanza la corrutina y pide las bandas
         viewModel = PerformerViewModel(application, PerformerRepository(application))
     }
 
@@ -181,7 +188,7 @@ class PerformerViewModelTest {
             .invoke(request, response)
     }
 
-    /** `postValue` publica en el hilo principal; con Robolectric hay que procesar su cola. */
+    /** Procesa la cola del hilo principal de Robolectric por si quedó algo pendiente. */
     private fun idleMainLooper() = shadowOf(Looper.getMainLooper()).idle()
 
     private fun network500Response() =

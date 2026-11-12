@@ -11,6 +11,11 @@ import com.android.volley.toolbox.StringRequest
 import com.example.vinyls_application.models.Performer
 import com.example.vinyls_application.models.PerformerType
 import com.example.vinyls_application.network.NetworkServiceAdapter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -28,6 +33,7 @@ import org.mockito.Mockito.verify
  * Pruebas de integración de HU03: PerformerRepository + NetworkServiceAdapter + parser.
  * Solo se simula la cola de Volley: se capturan las peticiones y se les entrega la respuesta.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class PerformerRepositoryTest {
 
     private val bandsJson = """
@@ -61,6 +67,8 @@ class PerformerRepositoryTest {
         ]
     """.trimIndent()
 
+    // Corre las corrutinas de inmediato en el hilo de la prueba (ver MainDispatcherRule)
+    private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var requestQueue: RequestQueue
     private lateinit var repository: PerformerRepository
     private var result: List<Performer>? = null
@@ -70,7 +78,7 @@ class PerformerRepositoryTest {
     fun setUp() {
         val application = mock(Application::class.java)
         requestQueue = mock(RequestQueue::class.java)
-        NetworkServiceAdapter.instance = NetworkServiceAdapter(application, requestQueue)
+        NetworkServiceAdapter.instance = NetworkServiceAdapter(application, requestQueue, testDispatcher)
         repository = PerformerRepository(application)
         result = null
         error = null
@@ -83,9 +91,9 @@ class PerformerRepositoryTest {
 
     // PI-007: GET /bands y /musicians responden 200 y el repositorio entrega una sola lista
     @Test
-    fun pi007_bands_y_musicians_responden_200_y_el_repositorio_entrega_una_sola_lista() {
+    fun pi007_bands_y_musicians_responden_200_y_el_repositorio_entrega_una_sola_lista() = runTest(testDispatcher) {
         // Arrange
-        repository.getPerformers({ result = it }, { error = it })
+        loadPerformers()
         val bandsRequest = bandsRequest()
 
         // Act
@@ -117,9 +125,9 @@ class PerformerRepositoryTest {
 
     // PI-008: GET /bands y /musicians responden con listas vacías
     @Test
-    fun pi008_bands_y_musicians_responden_listas_vacias_y_el_repositorio_entrega_lista_vacia() {
+    fun pi008_bands_y_musicians_responden_listas_vacias_y_el_repositorio_entrega_lista_vacia() = runTest(testDispatcher) {
         // Arrange
-        repository.getPerformers({ result = it }, { error = it })
+        loadPerformers()
 
         // Act
         deliverResponse(bandsRequest(), "[]")
@@ -133,9 +141,9 @@ class PerformerRepositoryTest {
 
     // PI-009: GET /bands y /musicians responden 500 o no hay red (caso 500 en /bands)
     @Test
-    fun pi009_bands_responde_500_y_el_repositorio_entrega_error() {
+    fun pi009_bands_responde_500_y_el_repositorio_entrega_error() = runTest(testDispatcher) {
         // Arrange
-        repository.getPerformers({ result = it }, { error = it })
+        loadPerformers()
 
         // Act
         bandsRequest().deliverError(ServerError(networkResponse(500)))
@@ -149,9 +157,9 @@ class PerformerRepositoryTest {
 
     // PI-009: GET /bands y /musicians responden 500 o no hay red (caso 500 en /musicians)
     @Test
-    fun pi009_musicians_responde_500_y_el_repositorio_entrega_error() {
+    fun pi009_musicians_responde_500_y_el_repositorio_entrega_error() = runTest(testDispatcher) {
         // Arrange
-        repository.getPerformers({ result = it }, { error = it })
+        loadPerformers()
         deliverResponse(bandsRequest(), bandsJson)
 
         // Act
@@ -165,9 +173,9 @@ class PerformerRepositoryTest {
 
     // PI-009: GET /bands y /musicians responden 500 o no hay red (caso sin red en /bands)
     @Test
-    fun pi009_sin_red_en_bands_el_repositorio_entrega_error() {
+    fun pi009_sin_red_en_bands_el_repositorio_entrega_error() = runTest(testDispatcher) {
         // Arrange
-        repository.getPerformers({ result = it }, { error = it })
+        loadPerformers()
 
         // Act
         bandsRequest().deliverError(NoConnectionError())
@@ -179,9 +187,9 @@ class PerformerRepositoryTest {
 
     // PI-009: GET /bands y /musicians responden 500 o no hay red (caso sin red en /musicians)
     @Test
-    fun pi009_sin_red_en_musicians_el_repositorio_entrega_error() {
+    fun pi009_sin_red_en_musicians_el_repositorio_entrega_error() = runTest(testDispatcher) {
         // Arrange
-        repository.getPerformers({ result = it }, { error = it })
+        loadPerformers()
         deliverResponse(bandsRequest(), bandsJson)
 
         // Act
@@ -190,6 +198,18 @@ class PerformerRepositoryTest {
         // Assert
         assertTrue(error is NoConnectionError)
         assertNull(result)
+    }
+
+    /**
+     * Lanza getPerformers() en una corrutina. Queda suspendida esperando /bands; cuando la prueba
+     * entrega esa respuesta se reanuda y encola /musicians.
+     */
+    private fun CoroutineScope.loadPerformers() = launch {
+        try {
+            result = repository.getPerformers()
+        } catch (e: VolleyError) {
+            error = e
+        }
     }
 
     /** Primera petición encolada: debe ser GET /bands. */

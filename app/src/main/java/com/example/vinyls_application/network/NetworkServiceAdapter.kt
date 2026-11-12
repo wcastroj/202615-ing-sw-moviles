@@ -5,7 +5,6 @@ import androidx.annotation.VisibleForTesting
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.Response
-import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
@@ -21,10 +20,26 @@ import com.example.vinyls_application.models.PerformerBase
 import com.example.vinyls_application.models.PerformerPrize
 import com.example.vinyls_application.models.PerformerType
 import com.example.vinyls_application.models.Track
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import kotlin.Int
 import kotlin.String
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
-class NetworkServiceAdapter constructor(context: Context, queue: RequestQueue? = null) {
+/**
+ * @param queue cola de Volley; en las pruebas se pasa un mock.
+ * @param dispatcher hilo donde se hace el trabajo de CPU (parsear JSON, y en los repositorios unir u
+ * ordenar listas). Por defecto [Dispatchers.Default], fuera del hilo principal. En las pruebas
+ * unitarias se pasa un TestDispatcher, y en las E2E con IdlingResource, Dispatchers.Main.
+ */
+class NetworkServiceAdapter constructor(
+    context: Context,
+    queue: RequestQueue? = null,
+    val dispatcher: CoroutineDispatcher = Dispatchers.Default
+) {
     companion object{
         @VisibleForTesting
         var BASE_URL = com.example.vinyls_application.BuildConfig.BACKEND_URL
@@ -236,92 +251,83 @@ class NetworkServiceAdapter constructor(context: Context, queue: RequestQueue? =
         queue ?: Volley.newRequestQueue(context.applicationContext)
     }
 
-    fun getAlbums( onComplete:(resp:List<Album>)->Unit , onError: (error:VolleyError)->Unit){
-        requestQueue.add(getRequest("albums",
-            { response ->
-                onComplete(parseAlbums(response))
-            },
-            {
-                onError(it)
-            }))
+    // ---------------------------------------------------------------------------------------------
+    // API con corrutinas
+    //
+    // Cada función:
+    //  1. Suspende (no bloquea) mientras Volley hace la petición en su propio hilo de red.
+    //  2. Cuando llega la respuesta, parsea el JSON dentro de withContext(dispatcher), es decir,
+    //     FUERA del hilo principal. Antes ese parseo ocurría en el listener de Volley, que corre
+    //     en el hilo principal, y era el punto de riesgo de ANR.
+    //  3. Devuelve el modelo ya listo, o lanza la VolleyError si la petición falló.
+    // ---------------------------------------------------------------------------------------------
+
+    suspend fun getAlbums(): List<Album> = withContext(dispatcher) {
+        parseAlbums(getString("albums"))
     }
 
-    fun getAlbumDetail( id: Int, onComplete:(resp: AlbumDetail)-> Unit, onError: (error: VolleyError)->Unit){
-        requestQueue.add(getRequest("albums/$id",
-            { response ->
-                onComplete(parseAlbumDetail(response))
-            }, {
-                onError(it)
-            }
-
-        ))
+    suspend fun getAlbumDetail(id: Int): AlbumDetail = withContext(dispatcher) {
+        parseAlbumDetail(getString("albums/$id"))
     }
 
-    fun getBands(onComplete:(resp:List<Performer>)->Unit, onError: (error:VolleyError)->Unit){
-        requestQueue.add(getRequest("bands",
-            { response ->
-                onComplete(parseBands(response))
-            },
-            {
-                onError(it)
-            }))
-    }
-    fun getMusicians(onComplete:(resp:List<Performer>)->Unit, onError: (error:VolleyError)->Unit){
-        requestQueue.add(getRequest("musicians",
-            { response ->
-                onComplete(parseMusicians(response))
-            },
-            {
-                onError(it)
-            }))
+    suspend fun getBands(): List<Performer> = withContext(dispatcher) {
+        parseBands(getString("bands"))
     }
 
-    fun postComment(
-        albumId: Int,
-        comment: String,
-        rating: Int,
-        onComplete: (resp: JSONObject) -> Unit,
-        onError: (error: VolleyError) -> Unit
-    ) {
+    suspend fun getMusicians(): List<Performer> = withContext(dispatcher) {
+        parseMusicians(getString("musicians"))
+    }
+
+    suspend fun getPerformer(id: Int, type: PerformerType): PerformerBase = withContext(dispatcher) {
+        parsePerformer(getString(performerPath(id, type)))
+    }
+
+    /** La respuesta del POST no se parsea a un modelo, así que no hace falta cambiar de hilo. */
+    suspend fun postComment(albumId: Int, comment: String, rating: Int): JSONObject =
+        postJson("albums/$albumId/comments", commentBody(comment, rating))
+
+    /**
+     * Convierte una petición GET de Volley (basada en callbacks) en una función suspend.
+     *
+     * - suspendCancellableCoroutine pausa la corrutina sin bloquear el hilo.
+     * - El listener de éxito la reanuda con el String y el de error con una excepción.
+     * - Si la corrutina se cancela (por ejemplo, se destruye el ViewModel), también se cancela
+     *   la petición en Volley para no procesar una respuesta que ya nadie necesita.
+     */
+    private suspend fun getString(path: String): String = suspendCancellableCoroutine { cont ->
+        val request = getRequest(
+            path,
+            { response -> cont.resume(response) },
+            { error -> cont.resumeWithException(error) }
+        )
+        requestQueue.add(request)
+        cont.invokeOnCancellation { request.cancel() }
+    }
+
+    /** Igual que [getString], pero para un POST con cuerpo JSON. */
+    private suspend fun postJson(path: String, body: JSONObject): JSONObject =
+        suspendCancellableCoroutine { cont ->
+            val request = postRequest(
+                path,
+                body,
+                { response -> cont.resume(response) },
+                { error -> cont.resumeWithException(error) }
+            )
+            requestQueue.add(request)
+            cont.invokeOnCancellation { request.cancel() }
+        }
+
+    private fun performerPath(id: Int, type: PerformerType) =
+        if (type == PerformerType.BAND) "bands/$id" else "musicians/$id"
+
+    private fun commentBody(comment: String, rating: Int): JSONObject {
         val postParams = JSONObject()
         postParams.put("description", comment)
         postParams.put("rating", rating)
         val collectorObj = JSONObject()
         collectorObj.put("id", 100)
         postParams.put("collector", collectorObj)
-
-        requestQueue.add(
-            postRequest(
-                "albums/$albumId/comments",
-                postParams,
-                { response ->
-                    onComplete(response)
-                },
-                { error ->
-                    onError(error)
-                }
-            )
-        )
-    }
-
-    fun getPerformer(
-        id: Int,
-        type: PerformerType,
-        onComplete: (resp: PerformerBase) -> Unit,
-        onError: (error: VolleyError) -> Unit
-    ) {
-        val path = if (type == PerformerType.BAND) "bands/$id" else "musicians/$id"
-        requestQueue.add(
-            getRequest(
-                path,
-                { response ->
-                    onComplete(parsePerformer(response))
-                },
-                { error ->
-                    onError(error)
-                }
-            )
-        )
+        return postParams
     }
 
     private fun getRequest(path:String, responseListener: Response.Listener<String>, errorListener: Response.ErrorListener): StringRequest {
