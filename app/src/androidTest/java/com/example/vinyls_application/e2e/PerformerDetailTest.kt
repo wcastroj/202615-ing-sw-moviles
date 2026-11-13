@@ -33,7 +33,6 @@ import com.example.vinyls_application.models.PerformerBase
 import com.example.vinyls_application.models.PerformerPrize
 import com.example.vinyls_application.network.NetworkServiceAdapter
 import com.example.vinyls_application.ui.MainActivity
-import com.example.vinyls_application.utils.TimingRule
 import com.example.vinyls_application.utils.VolleyIdlingResource
 import kotlinx.coroutines.Dispatchers
 import okhttp3.mockwebserver.Dispatcher
@@ -45,7 +44,6 @@ import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.net.HttpURLConnection
@@ -61,13 +59,6 @@ import java.net.URL
 @LargeTest
 @RunWith(AndroidJUnit4::class)
 class PerformerDetailTest {
-
-    @get:Rule
-    val timing = TimingRule()
-
-    // DIAGNÓSTICO TEMPORAL: mide un paso y lo escribe en logcat (E2E-TIMING)
-    private inline fun <T> t(label: String, block: () -> T): T =
-        com.example.vinyls_application.utils.TimingLog.measure(label, block)
 
     private lateinit var idlingResource: VolleyIdlingResource
     private lateinit var queue: RequestQueue
@@ -138,15 +129,13 @@ class PerformerDetailTest {
 
     @After
     fun tearDown() {
-        t("tearDown") {
-            scenario.close()
-            IdlingRegistry.getInstance().unregister(idlingResource)
-            // Se detiene la cola para no dejar sus hilos vivos entre tests
-            queue.stop()
-            NetworkServiceAdapter.instance = null
-            NetworkServiceAdapter.BASE_URL = originalBaseUrl
-            server.shutdown()
-        }
+        scenario.close()
+        IdlingRegistry.getInstance().unregister(idlingResource)
+        // Se detiene la cola para no dejar sus hilos vivos entre tests
+        queue.stop()
+        NetworkServiceAdapter.instance = null
+        NetworkServiceAdapter.BASE_URL = originalBaseUrl
+        server.shutdown()
     }
 
     @Test
@@ -156,25 +145,21 @@ class PerformerDetailTest {
         openArtistsAsVisitor()
 
         // Paso 2: obtener del backend real el detalle del primer músico de la lista
-        val position = t("find first performer position") { findFirstPerformerPosition(MUSICIAN_LABEL) }
-        val musician = t("test-fetch performer detail") { getPerformerDetailFromBackend(position) }
+        val position = findFirstPerformerPosition(MUSICIAN_LABEL)
+        val musician = getPerformerDetailFromBackend(position)
 
         // Paso 3: abrir el músico por su posición
-        t("click performer + detail loaded") {
-            onView(withId(R.id.performersRv))
-                .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(position, click()))
-        }
+        onView(withId(R.id.performersRv))
+            .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(position, click()))
 
         // Paso 4: la tarjeta muestra lo mismo que entrega el backend, con el tipo "Músico/a"
-        t("detail card checks") { assertDetailCard(musician, expectedTag = "Músico/a") }
+        assertDetailCard(musician, expectedTag = "Músico/a")
 
         // Paso 5: tocar el botón de regresar
-        t("return to list") {
-            onView(withId(R.id.btnReturn)).perform(click())
+        onView(withId(R.id.btnReturn)).perform(click())
 
-            // Paso 6: se vuelve a la lista de artistas
-            onView(withId(R.id.performersRv)).check(matches(isDisplayed()))
-        }
+        // Paso 6: se vuelve a la lista de artistas
+        onView(withId(R.id.performersRv)).check(matches(isDisplayed()))
         onView(withId(R.id.txtPerformersTitle)).check(matches(withText(R.string.title_performers)))
     }
 
@@ -185,17 +170,15 @@ class PerformerDetailTest {
         openArtistsAsVisitor()
 
         // Paso 2: obtener del backend real el detalle de la primera banda de la lista
-        val position = t("find first performer position") { findFirstPerformerPosition(BAND_LABEL) }
-        val band = t("test-fetch performer detail") { getPerformerDetailFromBackend(position) }
+        val position = findFirstPerformerPosition(BAND_LABEL)
+        val band = getPerformerDetailFromBackend(position)
 
         // Paso 3: abrir la banda por su posición
-        t("click performer + detail loaded") {
-            onView(withId(R.id.performersRv))
-                .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(position, click()))
-        }
+        onView(withId(R.id.performersRv))
+            .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(position, click()))
 
         // Paso 4: la tarjeta muestra los datos de la banda, con el tipo "Banda"
-        t("detail card checks") { assertDetailCard(band, expectedTag = "Banda") }
+        assertDetailCard(band, expectedTag = "Banda")
     }
 
     @Test
@@ -205,25 +188,23 @@ class PerformerDetailTest {
         openArtistsAsVisitor()
 
         // Paso 2: obtener del backend real el detalle del primer músico; debe tener álbumes
-        val position = t("find first performer position") { findFirstPerformerPosition(MUSICIAN_LABEL) }
-        val musician = t("test-fetch performer detail") { getPerformerDetailFromBackend(position) }
+        val position = findFirstPerformerPosition(MUSICIAN_LABEL)
+        val musician = getPerformerDetailFromBackend(position)
         assertTrue(
             "${musician.name} no tiene álbumes en ${NetworkServiceAdapter.BASE_URL}",
             musician.albums.isNotEmpty()
         )
 
         // Paso 3: abrir el músico por su posición
-        t("click performer + detail loaded") {
-            onView(withId(R.id.performersRv))
-                .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(position, click()))
-        }
+        onView(withId(R.id.performersRv))
+            .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(position, click()))
 
         // Paso 4: se ve la lista de álbumes y no el mensaje de "sin álbumes"
         onView(withId(R.id.rvRelatedAlbums)).check(matches(isDisplayed()))
         onView(withId(R.id.txtEmptyAlbums)).check(matches(withEffectiveVisibility(Visibility.GONE)))
 
         // Paso 5: cada álbum con su nombre y fecha de lanzamiento, por su posición
-        t("related albums checks (${musician.albums.size})") { musician.albums.forEachIndexed { i, album ->
+        musician.albums.forEachIndexed { i, album ->
             onView(allOf(withParent(withId(R.id.rvRelatedAlbums)), withParentIndex(i)))
                 .perform(scrollTo())
                 .check(
@@ -234,7 +215,7 @@ class PerformerDetailTest {
                         )
                     )
                 )
-        } }
+        }
     }
 
     @Test
@@ -244,7 +225,7 @@ class PerformerDetailTest {
         openArtistsAsVisitor()
 
         // Paso 2: abrir la banda
-        t("click performer + detail loaded") { openPerformerByName("Queen") }
+        openPerformerByName("Queen")
 
         // Paso 3: se muestra "Sin álbumes disponibles" y no la lista
         onView(withText(R.string.performer_no_albums)).check(matches(isDisplayed()))
@@ -260,7 +241,7 @@ class PerformerDetailTest {
         openArtistsAsVisitor()
 
         // Paso 2: abrir el músico; el detalle falla
-        t("click performer + error loaded") { openPerformerByName("Rubén Blades") }
+        openPerformerByName("Rubén Blades")
 
         // Paso 3: se muestra la pantalla de error con el mensaje exacto
         onView(withId(R.id.layoutError)).check(matches(isDisplayed()))
@@ -270,27 +251,21 @@ class PerformerDetailTest {
             .check(matches(withText("Algo inesperado ha ocurrido.\nIntenta más tarde.")))
 
         // Paso 4: tocar el botón de regresar
-        t("return to list") {
-            onView(withId(R.id.btnReturn)).perform(click())
+        onView(withId(R.id.btnReturn)).perform(click())
 
-            // Paso 5: se vuelve a la lista
-            onView(withId(R.id.performersRv)).check(matches(isDisplayed()))
-        }
+        // Paso 5: se vuelve a la lista
+        onView(withId(R.id.performersRv)).check(matches(isDisplayed()))
         onView(withText("Rubén Blades")).check(matches(isDisplayed()))
     }
 
     /** Entra como visitante y toca "Artistas" en la barra inferior. */
     private fun openArtistsAsVisitor() {
-        t("click cardVisitor + albums list") {
-            onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
-            onView(withId(R.id.cardVisitor)).perform(click())
-            // Esperar a que el catálogo de álbumes esté en pantalla con al menos una tarjeta
-            onView(withId(R.id.albumsRv)).check(matches(hasMinimumChildCount(1)))
-        }
-        t("click Artistas + performers list") {
-            onView(withId(R.id.navigation_artists)).perform(click())
-            onView(withId(R.id.performersRv)).check(matches(hasMinimumChildCount(1)))
-        }
+        onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
+        onView(withId(R.id.cardVisitor)).perform(click())
+        // Esperar a que el catálogo de álbumes esté en pantalla con al menos una tarjeta
+        onView(withId(R.id.albumsRv)).check(matches(hasMinimumChildCount(1)))
+        onView(withId(R.id.navigation_artists)).perform(click())
+        onView(withId(R.id.performersRv)).check(matches(hasMinimumChildCount(1)))
     }
 
     /**
@@ -301,7 +276,7 @@ class PerformerDetailTest {
         if (useMockServer) {
             NetworkServiceAdapter.BASE_URL = server.url("/").toString()
         }
-        t("launchApp") { scenario = ActivityScenario.launch(MainActivity::class.java) }
+        scenario = ActivityScenario.launch(MainActivity::class.java)
     }
 
     /** Solo para los tests con servidor falso, que entran por texto como pe006 de AlbumDetailE2ETest. */

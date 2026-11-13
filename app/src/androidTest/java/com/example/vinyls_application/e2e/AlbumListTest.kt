@@ -52,10 +52,6 @@ import java.net.URL
 @RunWith(AndroidJUnit4::class)
 class AlbumListTest {
 
-    // DIAGNÓSTICO TEMPORAL: duración total de cada test en logcat (E2E-TIMING)
-    @get:org.junit.Rule
-    val timing = com.example.vinyls_application.utils.TimingRule()
-
     private lateinit var server: MockWebServer
     private lateinit var originalBaseUrl: String
     private lateinit var idlingResource: VolleyIdlingResource
@@ -103,20 +99,16 @@ class AlbumListTest {
         openCatalogAsVisitor()
 
         // La app ya cargó la lista del backend real (Espresso esperó la petición)
-        com.example.vinyls_application.utils.TimingLog.measure("pe001 albumsRv >= 1 (idling)") {
-            onView(withId(R.id.albumsRv)).check(matches(hasMinimumChildCount(1)))
-        }
+        onView(withId(R.id.albumsRv)).check(matches(hasMinimumChildCount(1)))
 
-        com.example.vinyls_application.utils.TimingLog.measure("pe001 assertions") {
-            onView(withId(R.id.txtHeader)).check(matches(withText(R.string.header_home)))
-            onView(withText("Catálogo de Álbumes")).check(matches(isDisplayed()))
-            // Las dos primeras tarjetas son visibles en la grilla de 2 columnas
-            for (i in 0 until minOf(2, albums.length())) {
-                val album = albums.getJSONObject(i)
-                assertAlbumCard(name = album.getString("name"), genre = album.getString("genre"))
-            }
-            assertGone(R.id.layoutEmpty, R.id.layoutError)
+        onView(withId(R.id.txtHeader)).check(matches(withText(R.string.header_home)))
+        onView(withText("Catálogo de Álbumes")).check(matches(isDisplayed()))
+        // Las dos primeras tarjetas son visibles en la grilla de 2 columnas
+        for (i in 0 until minOf(2, albums.length())) {
+            val album = albums.getJSONObject(i)
+            assertAlbumCard(name = album.getString("name"), genre = album.getString("genre"))
         }
+        assertGone(R.id.layoutEmpty, R.id.layoutError)
     }
 
     /** PE-002 (negativa): sin álbumes se muestra "No se encontraron álbumes". */
@@ -126,9 +118,7 @@ class AlbumListTest {
 
         openCatalogAsVisitor()
 
-        com.example.vinyls_application.utils.TimingLog.measure("pe002 layoutEmpty visible (idling)") {
-            onView(withId(R.id.layoutEmpty)).check(matches(isDisplayed()))
-        }
+        onView(withId(R.id.layoutEmpty)).check(matches(isDisplayed()))
         onView(withText("No se encontraron álbumes")).check(matches(isDisplayed()))
         assertGone(R.id.layoutContent, R.id.layoutError)
     }
@@ -142,9 +132,7 @@ class AlbumListTest {
 
         openCatalogAsVisitor()
 
-        com.example.vinyls_application.utils.TimingLog.measure("pe003 layoutError visible (idling)") {
-            onView(withId(R.id.layoutError)).check(matches(isDisplayed()))
-        }
+        onView(withId(R.id.layoutError)).check(matches(isDisplayed()))
         onView(withText("¡Ups! Algo se\ndesafinó en la señal")).check(matches(isDisplayed()))
         assertGone(R.id.layoutContent, R.id.layoutEmpty)
     }
@@ -154,11 +142,11 @@ class AlbumListTest {
      * Corre en el hilo del test (no en el de UI), antes de abrir la app. Timeout de 10 s: si el
      * backend no responde, el test falla rápido con un error claro.
      */
-    private fun fetchAlbumsFromBackend(): JSONArray = com.example.vinyls_application.utils.TimingLog.measure("test-fetch GET albums") {
+    private fun fetchAlbumsFromBackend(): JSONArray {
         val connection = URL(NetworkServiceAdapter.BASE_URL + "albums").openConnection() as HttpURLConnection
         connection.connectTimeout = 10_000
         connection.readTimeout = 10_000
-        try {
+        return try {
             JSONArray(connection.inputStream.bufferedReader().use { it.readText() })
         } finally {
             connection.disconnect()
@@ -173,17 +161,11 @@ class AlbumListTest {
         }
     }
 
-    private fun launchApp() = com.example.vinyls_application.utils.TimingLog.measure("launchApp") {
-        scenario = ActivityScenario.launch(MainActivity::class.java)
-    }
-
     /** Abre la app y entra como visitante; Espresso espera a que la app pida GET /albums. */
     private fun openCatalogAsVisitor() {
-        launchApp()
-        com.example.vinyls_application.utils.TimingLog.measure("click cardVisitor") {
-            onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
-            onView(withId(R.id.cardVisitor)).perform(click())
-        }
+        scenario = ActivityScenario.launch(MainActivity::class.java)
+        onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
+        onView(withId(R.id.cardVisitor)).perform(click())
     }
 
     /** Verifica que cada vista indicada esté oculta (GONE). */
