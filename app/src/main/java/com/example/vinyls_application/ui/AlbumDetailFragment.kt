@@ -97,7 +97,7 @@ class AlbumDetailFragment : Fragment() {
                 binding.performersListWidget.setItems(performerItems)
                 val listComment = mutableListOf<CommentItem>()
                 val comments = this.comments
-                for (i in 0 until comments.size) {
+                for (i in comments.indices) {
                     val comment = comments[i]
                     val newComment = CommentItem(rating = comment.rating.toIntOrNull() ?: 0, comment = comment.description)
                     listComment.add(newComment)

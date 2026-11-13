@@ -10,6 +10,7 @@ import androidx.core.content.withStyledAttributes
 import androidx.core.view.isVisible
 import com.example.vinyls_application.R
 import com.example.vinyls_application.databinding.WidgetRoleCardBinding
+import androidx.core.graphics.toColorInt
 
 class RoleCardWidget @JvmOverloads constructor(
     context: Context,
@@ -41,7 +42,7 @@ class RoleCardWidget @JvmOverloads constructor(
             if (isPrimary) R.drawable.bg_role_icon_primary else R.drawable.bg_role_icon
         )
         binding.ivRoleIcon.imageTintList = ColorStateList.valueOf(
-            if (isPrimary) Color.WHITE else Color.parseColor("#7C4DFF")
+            if (isPrimary) Color.WHITE else "#7C4DFF".toColorInt()
         )
     }
 

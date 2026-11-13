@@ -40,7 +40,7 @@
         android:padding="10dp"
         android:scaleType="fitCenter"
         android:elevation="4dp"
-        android:contentDescription="Logo"
+        android:contentDescription="@string/logo"
         android:visibility="gone"
         tools:visibility="visible"
         />

@@ -37,7 +37,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Canciones relacionadas"
+            android:text="@string/canciones_relacionadas"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="#1C1B1F"
@@ -49,11 +49,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <!-- Artistas Relacionados -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Artistas relacionados"
+            android:text="@string/artistas_relacionados"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="#1C1B1F"

@@ -1,25 +1,9 @@
 <resources>
     <string name="app_name">Vinyls_Jetpack_Application</string>
     <string name="action_settings">Settings</string>
-    <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
 
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
-    <string name="collector_name_placeholder">Nombre del coleccionista</string>
-    <string name="collector_email_placeholder">Correo del coleccionista</string>
-    <string name="collector_phone_placeholder">Número telefónico</string>
-    <string name="comment_rating_placeholder">##</string>
-    <string name="comment_description_placeholder">Descripción del comentario</string>
-    <string name="album_name_placeholder">Nombre del album</string>
-    <string name="album_description_placeholder">Descripcion del album</string>
     <string name="txt_no_comments">No hay comentarios para este álbum</string>
     <string name="title_albums">Albums</string>
-    <string name="title_collectors">Coleccionistas</string>
-    <string name="title_comments">Comentarios del álbum</string>
     <string name="title_album_detail">Detalle del Álbum</string>
     <string name="catalog_card_action_default">Explorar →</string>
     <string name="navigation_home">Inicio</string>
@@ -34,11 +18,22 @@
     <string name="performers_empty_title">No se encontraron artistas</string>
     <string name="performers_empty_description">Por ahora no hay artistas disponibles</string>
     <string name="add_comment_rating_label">Tu Calificación:</string>
-    <string name="add_comment_placeholder">Escribe tu opinión o reseña sobre este álbum...</string>
+    <string name="add_comment_placeholder">Escribe tu opinión o reseña sobre este álbum…</string>
     <string name="add_comment_submit_button">Publicar Comentario</string>
     <string name="add_comment_rating_error">Por favor selecciona una calificación entre 1 y 5.</string>
     <string name="add_comment_text_error">El comentario debe tener más de 1 carácter.</string>
     <string name="add_comment_success">Comentario publicado exitosamente</string>
     <string name="related_albums_title">Álbumes relacionados</string>
     <string name="performer_no_albums">Sin álbumes disponibles</string>
+    <string name="_1">1</string>
+    <string name="_2">2</string>
+    <string name="_3">3</string>
+    <string name="_4">4</string>
+    <string name="_5">5</string>
+    <string name="canciones_relacionadas">Canciones relacionadas</string>
+    <string name="artistas_relacionados">Artistas relacionados</string>
+    <string name="catalogo_de_albumes">Catálogo de Álbumes</string>
+    <string name="logo">Logo</string>
+    <string name="login_title">Selecciona cómo deseas ingresar a la plataforma y sincroniza tus emociones.</string>
+    <string name="login_main_title">Bienvenido a tu universo musical</string>
 </resources>

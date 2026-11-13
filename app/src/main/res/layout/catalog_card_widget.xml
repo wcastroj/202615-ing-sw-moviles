@@ -94,7 +94,7 @@
                     android:text="@string/catalog_card_action_default"
                     android:textAllCaps="false"
                     android:textColor="@android:color/white"
-                    android:textSize="10sp"
+                    android:textSize="11sp"
                     app:cornerRadius="16dp" />
 
             </RelativeLayout>

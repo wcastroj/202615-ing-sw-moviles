@@ -3,6 +3,7 @@ package com.example.vinyls_application.ui.widgets
 import android.content.Context
 import android.util.AttributeSet
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.vinyls_application.R
@@ -70,8 +71,17 @@ class CatalogListWidget @JvmOverloads constructor(
 
         var items: List<CatalogItem> = emptyList()
             set(value) {
+                val diffCallback = object : DiffUtil.Callback() {
+                    override fun getOldListSize(): Int = field.size
+                    override fun getNewListSize(): Int = value.size
+                    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
+                        field[oldItemPosition].id == value[newItemPosition].id
+                    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
+                        field[oldItemPosition] == value[newItemPosition]
+                }
+                val diffResult = DiffUtil.calculateDiff(diffCallback)
                 field = value
-                notifyDataSetChanged()
+                diffResult.dispatchUpdatesTo(this)
             }
 
         var onItemClick: ((CatalogItem) -> Unit)? = null
@@ -79,8 +89,8 @@ class CatalogListWidget @JvmOverloads constructor(
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val card = CatalogCardWidget(parent.context).apply {
                 layoutParams = LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
+                    LayoutParams.MATCH_PARENT,
+                    LayoutParams.WRAP_CONTENT
                 )
             }
             return ViewHolder(card)

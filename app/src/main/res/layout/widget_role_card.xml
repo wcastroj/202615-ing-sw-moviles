@@ -55,12 +55,12 @@
             android:layout_marginTop="14dp"
             android:paddingVertical="6dp"
             android:background="?attr/selectableItemBackground"
-            android:drawableEnd="@drawable/ic_login"
             android:drawablePadding="10dp"
             android:textColor="#1E1E1E"
             android:textSize="16sp"
             android:textStyle="bold"
             android:visibility="visible"
+            app:drawableEndCompat="@drawable/ic_login"
             tools:visibility="visible"
             tools:text="Ingresar como Visitante" />
 
@@ -73,14 +73,14 @@
             android:paddingHorizontal="24dp"
             android:paddingVertical="14dp"
             android:background="@drawable/bg_role_button_primary"
-            android:drawableEnd="@drawable/ic_login"
-            android:drawableTint="#FFFFFF"
+            app:drawableTint="#FFFFFF"
             android:drawablePadding="10dp"
             android:gravity="center"
             android:textColor="#FFFFFF"
             android:textSize="16sp"
             android:textStyle="bold"
             android:visibility="gone"
+            app:drawableEndCompat="@drawable/ic_login"
             tools:visibility="gone"
             tools:text="Ingresar como Coleccionista" />
     </LinearLayout>

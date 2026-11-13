@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.vinyls_application.models.PerformerBase
 import com.example.vinyls_application.models.PerformerType
 import com.example.vinyls_application.repositories.PerformerDetailRepository
-import com.example.vinyls_application.repositories.PerformerRepository
 
 class PerformerDetailViewModel(
     application: Application,

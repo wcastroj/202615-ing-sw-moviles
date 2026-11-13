@@ -14,22 +14,22 @@ class AlbumDetailViewModel(application: Application, private val albumId: Int) :
     private val _album = MutableLiveData<AlbumDetail>()
     val album : LiveData<AlbumDetail>
         get() = _album
-    private var _eventNetworkError = MutableLiveData<Boolean>(false)
+    private var _eventNetworkError = MutableLiveData(false)
 
     val eventNetworkError: LiveData<Boolean>
         get() = _eventNetworkError
 
-    private var _isNetworkErrorShown = MutableLiveData<Boolean>(false)
+    private var _isNetworkErrorShown = MutableLiveData(false)
     private val albumRepository = AlbumDetailRepository(application)
 
     val isNetworkErrorShown: LiveData<Boolean>
         get() = _isNetworkErrorShown
 
-    private val _isLoading = MutableLiveData<Boolean>(false)
+    private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean>
         get() = _isLoading
 
-    private val _commentPostedSuccess = MutableLiveData<Boolean>(false)
+    private val _commentPostedSuccess = MutableLiveData(false)
     val commentPostedSuccess: LiveData<Boolean>
         get() = _commentPostedSuccess
 

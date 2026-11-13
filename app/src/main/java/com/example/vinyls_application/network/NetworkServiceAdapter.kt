@@ -24,7 +24,7 @@ import com.example.vinyls_application.models.Track
 import kotlin.Int
 import kotlin.String
 
-class NetworkServiceAdapter constructor(context: Context, queue: RequestQueue? = null) {
+class NetworkServiceAdapter(context: Context, queue: RequestQueue? = null) {
     companion object{
         @VisibleForTesting
         var BASE_URL = com.example.vinyls_application.BuildConfig.BACKEND_URL

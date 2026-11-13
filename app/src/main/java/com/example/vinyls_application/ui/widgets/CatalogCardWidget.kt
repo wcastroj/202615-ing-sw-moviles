@@ -3,7 +3,6 @@ package com.example.vinyls_application.ui.widgets
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.isVisible
@@ -72,7 +71,7 @@ class CatalogCardWidget @JvmOverloads constructor(
         binding.btnAction.text =
             actionText ?: context.getString(R.string.catalog_card_action_default)
         binding.btnAction.setOnClickListener(onAction)
-        binding.btnAction.visibility = if (onAction == null) View.GONE else View.VISIBLE
+        binding.btnAction.visibility = if (onAction == null) GONE else VISIBLE
     }
 
     private fun loadCover(url: String?) {
