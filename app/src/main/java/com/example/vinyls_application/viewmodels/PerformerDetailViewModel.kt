@@ -6,10 +6,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.example.vinyls_application.models.PerformerBase
 import com.example.vinyls_application.models.PerformerType
 import com.example.vinyls_application.repositories.PerformerDetailRepository
-import com.example.vinyls_application.repositories.PerformerRepository
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 
 class PerformerDetailViewModel(
     application: Application,
@@ -32,18 +34,17 @@ class PerformerDetailViewModel(
     }
 
     fun getPerformerDetail() {
-        repository.getPerformer(
-            id,
-            type,
-            { data ->
-                _performer.postValue(data)
+        viewModelScope.launch {
+            try {
+                _performer.value = repository.getPerformer(id, type)
                 _eventNetworkError.value = false
                 _isNetworkErrorShown.value = false
-            },
-            {
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
                 _eventNetworkError.value = true
             }
-        )
+        }
     }
 
     fun onNetworkErrorShown() {

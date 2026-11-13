@@ -85,7 +85,6 @@ class AlbumCommentE2ETest {
         idlingResource = VolleyIdlingResource()
         val queue = Volley.newRequestQueue(context)
         queue.addRequestEventListener(idlingResource)
-        NetworkServiceAdapter.instance = NetworkServiceAdapter(context, queue)
         IdlingRegistry.getInstance().register(idlingResource)
     }
 

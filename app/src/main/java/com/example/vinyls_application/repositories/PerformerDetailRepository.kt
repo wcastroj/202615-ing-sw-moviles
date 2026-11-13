@@ -7,15 +7,8 @@ import com.example.vinyls_application.models.PerformerType
 import com.example.vinyls_application.network.NetworkServiceAdapter
 
 class PerformerDetailRepository(val application: Application) {
-    fun getPerformer(
-        id: Int,
-        type: PerformerType,
-        callback: (PerformerBase) -> Unit,
-        onError: (VolleyError) -> Unit
-    ) {
-        NetworkServiceAdapter.getInstance(application).getPerformer(
-            id, type,
-            { callback(it) },
-            { onError(it) })
-    }
+
+    /** Devuelve la banda o el músico, o lanza la [VolleyError] si la petición falla. */
+    suspend fun getPerformer(id: Int, type: PerformerType): PerformerBase =
+        NetworkServiceAdapter.getInstance(application).getPerformer(id, type)
 }

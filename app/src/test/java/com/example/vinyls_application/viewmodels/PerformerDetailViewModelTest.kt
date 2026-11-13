@@ -7,6 +7,7 @@ import com.android.volley.NetworkResponse
 import com.android.volley.RequestQueue
 import com.android.volley.ServerError
 import com.android.volley.toolbox.StringRequest
+import com.example.vinyls_application.MainDispatcherRule
 import com.example.vinyls_application.models.Band
 import com.example.vinyls_application.models.Musician
 import com.example.vinyls_application.models.PerformerType
@@ -19,6 +20,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -86,6 +88,10 @@ class PerformerDetailViewModelTest {
         }
     """.trimIndent()
 
+    // viewModelScope usa Dispatchers.Main: la regla lo cambia por un TestDispatcher
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
+
     private lateinit var application: Application
     private lateinit var requestQueue: RequestQueue
     private lateinit var viewModel: PerformerDetailViewModel
@@ -94,7 +100,8 @@ class PerformerDetailViewModelTest {
     fun setUp() {
         application = ApplicationProvider.getApplicationContext()
         requestQueue = mock(RequestQueue::class.java)
-        NetworkServiceAdapter.instance = NetworkServiceAdapter(application, requestQueue)
+        NetworkServiceAdapter.instance =
+            NetworkServiceAdapter(application, requestQueue, mainDispatcherRule.testDispatcher)
     }
 
     @After

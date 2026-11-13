@@ -7,6 +7,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.hasDescendant
@@ -22,6 +23,7 @@ import com.example.vinyls_application.R
 import com.example.vinyls_application.network.NetworkServiceAdapter
 import com.example.vinyls_application.ui.MainActivity
 import com.example.vinyls_application.utils.VolleyIdlingResource
+import kotlinx.coroutines.Dispatchers
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -51,8 +53,9 @@ class PerformerDetailTest {
           "description":"Cantante panameño","birthDate":"1948-07-16T00:00:00.000Z"}]
     """.trimIndent()
 
+    // La imagen no puede ir vacía: DetailCardWidget oculta la portada cuando no hay URL
     private val musicianDetailJson = """
-        {"id":100,"name":"Rubén Blades","image":"",
+        {"id":100,"name":"Rubén Blades","image":"http://localhost/ruben.jpg",
          "description":"Cantante panameño de salsa y jazz.",
          "birthDate":"1948-07-16T00:00:00.000Z",
          "albums":[{"id":10,"name":"Buscando América","cover":"",
@@ -90,7 +93,9 @@ class PerformerDetailTest {
         idlingResource = VolleyIdlingResource()
         val queue = Volley.newRequestQueue(context)
         queue.addRequestEventListener(idlingResource)
-        NetworkServiceAdapter.instance = NetworkServiceAdapter(context, queue)
+        // Dispatchers.Main: el parseo pasa por la cola del hilo principal, que Espresso sí vigila.
+        // Con Dispatchers.Default el IdlingResource quedaría libre antes de que llegue el dato a la UI.
+        NetworkServiceAdapter.instance = NetworkServiceAdapter(context, queue, Dispatchers.Main)
         IdlingRegistry.getInstance().register(idlingResource)
     }
 
@@ -174,8 +179,10 @@ class PerformerDetailTest {
             )
         )
 
-        onView(withId(R.id.rvRelatedAlbums)).check(matches(isDisplayed()))
-        onView(allOf(withId(R.id.txtTitle), isDescendantOfA(withId(R.id.rvRelatedAlbums)))).check(
+        // En pantallas pequeñas la lista queda debajo del borde visible: se desplaza hasta ella
+        onView(withId(R.id.rvRelatedAlbums)).perform(scrollTo()).check(matches(isDisplayed()))
+        // Los álbumes relacionados usan SummaryCardWidget, cuyo título es summaryCardTitle
+        onView(allOf(withId(R.id.summaryCardTitle), isDescendantOfA(withId(R.id.rvRelatedAlbums)))).check(
             matches(withText("Buscando América"))
         )
     }
@@ -243,8 +250,14 @@ class PerformerDetailTest {
     private fun jsonResponse(body: String) = MockResponse().setResponseCode(200)
         .addHeader("Content-Type", "application/json; charset=utf-8").setBody(body)
 
+    /**
+     * La app abre en el login y la barra inferior está oculta hasta elegir un rol.
+     * Se entra como visitante y luego se toca "Artistas".
+     */
     private fun launchAppAndNavigateToArtists() {
         scenario = ActivityScenario.launch(MainActivity::class.java)
+        onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
+        onView(withId(R.id.cardVisitor)).perform(click())
         onView(withId(R.id.navigation_artists)).perform(click())
         onView(withId(R.id.performersRv)).check(matches(hasMinimumChildCount(1)))
     }

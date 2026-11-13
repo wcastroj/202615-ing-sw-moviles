@@ -6,8 +6,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.example.vinyls_application.models.Performer
 import com.example.vinyls_application.repositories.PerformerRepository
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 
 
 class PerformerViewModel(application: Application, private val performerRepository: PerformerRepository) :  AndroidViewModel(application) {
@@ -30,13 +33,17 @@ class PerformerViewModel(application: Application, private val performerReposito
     }
     /** Trae bandas y músicos ya unidos en una sola lista desde el repositorio. */
     private fun getPerformersFromNetwork() {
-        performerRepository.getPerformers({
-            _performers.postValue(it)
-            _eventNetworkError.value = false
-            _isNetworkErrorShown.value = false
-        }, {
-            _eventNetworkError.value = true
-        })
+        viewModelScope.launch {
+            try {
+                _performers.value = performerRepository.getPerformers()
+                _eventNetworkError.value = false
+                _isNetworkErrorShown.value = false
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _eventNetworkError.value = true
+            }
+        }
     }
 
     fun onNetworkErrorShown() {
