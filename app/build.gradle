@@ -68,6 +68,19 @@ android {
             }
         }
     }
+
+    lint {
+        htmlReport true
+        xmlReport true
+        textReport true
+        abortOnError false
+        warningsAsErrors false
+        checkDependencies true
+        checkReleaseBuilds false
+        lintConfig file("lint.xml")
+        baseline file("lint-baseline.xml")
+    }
+
     applicationVariants.all { variant ->
             variant.outputs.all {
                 outputFileName = "Vivo_Sonika_${variant.name.capitalize()}_v${variant.versionName}.apk"
