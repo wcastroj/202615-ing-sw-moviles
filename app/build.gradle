@@ -73,7 +73,7 @@ android {
         htmlReport true
         xmlReport true
         textReport true
-        abortOnError false
+        abortOnError true
         warningsAsErrors false
         checkDependencies true
         checkReleaseBuilds false
