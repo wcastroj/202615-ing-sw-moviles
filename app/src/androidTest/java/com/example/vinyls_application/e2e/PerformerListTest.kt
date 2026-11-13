@@ -24,6 +24,7 @@ import com.example.vinyls_application.R
 import com.example.vinyls_application.network.NetworkServiceAdapter
 import com.example.vinyls_application.ui.MainActivity
 import com.example.vinyls_application.utils.VolleyIdlingResource
+import kotlinx.coroutines.Dispatchers
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -81,7 +82,9 @@ class PerformerListTest {
         idlingResource = VolleyIdlingResource()
         queue = Volley.newRequestQueue(context)
         queue.addRequestEventListener(idlingResource)
-        NetworkServiceAdapter.instance = NetworkServiceAdapter(context, queue)
+        // Dispatchers.Main: el parseo pasa por la cola del hilo principal, que Espresso sí vigila.
+        // Con Dispatchers.Default el IdlingResource quedaría libre antes de que llegue el dato a la UI.
+        NetworkServiceAdapter.instance = NetworkServiceAdapter(context, queue, Dispatchers.Main)
         IdlingRegistry.getInstance().register(idlingResource)
     }
 
