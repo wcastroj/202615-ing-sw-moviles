@@ -18,7 +18,7 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        def backendUrl = project.findProperty("BACKEND_URL") ?: "https://backvynils-q6yc.onrender.com/"
+        def backendUrl = project.findProperty("BACKEND_URL") ?: "http://10.0.2.2:3000/"
         buildConfigField "String", "BACKEND_URL", "\"${backendUrl}\""
     }
 

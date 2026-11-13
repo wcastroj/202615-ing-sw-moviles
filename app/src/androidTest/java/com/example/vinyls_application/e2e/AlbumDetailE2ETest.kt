@@ -22,6 +22,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withParentIndex
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import com.android.volley.RequestQueue
 import com.android.volley.toolbox.Volley
 import com.example.vinyls_application.R
 import com.example.vinyls_application.models.AlbumDetail
@@ -53,7 +54,16 @@ import androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility
 
 class AlbumDetailE2ETest {
 
+    // DIAGNÓSTICO TEMPORAL: duración total de cada test en logcat (E2E-TIMING)
+    @get:org.junit.Rule
+    val timing = com.example.vinyls_application.utils.TimingRule()
+
+    // DIAGNÓSTICO TEMPORAL: mide un paso y lo escribe en logcat (E2E-TIMING)
+    private inline fun <T> t(label: String, block: () -> T): T =
+        com.example.vinyls_application.utils.TimingLog.measure(label, block)
+
     private lateinit var idlingResource: VolleyIdlingResource
+    private lateinit var queue: RequestQueue
     private lateinit var scenario: ActivityScenario<MainActivity>
     private lateinit var server: MockWebServer
     private lateinit var originalBaseUrl: String
@@ -84,99 +94,132 @@ class AlbumDetailE2ETest {
         }
         server.start()
 
-        // 2. Guardar la URL del backend real; pe004 y pe005 la usan tal cual
+        // 2. Guardar la URL del backend real; pe004, pe005 y los login_ la usan tal cual
         originalBaseUrl = NetworkServiceAdapter.BASE_URL
 
         // 3. Cola de Volley vigilada por el IdlingResource
         val context = ApplicationProvider.getApplicationContext<Context>()
         idlingResource = VolleyIdlingResource()
-        val queue = Volley.newRequestQueue(context)
+        queue = Volley.newRequestQueue(context)
         queue.addRequestEventListener(idlingResource)
         NetworkServiceAdapter.instance = NetworkServiceAdapter(context, queue)
         IdlingRegistry.getInstance().register(idlingResource)
 
-        // 4. Abrir la app
-        scenario = ActivityScenario.launch(MainActivity::class.java)
+        // La app se abre dentro de cada test con launchApp(), así pe006 la abre una sola vez
     }
 
     @After
     fun tearDown() {
-        scenario.close()
-        IdlingRegistry.getInstance().unregister(idlingResource)
-        NetworkServiceAdapter.instance = null
-        NetworkServiceAdapter.BASE_URL = originalBaseUrl
-        server.shutdown()
+        t("tearDown") {
+            scenario.close()
+            IdlingRegistry.getInstance().unregister(idlingResource)
+            // Se detiene la cola para no dejar sus hilos vivos entre tests
+            queue.stop()
+            NetworkServiceAdapter.instance = null
+            NetworkServiceAdapter.BASE_URL = originalBaseUrl
+            server.shutdown()
+        }
     }
 
     @Test
     fun pe004_OpenAlbumDetailAndBackToList() {
-        onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
-        onView(withId(R.id.cardVisitor)).perform(click())
+        launchApp()
+        t("click login card") {
+            onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
+            onView(withId(R.id.cardVisitor)).perform(click())
+        }
         // Paso 1: la lista de álbumes se ve
-        onView(withId(R.id.albumsRv)).check(matches(isDisplayed()))
+        t("list visible") { onView(withId(R.id.albumsRv)).check(matches(isDisplayed())) }
 
         // Paso 2: tocar el primer álbum
-        onView(withId(R.id.albumsRv))
-            .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
+        t("click album + detail visible") {
+            onView(withId(R.id.albumsRv))
+                .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
 
-        // Paso 3: se abre el detalle en una pantalla aparte
-        onView(withId(R.id.detail_card)).check(matches(isDisplayed()))
+            // Paso 3: se abre el detalle en una pantalla aparte
+            onView(withId(R.id.detail_card)).check(matches(isDisplayed()))
+        }
         onView(withId(R.id.albumsRv)).check(doesNotExist())
 
         // Paso 4: tocar el botón de regresar
-        onView(withId(R.id.btnReturn)).perform(click())
+        t("return to list") {
+            onView(withId(R.id.btnReturn)).perform(click())
 
-        // Paso 5: se regresa a la lista
-        onView(withId(R.id.albumsRv)).check(matches(isDisplayed()))
+            // Paso 5: se regresa a la lista
+            onView(withId(R.id.albumsRv)).check(matches(isDisplayed()))
+        }
         onView(withText("Catálogo de Álbumes")).check(matches(isDisplayed()))
     }
 
     @Test
     fun pe005_AlbumDetailShowAllInformation() {
-        onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
-        onView(withId(R.id.cardVisitor)).perform(click())
+        launchApp()
+        t("click login card") {
+            onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
+            onView(withId(R.id.cardVisitor)).perform(click())
+        }
         // Paso 1: la lista de álbumes se ve y tiene al menos una tarjeta
-        onView(withId(R.id.albumsRv)).check(matches(allOf(isDisplayed(), hasMinimumChildCount(1))))
+        t("list visible") { onView(withId(R.id.albumsRv)).check(matches(allOf(isDisplayed(), hasMinimumChildCount(1)))) }
 
         // Paso 2: obtener del backend real el detalle del primer álbum de la lista
-        val album = getFirstAlbumDetailFromBackend()
+        val album = t("test-fetch GET albums/{id}") { getFirstAlbumDetailFromBackend() }
 
         // Paso 3: abrir el primer álbum
-        onView(withId(R.id.albumsRv))
-            .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
+        t("click album + detail visible") {
+            onView(withId(R.id.albumsRv))
+                .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
 
-        // Paso 4: portada, nombre, género y número de canciones
-        onView(allOf(withId(R.id.cover), isDescendantOfA(withId(R.id.detail_card))))
-            .check(matches(isDisplayed()))
-        onView(allOf(withId(R.id.title), isDescendantOfA(withId(R.id.detail_card))))
-            .check(matches(withText(album.name)))
-        onView(allOf(withId(R.id.tag), isDescendantOfA(withId(R.id.detail_card))))
-            .check(matches(withText(album.genre)))
-        onView(allOf(withId(R.id.subtitle), isDescendantOfA(withId(R.id.detail_card))))
-            .check(matches(withText("• " + album.tracks.size + " Canciones")))
+            // Paso 4: portada, nombre, género y número de canciones
+            onView(allOf(withId(R.id.cover), isDescendantOfA(withId(R.id.detail_card))))
+                .check(matches(isDisplayed()))
+        }
+        t("detail card checks") {
+            onView(allOf(withId(R.id.title), isDescendantOfA(withId(R.id.detail_card))))
+                .check(matches(withText(album.name)))
+            onView(allOf(withId(R.id.tag), isDescendantOfA(withId(R.id.detail_card))))
+                .check(matches(withText(album.genre)))
+            onView(allOf(withId(R.id.subtitle), isDescendantOfA(withId(R.id.detail_card))))
+                .check(matches(withText("• " + album.tracks.size + " Canciones")))
+        }
 
         // Paso 5: cada canción, por su posición (hay nombres repetidos en el backend)
-        album.tracks.forEachIndexed { i, track ->
-            onView(allOf(withParent(withId(R.id.tracksListWidget)), withParentIndex(i)))
-                .perform(scrollTo())
-                .check(matches(allOf(hasDescendant(withText(track.name)), hasDescendant(withText(track.duration)))))
+        t("tracks checks (${album.tracks.size})") {
+            album.tracks.forEachIndexed { i, track ->
+                onView(allOf(withParent(withId(R.id.tracksListWidget)), withParentIndex(i)))
+                    .perform(scrollTo())
+                    .check(matches(allOf(hasDescendant(withText(track.name)), hasDescendant(withText(track.duration)))))
+            }
         }
 
         // Paso 6: cada artista, por su posición
-        album.performers.forEachIndexed { i, performer ->
-            onView(allOf(withParent(withId(R.id.performersListWidget)), withParentIndex(i)))
-                .perform(scrollTo())
-                .check(matches(hasDescendant(withText(performer.name))))
+        t("performers checks (${album.performers.size})") {
+            album.performers.forEachIndexed { i, performer ->
+                onView(allOf(withParent(withId(R.id.performersListWidget)), withParentIndex(i)))
+                    .perform(scrollTo())
+                    .check(matches(hasDescendant(withText(performer.name))))
+            }
         }
 
         // Paso 7: cada comentario con su calificación, en la misma tarjeta y por su posición
-        album.comments.forEachIndexed { i, comment ->
-            onView(allOf(isAssignableFrom(CommentCardWidget::class.java), withParentIndex(i), isDescendantOfA(withId(R.id.comments_list))))
-                .perform(scrollTo())
-                .check(matches(allOf(hasDescendant(withText(comment.description)), hasDescendant(withText("${comment.rating}/5")))))
+        t("comments checks (${album.comments.size})") {
+            album.comments.forEachIndexed { i, comment ->
+                onView(allOf(isAssignableFrom(CommentCardWidget::class.java), withParentIndex(i), isDescendantOfA(withId(R.id.comments_list))))
+                    .perform(scrollTo())
+                    .check(matches(allOf(hasDescendant(withText(comment.description)), hasDescendant(withText("${comment.rating}/5")))))
+            }
         }
     }
 
+
+    /**
+     * Abre la app. Con [useMockServer] la apunta antes al servidor falso; si no, usa el backend real.
+     */
+    private fun launchApp(useMockServer: Boolean = false) {
+        if (useMockServer) {
+            NetworkServiceAdapter.BASE_URL = server.url("/").toString()
+        }
+        t("launchApp") { scenario = ActivityScenario.launch(MainActivity::class.java) }
+    }
 
     private fun getFirstAlbumDetailFromBackend(): AlbumDetail {
         // 1. Leer el id del primer álbum desde el tag de su tarjeta
@@ -228,65 +271,81 @@ class AlbumDetailE2ETest {
 
     @Test
     fun pe006_AlbumDetailErrorShowsMessageAndReturnsToList() {
-        // Paso 1: apuntar la app al servidor falso (lista OK, detalle 500) y volver a abrirla
-        NetworkServiceAdapter.BASE_URL = server.url("/").toString()
-        scenario.close()
-        scenario = ActivityScenario.launch(MainActivity::class.java)
-        onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
-        onView(withId(R.id.cardVisitor)).perform(click())
+        // Paso 1: abrir la app apuntando al servidor falso (lista OK, detalle 500)
+        launchApp(useMockServer = true)
+        t("click login card") {
+            onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
+            onView(withId(R.id.cardVisitor)).perform(click())
+        }
 
         // Paso 2: la lista muestra el álbum del servidor falso
-        onView(withText("Buscando América")).check(matches(isDisplayed()))
+        t("list visible") { onView(withText("Buscando América")).check(matches(isDisplayed())) }
 
         // Paso 3: abrir el álbum; el detalle falla
-        onView(withText("Buscando América")).perform(click())
+        t("click album + error visible") {
+            onView(withText("Buscando América")).perform(click())
 
-        // Paso 4: se muestra la pantalla de error con el mensaje exacto
-        onView(withId(R.id.layoutError)).check(matches(isDisplayed()))
+            // Paso 4: se muestra la pantalla de error con el mensaje exacto
+            onView(withId(R.id.layoutError)).check(matches(isDisplayed()))
+        }
         onView(allOf(withId(R.id.description), isDescendantOfA(withId(R.id.errorInformationWidget))))
             .check(matches(withText("Algo inesperado ha ocurrido.\nIntenta más tarde.")))
 
         // Paso 5: tocar el botón de regresar
-        onView(withId(R.id.btnReturn)).perform(click())
+        t("return to list") {
+            onView(withId(R.id.btnReturn)).perform(click())
 
-        // Paso 6: se vuelve a la lista
-        onView(withId(R.id.albumsRv)).check(matches(isDisplayed()))
+            // Paso 6: se vuelve a la lista
+            onView(withId(R.id.albumsRv)).check(matches(isDisplayed()))
+        }
         onView(withText("Buscando América")).check(matches(isDisplayed()))
     }
 
     @Test
     fun login_AlbumDetailShowsElementsAsACollector() {
         // Paso 1: entrar como coleccionista
-        onView(withId(R.id.cardCollector)).check(matches(isDisplayed()))
-        onView(withId(R.id.cardCollector)).perform(click())
+        launchApp()
+        t("click login card") {
+            onView(withId(R.id.cardCollector)).check(matches(isDisplayed()))
+            onView(withId(R.id.cardCollector)).perform(click())
+        }
 
         // Paso 2: la lista de álbumes se ve y tiene al menos uno
-        onView(withId(R.id.albumsRv)).check(matches(allOf(isDisplayed(), hasMinimumChildCount(1))))
+        t("list visible") { onView(withId(R.id.albumsRv)).check(matches(allOf(isDisplayed(), hasMinimumChildCount(1)))) }
 
         // Paso 3: abrir el primer álbum
-        onView(withId(R.id.albumsRv))
-            .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
-        onView(withId(R.id.detail_card)).check(matches(isDisplayed()))
+        t("click album + detail visible") {
+            onView(withId(R.id.albumsRv))
+                .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
+            onView(withId(R.id.detail_card)).check(matches(isDisplayed()))
+        }
 
         // Paso 4: los elementos de coleccionista se ven
-        onView(withId(R.id.buttonAssociateTrack)).perform(scrollTo()).check(matches(isDisplayed()))
-        onView(withId(R.id.titleComment)).perform(scrollTo()).check(matches(isDisplayed()))
-        onView(withId(R.id.addCommentWidget)).perform(scrollTo()).check(matches(isDisplayed()))
+        t("collector elements checks") {
+            onView(withId(R.id.buttonAssociateTrack)).perform(scrollTo()).check(matches(isDisplayed()))
+            onView(withId(R.id.titleComment)).perform(scrollTo()).check(matches(isDisplayed()))
+            onView(withId(R.id.addCommentWidget)).perform(scrollTo()).check(matches(isDisplayed()))
+        }
     }
 
     @Test
     fun login_AlbumDetailDoesNotShowCollectorElements() {
         // Paso 1: entrar como visitante
-        onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
-        onView(withId(R.id.cardVisitor)).perform(click())
+        launchApp()
+        t("click login card") {
+            onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
+            onView(withId(R.id.cardVisitor)).perform(click())
+        }
 
         // Paso 2: la lista de álbumes se ve y tiene al menos uno
-        onView(withId(R.id.albumsRv)).check(matches(allOf(isDisplayed(), hasMinimumChildCount(1))))
+        t("list visible") { onView(withId(R.id.albumsRv)).check(matches(allOf(isDisplayed(), hasMinimumChildCount(1)))) }
 
         // Paso 3: abrir el primer álbum
-        onView(withId(R.id.albumsRv))
-            .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
-        onView(withId(R.id.detail_card)).check(matches(isDisplayed()))
+        t("click album + detail visible") {
+            onView(withId(R.id.albumsRv))
+                .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
+            onView(withId(R.id.detail_card)).check(matches(isDisplayed()))
+        }
 
         // Paso 4: los elementos de coleccionista están ocultos (GONE)
         onView(withId(R.id.buttonAssociateTrack)).check(matches(withEffectiveVisibility(Visibility.GONE)))
