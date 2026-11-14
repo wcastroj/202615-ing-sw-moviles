@@ -2,6 +2,7 @@ package com.example.vinyls_application.network
 
 import android.content.Context
 import androidx.annotation.VisibleForTesting
+import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.Response
@@ -43,6 +44,13 @@ class NetworkServiceAdapter(
     companion object{
         @VisibleForTesting
         var BASE_URL = com.example.vinyls_application.BuildConfig.BACKEND_URL
+
+        /**
+         * Tiempo máximo de espera por intento. El valor por defecto de Volley (2,5 s) es muy corto
+         * con un backend o un dispositivo lento: la petición se abandona y la app muestra error.
+         */
+        const val REQUEST_TIMEOUT_MS = 10_000
+
         var instance: NetworkServiceAdapter? = null
         fun getInstance(context: Context) =
             instance ?: synchronized(this) {
@@ -332,6 +340,7 @@ class NetworkServiceAdapter(
 
     private fun getRequest(path:String, responseListener: Response.Listener<String>, errorListener: Response.ErrorListener): StringRequest {
         return StringRequest(Request.Method.GET, BASE_URL+path, responseListener,errorListener)
+            .apply { retryPolicy = DefaultRetryPolicy(REQUEST_TIMEOUT_MS, 1, 1f) }
     }
 
     private fun postRequest(
@@ -341,5 +350,6 @@ class NetworkServiceAdapter(
         errorListener: Response.ErrorListener
     ): JsonObjectRequest {
         return JsonObjectRequest(Request.Method.POST, BASE_URL + path, body, responseListener, errorListener)
+            .apply { retryPolicy = DefaultRetryPolicy(REQUEST_TIMEOUT_MS, 1, 1f) }
     }
 }
