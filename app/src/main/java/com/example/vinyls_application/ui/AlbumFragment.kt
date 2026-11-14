@@ -1,5 +1,6 @@
 package com.example.vinyls_application.ui
 
+import android.content.ComponentCallbacks2
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import com.example.vinyls_application.R
 import com.example.vinyls_application.databinding.AlbumFragmentBinding
 import com.example.vinyls_application.models.Album
@@ -16,9 +18,9 @@ import com.example.vinyls_application.ui.widgets.CatalogItem
 import com.example.vinyls_application.viewmodels.AlbumViewModel
 
 /**
- * A simple [Fragment] subclass as the second destination in the navigation.
+ * Catálogo de álbumes en cuadrícula.
  */
-class AlbumFragment : Fragment() {
+class AlbumFragment : Fragment(), ComponentCallbacks2 {
     private var _binding: AlbumFragmentBinding? = null
     private val binding get() = _binding!!
     private lateinit var viewModel: AlbumViewModel
@@ -40,7 +42,6 @@ class AlbumFragment : Fragment() {
             findNavController().navigate(action)
         }
 
-        // Configuramos tu InformationWidget con el título, descripción e icono
         binding.errorInformationWidget.setContent(
             title = "¡Ups! Algo se\ndesafinó en la señal",
             description = "Algo inesperado ha ocurrido.\nIntenta más tarde.",
@@ -53,13 +54,11 @@ class AlbumFragment : Fragment() {
             iconRes = R.drawable.sinalbum
         )
 
-        // Acción temporal de reintento al hacer clic en el widget
         binding.errorInformationWidget.setOnClickListener {
             binding.layoutError.visibility = View.GONE
             binding.layoutContent.visibility = View.VISIBLE
         }
 
-        // Inicialización del ViewModel
         val activity = requireNotNull(this.activity) {
             "You can only access the viewModel after onViewCreated()"
         }
@@ -68,8 +67,10 @@ class AlbumFragment : Fragment() {
         viewModel = ViewModelProvider(this, AlbumViewModel.Factory(activity.application))[AlbumViewModel::class.java]
 
         viewModel.albums.observe(viewLifecycleOwner, Observer<List<Album>> { list ->
-            list.apply {
-                binding.albumsRv.setItems(map { album ->
+            val items = ArrayList<CatalogItem>(list.size)
+            for (i in 0 until list.size) {
+                val album = list[i]
+                items.add(
                     CatalogItem(
                         id = album.albumId,
                         title = album.name,
@@ -77,15 +78,16 @@ class AlbumFragment : Fragment() {
                         subtitle = album.genre,
                         detail = album.recordLabel
                     )
-                })
-                binding.layoutError.visibility = View.GONE
-                if (this.isNotEmpty()) {
-                    binding.layoutContent.visibility = View.VISIBLE
-                    binding.layoutEmpty.visibility = View.GONE
-                } else {
-                    binding.layoutContent.visibility = View.GONE
-                    binding.layoutEmpty.visibility = View.VISIBLE
-                }
+                )
+            }
+            binding.albumsRv.setItems(items)
+            binding.layoutError.visibility = View.GONE
+            if (list.isNotEmpty()) {
+                binding.layoutContent.visibility = View.VISIBLE
+                binding.layoutEmpty.visibility = View.GONE
+            } else {
+                binding.layoutContent.visibility = View.GONE
+                binding.layoutEmpty.visibility = View.VISIBLE
             }
         })
 
@@ -97,6 +99,21 @@ class AlbumFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onTrimMemory(level: Int) {
+        context?.let { ctx ->
+            if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) {
+                Glide.get(ctx).clearMemory()
+            } else {
+                Glide.get(ctx).trimMemory(level)
+            }
+        }
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        context?.let { Glide.get(it).clearMemory() }
     }
 
     private fun onNetworkError() {

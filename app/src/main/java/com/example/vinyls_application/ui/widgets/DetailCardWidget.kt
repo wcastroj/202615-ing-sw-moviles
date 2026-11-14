@@ -7,7 +7,9 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.isVisible
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.vinyls_application.databinding.DetailCardWidgetBinding
+import com.example.vinyls_application.utils.MemoryUtils
 
 class DetailCardWidget @JvmOverloads constructor(
     context: Context,
@@ -41,9 +43,16 @@ class DetailCardWidget @JvmOverloads constructor(
         val hasCover = !url.isNullOrBlank()
         binding.cover.isVisible = hasCover
         if (hasCover) {
+            val format = MemoryUtils.getPreferredDecodeFormat(context)
             Glide.with(this)
                 .load(url)
+                .format(format)
+                .centerCrop()
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(binding.cover)
+        } else {
+            Glide.with(this).clear(binding.cover)
+            binding.cover.setImageDrawable(null)
         }
     }
 

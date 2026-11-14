@@ -2,25 +2,17 @@ package com.example.vinyls_application.ui.adapters
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.vinyls_application.models.Album
 import com.example.vinyls_application.ui.widgets.SummaryCardWidget
 
-class RelatedAlbumsAdapter : RecyclerView.Adapter<RelatedAlbumsAdapter.AlbumViewHolder>() {
+class RelatedAlbumsAdapter : ListAdapter<Album, RelatedAlbumsAdapter.AlbumViewHolder>(AlbumDiffCallback) {
 
-    var albums: List<Album> = emptyList()
+    var albums: List<Album>
+        get() = currentList
         set(value) {
-            val diffCallback = object : DiffUtil.Callback() {
-                override fun getOldListSize(): Int = field.size
-                override fun getNewListSize(): Int = value.size
-                override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
-                    field[oldItemPosition].albumId == value[newItemPosition].albumId
-                override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
-                    field[oldItemPosition] == value[newItemPosition]
-            }
-            val diffResult = DiffUtil.calculateDiff(diffCallback)
-            field = value
-            diffResult.dispatchUpdatesTo(this)
+            submitList(value)
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlbumViewHolder {
@@ -34,15 +26,25 @@ class RelatedAlbumsAdapter : RecyclerView.Adapter<RelatedAlbumsAdapter.AlbumView
     }
 
     override fun onBindViewHolder(holder: AlbumViewHolder, position: Int) {
-        val album = albums[position]
+        val album = getItem(position)
         holder.widget.setContent(
             id = album.albumId.toString(),
             title = album.name,
-            subtitle = album.releaseDate.take(10)
+            subtitle = if (album.releaseDate.length >= 10) album.releaseDate.substring(0, 10) else album.releaseDate
         )
     }
 
-    override fun getItemCount(): Int = albums.size
+    override fun onViewRecycled(holder: AlbumViewHolder) {
+        super.onViewRecycled(holder)
+    }
 
     class AlbumViewHolder(val widget: SummaryCardWidget) : RecyclerView.ViewHolder(widget)
+
+    private object AlbumDiffCallback : DiffUtil.ItemCallback<Album>() {
+        override fun areItemsTheSame(oldItem: Album, newItem: Album): Boolean =
+            oldItem.albumId == newItem.albumId
+
+        override fun areContentsTheSame(oldItem: Album, newItem: Album): Boolean =
+            oldItem == newItem
+    }
 }

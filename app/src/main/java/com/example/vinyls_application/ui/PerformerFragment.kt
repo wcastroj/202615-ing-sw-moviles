@@ -1,5 +1,6 @@
 package com.example.vinyls_application.ui
 
+import android.content.ComponentCallbacks2
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +10,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import com.example.vinyls_application.R
 import com.example.vinyls_application.databinding.PerformerFragmentBinding
 import com.example.vinyls_application.models.Performer
@@ -20,7 +22,7 @@ import com.example.vinyls_application.viewmodels.PerformerViewModel
  * Catálogo de artistas (bandas y músicos) en cuadrícula usando
  * [com.example.vinyls_application.ui.widgets.CatalogListWidget], igual que el catálogo de álbumes.
  */
-class PerformerFragment : Fragment() {
+class PerformerFragment : Fragment(), ComponentCallbacks2 {
     private var _binding: PerformerFragmentBinding? = null
     private val binding get() = _binding!!
     private lateinit var viewModel: PerformerViewModel
@@ -76,8 +78,15 @@ class PerformerFragment : Fragment() {
         )[PerformerViewModel::class.java]
 
         viewModel.performers.observe(viewLifecycleOwner) { list ->
-            performerTypeMap = list.associate { it.id to it.type }
-            binding.performersRv.setItems(list.map { it.toCatalogItem() })
+            val typeMap = HashMap<Int, PerformerType>(list.size)
+            val catalogItems = ArrayList<CatalogItem>(list.size)
+            for (i in 0 until list.size) {
+                val performer = list[i]
+                typeMap[performer.id] = performer.type
+                catalogItems.add(performer.toCatalogItem())
+            }
+            performerTypeMap = typeMap
+            binding.performersRv.setItems(catalogItems)
             binding.layoutError.visibility = View.GONE
             if (list.isNotEmpty()) {
                 binding.layoutContent.visibility = View.VISIBLE
@@ -96,6 +105,21 @@ class PerformerFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onTrimMemory(level: Int) {
+        context?.let { ctx ->
+            if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) {
+                Glide.get(ctx).clearMemory()
+            } else {
+                Glide.get(ctx).trimMemory(level)
+            }
+        }
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        context?.let { Glide.get(it).clearMemory() }
     }
 
     /** Un músico muestra su `birthDate` y una banda su `creationDate`. */
