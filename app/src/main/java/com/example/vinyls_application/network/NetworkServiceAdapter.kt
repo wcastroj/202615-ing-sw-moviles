@@ -36,7 +36,7 @@ import kotlin.coroutines.resumeWithException
  * ordenar listas). Por defecto [Dispatchers.Default], fuera del hilo principal. En las pruebas
  * unitarias se pasa un TestDispatcher, y en las E2E con IdlingResource, Dispatchers.Main.
  */
-class NetworkServiceAdapter constructor(
+class NetworkServiceAdapter(
     context: Context,
     queue: RequestQueue? = null,
     val dispatcher: CoroutineDispatcher = Dispatchers.Default

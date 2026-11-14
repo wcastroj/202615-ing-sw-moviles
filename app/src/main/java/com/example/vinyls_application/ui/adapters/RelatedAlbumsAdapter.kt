@@ -1,6 +1,7 @@
 package com.example.vinyls_application.ui.adapters
 
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.vinyls_application.models.Album
 import com.example.vinyls_application.ui.widgets.SummaryCardWidget
@@ -9,8 +10,17 @@ class RelatedAlbumsAdapter : RecyclerView.Adapter<RelatedAlbumsAdapter.AlbumView
 
     var albums: List<Album> = emptyList()
         set(value) {
+            val diffCallback = object : DiffUtil.Callback() {
+                override fun getOldListSize(): Int = field.size
+                override fun getNewListSize(): Int = value.size
+                override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
+                    field[oldItemPosition].albumId == value[newItemPosition].albumId
+                override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
+                    field[oldItemPosition] == value[newItemPosition]
+            }
+            val diffResult = DiffUtil.calculateDiff(diffCallback)
             field = value
-            notifyDataSetChanged()
+            diffResult.dispatchUpdatesTo(this)
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlbumViewHolder {

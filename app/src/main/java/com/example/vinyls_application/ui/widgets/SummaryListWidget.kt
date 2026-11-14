@@ -16,12 +16,12 @@ class SummaryListWidget @JvmOverloads constructor(
 
     fun setItems(items: List<SummaryItem>) {
         removeAllViews()
-        for (item in items) {
+        for ((id1, title, subtitle) in items) {
             val cardWidget = SummaryCardWidget(context).apply {
                 setContent(
-                    id = item.id,
-                    title = item.title,
-                    subtitle = item.subtitle
+                    id = id1,
+                    title = title,
+                    subtitle = subtitle
                 )
             }
             addView(cardWidget)

@@ -10,6 +10,7 @@ import com.example.vinyls_application.R
 import com.example.vinyls_application.databinding.LoginFragmentBinding
 import android.content.Context
 import android.util.Log
+import androidx.core.content.edit
 
 class LoginFragment : Fragment() {
 
@@ -20,9 +21,8 @@ class LoginFragment : Fragment() {
     }
     private fun saveRole(isCollector: Boolean) {
         val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
-        with(sharedPref.edit()) {
+        sharedPref.edit {
             putBoolean(KEY_IS_COLLECTOR, isCollector)
-            apply()
         }
         Log.d("LoginFragment", "is_collector guardado = ${sharedPref.getBoolean(KEY_IS_COLLECTOR, false)}")
     }

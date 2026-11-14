@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import com.google.android.material.button.MaterialButton
 import com.example.vinyls_application.R
+import androidx.core.content.withStyledAttributes
 
 /**
  * Componente de botón personalizado (Custom View) que extiende de MaterialButton.
@@ -89,13 +90,13 @@ class ButtonWidget @JvmOverloads constructor(
         stateListAnimator = null
 
         attrs?.let {
-            val typedArray = context.obtainStyledAttributes(it, R.styleable.ButtonWidget, 0, 0)
+            context.withStyledAttributes(it, R.styleable.ButtonWidget, 0, 0) {
 
-            buttonText = typedArray.getString(R.styleable.ButtonWidget_customText) ?: ""
-            hasIcon = typedArray.getBoolean(R.styleable.ButtonWidget_hasIcon, false)
-            customIcon = typedArray.getDrawable(R.styleable.ButtonWidget_customIcon)
+                buttonText = getString(R.styleable.ButtonWidget_customText) ?: ""
+                hasIcon = getBoolean(R.styleable.ButtonWidget_hasIcon, false)
+                customIcon = getDrawable(R.styleable.ButtonWidget_customIcon)
 
-            typedArray.recycle()
+            }
         }
     }
 

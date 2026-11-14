@@ -8,6 +8,7 @@ import androidx.navigation.fragment.NavHostFragment
 import com.example.vinyls_application.R
 import com.example.vinyls_application.databinding.ActivityMainBinding
 import androidx.core.view.isVisible
+import androidx.core.content.edit
 
 class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
@@ -24,7 +25,7 @@ class MainActivity : AppCompatActivity() {
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         if (savedInstanceState == null) {
-            getPreferences(MODE_PRIVATE).edit().clear().apply()
+            getPreferences(MODE_PRIVATE).edit { clear() }
         }
 
         // Get the navigation host fragment from this Activity

@@ -1,15 +1,8 @@
 package com.example.vinyls_application.ui.widgets
 
 import android.content.Context
-import android.graphics.Color
-import android.graphics.Typeface
 import android.util.AttributeSet
-import android.util.TypedValue
 import android.widget.LinearLayout
-import android.widget.TextView
-import androidx.core.view.isVisible
-import com.example.vinyls_application.R
-import androidx.core.graphics.toColorInt
 
 data class CommentItem(
     val rating: Int,
@@ -33,9 +26,9 @@ class CommentsListWidget @JvmOverloads constructor(
 
         val spacing = (12 * resources.displayMetrics.density).toInt()
 
-        for (item in comments) {
+        for ((rating, comment) in comments) {
             val card = CommentCardWidget(context)
-            card.setContent(rating = item.rating, comment = item.comment)
+            card.setContent(rating = rating, comment = comment)
 
             val params = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
             params.topMargin = spacing

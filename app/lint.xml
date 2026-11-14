@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="StaticFieldLeak" severity="error" />
+
+    <issue id="FragmentLiveDataObserve" severity="error" />
+    <issue id="ValidFragment" severity="error" />
+
+    <issue id="ViewHolder" severity="warning" />
+    <issue id="UnusedResources" severity="warning" />
+    <issue id="DrawAllocation" severity="warning" />
+
+    <issue id="TrustAllX509TrustManager" severity="error" />
+    <issue id="TrulyRandom" severity="error" />
+</lint>

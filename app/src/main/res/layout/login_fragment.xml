@@ -21,7 +21,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Bienvenido a tu universo musical"
+            android:text="@string/login_main_title"
             android:textColor="#1E1E1E"
             android:textSize="26sp"
             android:textStyle="bold" />
@@ -34,7 +34,7 @@
             android:layout_marginTop="8dp"
             android:gravity="center"
             android:lineSpacingExtra="4dp"
-            android:text="Selecciona cómo deseas ingresar a la plataforma y sincroniza tus emociones."
+            android:text="@string/login_title"
             android:textColor="#5F5F6B"
             android:textSize="15sp" />
 
@@ -52,7 +52,6 @@
             app:roleDescription="Explora y disfruta el catálogo de álbumes, descubre artistas y lee opiniones de coleccionistas."
             app:customText="Ingresar como Visitante" />
 
-        <!-- Card Coleccionista -->
         <com.example.vinyls_application.ui.widgets.RoleCardWidget
             android:id="@+id/cardCollector"
             android:layout_width="match_parent"
