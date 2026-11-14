@@ -12,7 +12,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.vinyls_application.R
 import com.example.vinyls_application.databinding.PerformerDetailFragmentBinding
-import com.example.vinyls_application.models.PerformerBase
+import com.example.vinyls_application.models.Performer
 import com.example.vinyls_application.models.PerformerType
 import com.example.vinyls_application.ui.adapters.RelatedAlbumsAdapter
 import com.example.vinyls_application.viewmodels.PerformerDetailViewModel
@@ -67,7 +67,7 @@ class PerformerDetailFragment : Fragment() {
             viewModel.getPerformerDetail()
         }
 
-        viewModel.performer.observe(viewLifecycleOwner, Observer<PerformerBase> { performer ->
+        viewModel.performer.observe(viewLifecycleOwner, Observer<Performer> { performer ->
             performer.apply {
                 val typeTag = if (type == PerformerType.BAND) "Banda" else "Músico/a"
                 val prizesCount = "${performerPrizes.size} Premios"

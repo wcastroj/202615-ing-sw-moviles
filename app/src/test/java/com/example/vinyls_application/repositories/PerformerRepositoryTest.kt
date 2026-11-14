@@ -8,6 +8,8 @@ import com.android.volley.RequestQueue
 import com.android.volley.ServerError
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
+import com.example.vinyls_application.models.Band
+import com.example.vinyls_application.models.Musician
 import com.example.vinyls_application.models.Performer
 import com.example.vinyls_application.models.PerformerType
 import com.example.vinyls_application.network.NetworkServiceAdapter
@@ -116,9 +118,9 @@ class PerformerRepositoryTest {
         // Assert: cada artista conserva su tipo y su fecha
         val byId = result!!.associateBy { it.id }
         assertEquals(PerformerType.BAND, byId.getValue(1).type)
-        assertEquals("1970-01-01T00:00:00.000Z", byId.getValue(1).creationDate)
+        assertEquals("1970-01-01T00:00:00.000Z", (byId.getValue(1) as Band).creationDate)
         assertEquals(PerformerType.MUSICIAN, byId.getValue(100).type)
-        assertEquals("1948-07-16T00:00:00.000Z", byId.getValue(100).birthDate)
+        assertEquals("1948-07-16T00:00:00.000Z", (byId.getValue(100) as Musician).birthDate)
         assertEquals(PerformerType.MUSICIAN, byId.getValue(101).type)
         assertNull(error)
     }

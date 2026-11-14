@@ -71,7 +71,6 @@ class PerformerParserTest {
         assertEquals("https://example.com/queen.jpg", bands[0].image)
         assertEquals("Banda británica de rock", bands[0].description)
         assertEquals("1970-01-01T00:00:00.000Z", bands[0].creationDate)
-        assertNull(bands[0].birthDate)
 
         assertEquals(2, bands[1].id)
         assertEquals("Los Van Van", bands[1].name)
@@ -90,7 +89,6 @@ class PerformerParserTest {
         assertEquals("https://example.com/ruben.jpg", musicians[0].image)
         assertEquals("Cantante, compositor y actor panameño", musicians[0].description)
         assertEquals("1948-07-16T00:00:00.000Z", musicians[0].birthDate)
-        assertNull(musicians[0].creationDate)
 
         assertEquals(101, musicians[1].id)
         assertEquals("Celia Cruz", musicians[1].name)

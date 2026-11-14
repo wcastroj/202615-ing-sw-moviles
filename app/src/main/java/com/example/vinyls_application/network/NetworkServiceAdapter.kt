@@ -17,7 +17,6 @@ import com.example.vinyls_application.models.Band
 import com.example.vinyls_application.models.Comment
 import com.example.vinyls_application.models.Musician
 import com.example.vinyls_application.models.Performer
-import com.example.vinyls_application.models.PerformerBase
 import com.example.vinyls_application.models.PerformerPrize
 import com.example.vinyls_application.models.PerformerType
 import com.example.vinyls_application.models.Track
@@ -85,55 +84,16 @@ class NetworkServiceAdapter(
 
             return albums as ArrayList<Album>
         }
-        fun parseBands(response: String): List<Performer> {
+        /** GET /bands. Las listas anidadas (albums, musicians, performerPrizes) se ignoran. */
+        fun parseBands(response: String): List<Band> {
             val resp = JSONArray(response)
-            val performers = mutableListOf<Performer>()
-
-            if (resp.length() == 0) {
-                return performers as List<Performer>
-            }
-
-            for (i in 0 until resp.length()) {
-                val performer = resp.getJSONObject(i)
-
-                performers.add(
-                    Performer(
-                        id = performer.getInt("id"),
-                        name = performer.getString("name"),
-                        image = performer.getString("image"),
-                        description = performer.getString("description"),
-                        type = PerformerType.BAND,
-                        creationDate = performer.getString("creationDate")
-                    )
-                )
-            }
-
-            return performers as ArrayList<Performer>
+            return (0 until resp.length()).map { parseBand(resp.getJSONObject(it)) }
         }
-        fun parseMusicians(response: String): List<Performer> {
+
+        /** GET /musicians. Las listas anidadas (albums, performerPrizes) se ignoran. */
+        fun parseMusicians(response: String): List<Musician> {
             val resp = JSONArray(response)
-            val performers = mutableListOf<Performer>()
-
-            if (resp.length() == 0) {
-                return performers as List<Performer>
-            }
-
-            for (i in 0 until resp.length()) {
-                val performer = resp.getJSONObject(i)
-
-                performers.add(
-                    Performer(
-                        id = performer.getInt("id"),
-                        name = performer.getString("name"),
-                        image = performer.getString("image"),
-                        description = performer.getString("description"),
-                        type = PerformerType.MUSICIAN,
-                        birthDate = performer.getString("birthDate")
-                    )
-                )
-            }
-
-            return performers as ArrayList<Performer>
+            return (0 until resp.length()).map { parseMusician(resp.getJSONObject(it)) }
         }
 
         fun parseAlbumDetail(response: String): AlbumDetail {
@@ -156,17 +116,11 @@ class NetworkServiceAdapter(
             val performersJson = resp.getJSONArray("performers")
             for (i in 0 until performersJson.length()) {
                 val p = performersJson.getJSONObject(i)
+                // Los performers de un álbum vienen mezclados: los músicos traen birthDate.
+                // Aquí la fecha es opcional para no romper el detalle del álbum si falta.
                 performers.add(
-                    Performer(
-                        id = p.getInt("id"),
-                        name = p.getString("name"),
-                        image = p.getString("image"),
-                        description = p.getString("description"),
-                        // Los performers de un álbum vienen mezclados: los músicos traen birthDate
-                        type = if (p.has("birthDate")) PerformerType.MUSICIAN else PerformerType.BAND,
-                        birthDate = if (p.has("birthDate")) p.getString("birthDate") else null,
-                        creationDate = if (p.has("creationDate")) p.getString("creationDate") else null
-                    )
+                    if (p.has("birthDate")) parseMusician(p)
+                    else parseBand(p, creationDate = p.optString("creationDate"))
                 )
             }
             val comments = mutableListOf<Comment>()
@@ -198,39 +152,51 @@ class NetworkServiceAdapter(
             return albumDetail
         }
 
-        fun parsePerformer(response: String): PerformerBase {
+        fun parsePerformer(response: String): Performer {
             val performer = JSONObject(response)
-
-            val id = performer.getInt("id")
-            val name = performer.getString("name")
-            val image = performer.getString("image")
-            val description = performer.getString("description")
-
             val albums = parseAlbums(performer.getJSONArray("albums").toString())
             val prizes = parsePrizes(performer.getJSONArray("performerPrizes"))
 
             return if (performer.has("creationDate")) {
-                Band(
-                    id = id,
-                    name = name,
-                    image = image,
-                    description = description,
-                    albums = albums,
-                    performerPrizes = prizes,
-                    creationDate = performer.getString("creationDate")
-                )
+                parseBand(performer, albums = albums, prizes = prizes)
             } else {
-                Musician(
-                    id = id,
-                    name = name,
-                    image = image,
-                    description = description,
-                    albums = albums,
-                    performerPrizes = prizes,
-                    birthDate = performer.getString("birthDate")
-                )
+                parseMusician(performer, albums = albums, prizes = prizes)
             }
         }
+
+        /**
+         * Construye una [Band] con los campos comunes del JSON. Los álbumes y premios solo los
+         * trae el detalle, así que por defecto quedan vacíos.
+         */
+        private fun parseBand(
+            json: JSONObject,
+            albums: List<Album> = emptyList(),
+            prizes: List<PerformerPrize> = emptyList(),
+            creationDate: String = json.getString("creationDate"),
+        ) = Band(
+            id = json.getInt("id"),
+            name = json.getString("name"),
+            image = json.getString("image"),
+            description = json.getString("description"),
+            albums = albums,
+            performerPrizes = prizes,
+            creationDate = creationDate
+        )
+
+        /** Igual que [parseBand], pero para un [Musician]. */
+        private fun parseMusician(
+            json: JSONObject,
+            albums: List<Album> = emptyList(),
+            prizes: List<PerformerPrize> = emptyList(),
+        ) = Musician(
+            id = json.getInt("id"),
+            name = json.getString("name"),
+            image = json.getString("image"),
+            description = json.getString("description"),
+            albums = albums,
+            performerPrizes = prizes,
+            birthDate = json.getString("birthDate")
+        )
 
         private fun parsePrizes(resp: JSONArray): List<PerformerPrize> {
             val prizes = mutableListOf<PerformerPrize>()
@@ -278,15 +244,15 @@ class NetworkServiceAdapter(
         parseAlbumDetail(getString("albums/$id"))
     }
 
-    suspend fun getBands(): List<Performer> = withContext(dispatcher) {
+    suspend fun getBands(): List<Band> = withContext(dispatcher) {
         parseBands(getString("bands"))
     }
 
-    suspend fun getMusicians(): List<Performer> = withContext(dispatcher) {
+    suspend fun getMusicians(): List<Musician> = withContext(dispatcher) {
         parseMusicians(getString("musicians"))
     }
 
-    suspend fun getPerformer(id: Int, type: PerformerType): PerformerBase = withContext(dispatcher) {
+    suspend fun getPerformer(id: Int, type: PerformerType): Performer = withContext(dispatcher) {
         parsePerformer(getString(performerPath(id, type)))
     }
 

@@ -7,7 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.vinyls_application.models.PerformerBase
+import com.example.vinyls_application.models.Performer
 import com.example.vinyls_application.models.PerformerType
 import com.example.vinyls_application.repositories.PerformerDetailRepository
 import kotlinx.coroutines.CancellationException
@@ -20,8 +20,8 @@ class PerformerDetailViewModel(
     private val repository: PerformerDetailRepository = PerformerDetailRepository(application)
 ) : AndroidViewModel(application) {
 
-    private val _performer = MutableLiveData<PerformerBase>()
-    val performer: LiveData<PerformerBase> get() = _performer
+    private val _performer = MutableLiveData<Performer>()
+    val performer: LiveData<Performer> get() = _performer
 
     private val _eventNetworkError = MutableLiveData(false)
     val eventNetworkError: LiveData<Boolean> get() = _eventNetworkError
