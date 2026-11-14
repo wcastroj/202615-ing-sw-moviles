@@ -22,6 +22,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withParentIndex
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import com.android.volley.RequestQueue
 import com.android.volley.toolbox.Volley
 import com.example.vinyls_application.R
 import com.example.vinyls_application.models.AlbumDetail
@@ -55,6 +56,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility
 class AlbumDetailE2ETest {
 
     private lateinit var idlingResource: VolleyIdlingResource
+    private lateinit var queue: RequestQueue
     private lateinit var scenario: ActivityScenario<MainActivity>
     private lateinit var server: MockWebServer
     private lateinit var originalBaseUrl: String
@@ -85,27 +87,28 @@ class AlbumDetailE2ETest {
         }
         server.start()
 
-        // 2. Guardar la URL del backend real; pe004 y pe005 la usan tal cual
+        // 2. Guardar la URL del backend real; pe004, pe005 y los login_ la usan tal cual
         originalBaseUrl = NetworkServiceAdapter.BASE_URL
 
         // 3. Cola de Volley vigilada por el IdlingResource
         val context = ApplicationProvider.getApplicationContext<Context>()
         idlingResource = VolleyIdlingResource()
-        val queue = Volley.newRequestQueue(context)
+        queue = Volley.newRequestQueue(context)
         queue.addRequestEventListener(idlingResource)
         // Dispatchers.Main: el parseo pasa por la cola del hilo principal, que Espresso sí vigila.
         // Con Dispatchers.Default el IdlingResource quedaría libre antes de que llegue el dato a la UI.
         NetworkServiceAdapter.instance = NetworkServiceAdapter(context, queue, Dispatchers.Main)
         IdlingRegistry.getInstance().register(idlingResource)
 
-        // 4. Abrir la app
-        scenario = ActivityScenario.launch(MainActivity::class.java)
+        // La app se abre dentro de cada test con launchApp(), así pe006 la abre una sola vez
     }
 
     @After
     fun tearDown() {
         scenario.close()
         IdlingRegistry.getInstance().unregister(idlingResource)
+        // Se detiene la cola para no dejar sus hilos vivos entre tests
+        queue.stop()
         NetworkServiceAdapter.instance = null
         NetworkServiceAdapter.BASE_URL = originalBaseUrl
         server.shutdown()
@@ -113,6 +116,7 @@ class AlbumDetailE2ETest {
 
     @Test
     fun pe004_OpenAlbumDetailAndBackToList() {
+        launchApp()
         onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
         onView(withId(R.id.cardVisitor)).perform(click())
         // Paso 1: la lista de álbumes se ve
@@ -136,6 +140,7 @@ class AlbumDetailE2ETest {
 
     @Test
     fun pe005_AlbumDetailShowAllInformation() {
+        launchApp()
         onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
         onView(withId(R.id.cardVisitor)).perform(click())
         // Paso 1: la lista de álbumes se ve y tiene al menos una tarjeta
@@ -180,6 +185,16 @@ class AlbumDetailE2ETest {
         }
     }
 
+
+    /**
+     * Abre la app. Con [useMockServer] la apunta antes al servidor falso; si no, usa el backend real.
+     */
+    private fun launchApp(useMockServer: Boolean = false) {
+        if (useMockServer) {
+            NetworkServiceAdapter.BASE_URL = server.url("/").toString()
+        }
+        scenario = ActivityScenario.launch(MainActivity::class.java)
+    }
 
     private fun getFirstAlbumDetailFromBackend(): AlbumDetail {
         // 1. Leer el id del primer álbum desde el tag de su tarjeta
@@ -231,10 +246,8 @@ class AlbumDetailE2ETest {
 
     @Test
     fun pe006_AlbumDetailErrorShowsMessageAndReturnsToList() {
-        // Paso 1: apuntar la app al servidor falso (lista OK, detalle 500) y volver a abrirla
-        NetworkServiceAdapter.BASE_URL = server.url("/").toString()
-        scenario.close()
-        scenario = ActivityScenario.launch(MainActivity::class.java)
+        // Paso 1: abrir la app apuntando al servidor falso (lista OK, detalle 500)
+        launchApp(useMockServer = true)
         onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
         onView(withId(R.id.cardVisitor)).perform(click())
 
@@ -260,6 +273,7 @@ class AlbumDetailE2ETest {
     @Test
     fun login_AlbumDetailShowsElementsAsACollector() {
         // Paso 1: entrar como coleccionista
+        launchApp()
         onView(withId(R.id.cardCollector)).check(matches(isDisplayed()))
         onView(withId(R.id.cardCollector)).perform(click())
 
@@ -280,6 +294,7 @@ class AlbumDetailE2ETest {
     @Test
     fun login_AlbumDetailDoesNotShowCollectorElements() {
         // Paso 1: entrar como visitante
+        launchApp()
         onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
         onView(withId(R.id.cardVisitor)).perform(click())
 
