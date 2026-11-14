@@ -29,7 +29,7 @@ import com.example.vinyls_application.R
 import com.example.vinyls_application.models.Album
 import com.example.vinyls_application.models.Band
 import com.example.vinyls_application.models.Musician
-import com.example.vinyls_application.models.PerformerBase
+import com.example.vinyls_application.models.Performer
 import com.example.vinyls_application.models.PerformerPrize
 import com.example.vinyls_application.network.NetworkServiceAdapter
 import com.example.vinyls_application.ui.MainActivity
@@ -199,8 +199,9 @@ class PerformerDetailTest {
         onView(withId(R.id.performersRv))
             .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(position, click()))
 
-        // Paso 4: se ve la lista de álbumes y no el mensaje de "sin álbumes"
-        onView(withId(R.id.rvRelatedAlbums)).check(matches(isDisplayed()))
+        // Paso 4: se ve la lista de álbumes y no el mensaje de "sin álbumes".
+        // La lista está debajo de la tarjeta de detalle: hay que desplazarse para que quede en pantalla.
+        onView(withId(R.id.rvRelatedAlbums)).perform(scrollTo()).check(matches(isDisplayed()))
         onView(withId(R.id.txtEmptyAlbums)).check(matches(withEffectiveVisibility(Visibility.GONE)))
 
         // Paso 5: cada álbum con su nombre y fecha de lanzamiento, por su posición
@@ -289,7 +290,7 @@ class PerformerDetailTest {
     }
 
     /** Verifica la tarjeta de detalle contra los datos del backend. */
-    private fun assertDetailCard(performer: PerformerBase, expectedTag: String) {
+    private fun assertDetailCard(performer: Performer, expectedTag: String) {
         onView(allOf(withId(R.id.title), isDescendantOfA(withId(R.id.detailCard))))
             .check(matches(withText(performer.name)))
         onView(allOf(withId(R.id.tag), isDescendantOfA(withId(R.id.detailCard))))
@@ -336,7 +337,7 @@ class PerformerDetailTest {
      * de la tarjeta (por defecto la primera) y pide el artista al backend real. El tipo
      * ("Banda" o "Músico") se lee de la misma tarjeta para saber qué endpoint pedir.
      */
-    private fun getPerformerDetailFromBackend(position: Int = 0): PerformerBase {
+    private fun getPerformerDetailFromBackend(position: Int = 0): Performer {
         // 1. Leer el id y el tipo del artista desde su tarjeta
         var performerId = 0
         var typeLabel = ""
