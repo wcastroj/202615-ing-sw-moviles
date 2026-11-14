@@ -8,4 +8,4 @@ data class Band(
     override val albums: List<Album>,
     override val performerPrizes: List<PerformerPrize>,
     val creationDate: String
-) : PerformerBase
+) : Performer

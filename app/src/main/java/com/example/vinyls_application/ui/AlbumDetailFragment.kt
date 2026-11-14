@@ -91,7 +91,7 @@ class AlbumDetailFragment : Fragment() {
                     SummaryItem(
                         id = performer.id.toString(),
                         title = performer.name,
-                        subtitle = performer.birthDate ?: performer.creationDate ?: ""
+                        subtitle = performer.date
                     )
                 }
                 binding.performersListWidget.setItems(performerItems)

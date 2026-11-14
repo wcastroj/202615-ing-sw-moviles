@@ -109,7 +109,7 @@ class PerformerFragment : Fragment() {
                 PerformerType.BAND -> R.string.performer_type_band
             }
         ),
-        detail = formatPerformerDate(birthDate ?: creationDate)
+        detail = formatPerformerDate(date)
     )
 
     private fun onNetworkError() {

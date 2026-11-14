@@ -11,7 +11,7 @@ import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.example.vinyls_application.models.Band
 import com.example.vinyls_application.models.Musician
-import com.example.vinyls_application.models.PerformerBase
+import com.example.vinyls_application.models.Performer
 import com.example.vinyls_application.models.PerformerType
 import com.example.vinyls_application.network.NetworkServiceAdapter
 import kotlinx.coroutines.CoroutineScope
@@ -92,7 +92,7 @@ class PerformerDetailRepositoryTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var requestQueue: RequestQueue
     private lateinit var repository: PerformerDetailRepository
-    private var result: PerformerBase? = null
+    private var result: Performer? = null
     private var error: VolleyError? = null
 
     @Before
