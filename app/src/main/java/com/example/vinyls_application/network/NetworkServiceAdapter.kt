@@ -40,6 +40,8 @@ class NetworkServiceAdapter(
     queue: RequestQueue? = null,
     val dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) {
+    private val appContext: Context = context.applicationContext ?: context
+
     companion object{
         @VisibleForTesting
         var BASE_URL = com.example.vinyls_application.BuildConfig.BACKEND_URL
@@ -53,7 +55,7 @@ class NetworkServiceAdapter(
         var instance: NetworkServiceAdapter? = null
         fun getInstance(context: Context) =
             instance ?: synchronized(this) {
-                instance ?: NetworkServiceAdapter(context).also {
+                instance ?: NetworkServiceAdapter(context.applicationContext ?: context).also {
                     instance = it
                 }
             }
@@ -222,7 +224,11 @@ class NetworkServiceAdapter(
 
     private val requestQueue: RequestQueue by lazy {
         // applicationContext keeps you from leaking the Activity or BroadcastReceiver if someone passes one in.
-        queue ?: Volley.newRequestQueue(context.applicationContext)
+        queue ?: Volley.newRequestQueue(appContext)
+    }
+
+    fun clearCache() {
+        requestQueue.cache?.clear()
     }
 
     // ---------------------------------------------------------------------------------------------
