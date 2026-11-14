@@ -15,6 +15,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.shadows.ShadowLooper
 
 @RunWith(RobolectricTestRunner::class)
 class CatalogListWidgetTest {
@@ -105,7 +106,10 @@ class CatalogListWidgetTest {
     @Test
     fun test_CatalogListWidget_SetItemsReplacesPreviousItems() {
         listWidget.setItems(items)
+        layoutWidget()
         listWidget.setItems(listOf(items[0]))
+        ShadowLooper.idleMainLooper()
+        layoutWidget()
 
         assertEquals(1, listWidget.adapter!!.itemCount)
     }
