@@ -9,6 +9,11 @@ import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.example.vinyls_application.models.Album
 import com.example.vinyls_application.network.NetworkServiceAdapter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -20,6 +25,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class AlbumRepositoryTest {
 
     private val albumsJson = """
@@ -45,6 +51,8 @@ class AlbumRepositoryTest {
         ]
     """.trimIndent()
 
+    // Corre las corrutinas de inmediato en el hilo de la prueba (ver MainDispatcherRule)
+    private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var requestQueue: RequestQueue
     private lateinit var repository: AlbumRepository
     private var result: List<Album>? = null
@@ -54,7 +62,7 @@ class AlbumRepositoryTest {
     fun setUp() {
         val application = mock(Application::class.java)
         requestQueue = mock(RequestQueue::class.java)
-        NetworkServiceAdapter.instance = NetworkServiceAdapter(application, requestQueue)
+        NetworkServiceAdapter.instance = NetworkServiceAdapter(application, requestQueue, testDispatcher)
         repository = AlbumRepository(application)
         result = null
         error = null
@@ -66,8 +74,8 @@ class AlbumRepositoryTest {
     }
 
     @Test
-    fun pi001_getAlbums_whenResponseIs200_deliversAlbumList() {
-        repository.getAlbums({ result = it }, { error = it })
+    fun pi001_getAlbums_whenResponseIs200_deliversAlbumList() = runTest(testDispatcher) {
+        loadAlbums()
         val request = capturedRequest()
 
         deliverResponse(request, albumsJson)
@@ -85,8 +93,8 @@ class AlbumRepositoryTest {
     }
 
     @Test
-    fun pi002_getAlbums_whenResponseIs200WithEmptyList_deliversEmptyList() {
-        repository.getAlbums({ result = it }, { error = it })
+    fun pi002_getAlbums_whenResponseIs200WithEmptyList_deliversEmptyList() = runTest(testDispatcher) {
+        loadAlbums()
         val request = capturedRequest()
 
         deliverResponse(request, "[]")
@@ -99,8 +107,8 @@ class AlbumRepositoryTest {
     }
 
     @Test
-    fun pi003_getAlbums_whenServerError500_deliversError() {
-        repository.getAlbums({ result = it }, { error = it })
+    fun pi003_getAlbums_whenServerError500_deliversError() = runTest(testDispatcher) {
+        loadAlbums()
         val request = capturedRequest()
 
         request.deliverError(ServerError(network500Response()))
@@ -108,6 +116,18 @@ class AlbumRepositoryTest {
         assertTrue(error is ServerError)
         assertEquals(500, error?.networkResponse?.statusCode)
         assertNull(result)
+    }
+
+    /**
+     * Lanza getAlbums() en una corrutina. Queda suspendida esperando a Volley y se reanuda
+     * cuando la prueba entrega la respuesta o el error.
+     */
+    private fun CoroutineScope.loadAlbums() = launch {
+        try {
+            result = repository.getAlbums()
+        } catch (e: VolleyError) {
+            error = e
+        }
     }
 
     private fun capturedRequest(): StringRequest {

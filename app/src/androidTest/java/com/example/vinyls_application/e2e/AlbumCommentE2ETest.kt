@@ -22,6 +22,7 @@ import com.example.vinyls_application.R
 import com.example.vinyls_application.network.NetworkServiceAdapter
 import com.example.vinyls_application.ui.MainActivity
 import com.example.vinyls_application.utils.VolleyIdlingResource
+import kotlinx.coroutines.Dispatchers
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -79,13 +80,14 @@ class AlbumCommentE2ETest {
         server = MockWebServer()
         server.start()
         originalBaseUrl = NetworkServiceAdapter.BASE_URL
-        NetworkServiceAdapter.BASE_URL = server.url("/").toString()
 
         val context = ApplicationProvider.getApplicationContext<Context>()
         idlingResource = VolleyIdlingResource()
         val queue = Volley.newRequestQueue(context)
         queue.addRequestEventListener(idlingResource)
-        NetworkServiceAdapter.instance = NetworkServiceAdapter(context, queue)
+
+        // Configuración sincronizada con develop para las corrutinas
+        NetworkServiceAdapter.instance = NetworkServiceAdapter(context, queue, Dispatchers.Main)
         IdlingRegistry.getInstance().register(idlingResource)
     }
 
@@ -99,7 +101,8 @@ class AlbumCommentE2ETest {
     }
 
     @Test
-    fun pe016_collectorCanCommentAlbumSuccessfully() {
+    fun pe032_and_pe033_collectorCanCommentAlbumSuccessfully() {
+        // PE-032 (Opción comentar abre formulario) y PE-033 (Comentario y rating válidos actualizan el detalle)
         server.dispatcher = object : Dispatcher() {
             var commentPosted = false
             override fun dispatch(request: RecordedRequest): MockResponse {
@@ -118,12 +121,17 @@ class AlbumCommentE2ETest {
             }
         }
 
+        NetworkServiceAdapter.BASE_URL = server.url("/").toString()
         scenario = ActivityScenario.launch(MainActivity::class.java)
 
         onView(withId(R.id.cardCollector)).perform(click())
         onView(withId(R.id.albumsRv)).check(matches(hasMinimumChildCount(1)))
         onView(withId(R.id.albumsRv)).perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
 
+        // PE-032: Validar que el widget/formulario de comentarios está visible al entrar como coleccionista
+        onView(withId(R.id.addCommentWidget)).perform(scrollTo()).check(matches(isDisplayed()))
+
+        // PE-033: Ingresar comentario y rating válidos para enviar exitosamente
         onView(withId(R.id.etComment)).perform(scrollTo(), replaceText("Excelente album clasico"), closeSoftKeyboard())
         onView(withId(R.id.rbRating5)).perform(scrollTo(), click())
         onView(withId(R.id.btnSubmitComment)).perform(scrollTo(), click())
@@ -132,7 +140,66 @@ class AlbumCommentE2ETest {
     }
 
     @Test
-    fun pe017_commentErrorShowsErrorScreen() {
+    fun pe034_emptyOrShortCommentBlocksSubmission() {
+        // PE-034: Comentario vacío o de 1 carácter valida la restricción del formulario
+        server.dispatcher = object : Dispatcher() {
+            override fun dispatch(request: RecordedRequest): MockResponse {
+                return when {
+                    request.path == "/albums" -> MockResponse().setResponseCode(200).setBody(albumsListJson)
+                    request.path == "/albums/100" && request.method == "GET" -> MockResponse().setResponseCode(200).setBody(albumDetailJson)
+                    else -> MockResponse().setResponseCode(404)
+                }
+            }
+        }
+
+        NetworkServiceAdapter.BASE_URL = server.url("/").toString()
+        scenario = ActivityScenario.launch(MainActivity::class.java)
+
+        onView(withId(R.id.cardCollector)).perform(click())
+        onView(withId(R.id.albumsRv)).check(matches(hasMinimumChildCount(1)))
+        onView(withId(R.id.albumsRv)).perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
+
+        // Escribir un comentario inválido (muy corto) y hacer clic en enviar
+        onView(withId(R.id.etComment)).perform(scrollTo(), replaceText("A"), closeSoftKeyboard())
+        onView(withId(R.id.rbRating5)).perform(scrollTo(), click())
+        onView(withId(R.id.btnSubmitComment)).perform(scrollTo(), click())
+
+        // Verificar que al estar el comentario incompleto, la petición POST nunca se lanza
+        // y el usuario permanece en la misma vista del formulario de comentario
+        onView(withId(R.id.addCommentWidget)).perform(scrollTo()).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun pe035_missingRatingBlocksSubmission() {
+        // PE-035: Sin rating se valida la restricción del formulario
+        server.dispatcher = object : Dispatcher() {
+            override fun dispatch(request: RecordedRequest): MockResponse {
+                return when {
+                    request.path == "/albums" -> MockResponse().setResponseCode(200).setBody(albumsListJson)
+                    request.path == "/albums/100" && request.method == "GET" -> MockResponse().setResponseCode(200).setBody(albumDetailJson)
+                    else -> MockResponse().setResponseCode(404)
+                }
+            }
+        }
+
+        NetworkServiceAdapter.BASE_URL = server.url("/").toString()
+        scenario = ActivityScenario.launch(MainActivity::class.java)
+
+        onView(withId(R.id.cardCollector)).perform(click())
+        onView(withId(R.id.albumsRv)).check(matches(hasMinimumChildCount(1)))
+        onView(withId(R.id.albumsRv)).perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
+
+        // Escribir comentario válido pero sin seleccionar ninguna estrella de calificación
+        onView(withId(R.id.etComment)).perform(scrollTo(), replaceText("Excelente album clasico"), closeSoftKeyboard())
+        onView(withId(R.id.btnSubmitComment)).perform(scrollTo(), click())
+
+        // Verificar que al faltar el rating, el formulario impide el avance y sigue visible
+        onView(withId(R.id.addCommentWidget)).perform(scrollTo()).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun pe036_commentErrorShowsErrorScreen() {
+        // PE-036: Si falla el guardado se redirige a la pantalla de error
         server.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
                 return when {
@@ -144,6 +211,7 @@ class AlbumCommentE2ETest {
             }
         }
 
+        NetworkServiceAdapter.BASE_URL = server.url("/").toString()
         scenario = ActivityScenario.launch(MainActivity::class.java)
 
         onView(withId(R.id.cardCollector)).perform(click())
@@ -153,6 +221,7 @@ class AlbumCommentE2ETest {
         onView(withId(R.id.rbRating4)).perform(scrollTo(), click())
         onView(withId(R.id.btnSubmitComment)).perform(scrollTo(), click())
 
+        // Validar que la aplicación muestra la pantalla de error ante la falla del servidor
         onView(withId(R.id.layoutError)).check(matches(isDisplayed()))
     }
 }

@@ -6,8 +6,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.example.vinyls_application.models.AlbumDetail
 import com.example.vinyls_application.repositories.AlbumDetailRepository
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 
 class AlbumDetailViewModel(application: Application, private val albumId: Int) : AndroidViewModel(application){
 
@@ -38,33 +41,37 @@ class AlbumDetailViewModel(application: Application, private val albumId: Int) :
     }
 
     fun refreshDataFromNetwork() {
-        albumRepository.refreshData(albumId,{
-            _album.postValue(it)
-            _eventNetworkError.value = false
-            _isNetworkErrorShown.value = false
-        },{
-            _eventNetworkError.value = true
-        })
+        viewModelScope.launch {
+            try {
+                _album.value = albumRepository.refreshData(albumId)
+                _eventNetworkError.value = false
+                _isNetworkErrorShown.value = false
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _eventNetworkError.value = true
+            }
+        }
     }
 
     fun addComment(comment: String, rating: Int) {
         _isLoading.value = true
-        albumRepository.postComment(
-            albumId,
-            comment,
-            rating,
-            {
-                _isLoading.postValue(false)
-                _commentPostedSuccess.postValue(true)
-                _eventNetworkError.postValue(false)
-                _isNetworkErrorShown.postValue(false)
+        viewModelScope.launch {
+            try {
+                albumRepository.postComment(albumId, comment, rating)
+                // Mismo orden que antes: primero se reactiva el formulario y luego se avisa el éxito
+                _isLoading.value = false
+                _commentPostedSuccess.value = true
+                _eventNetworkError.value = false
+                _isNetworkErrorShown.value = false
                 refreshDataFromNetwork()
-            },
-            {
-                _isLoading.postValue(false)
-                _eventNetworkError.postValue(true)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _isLoading.value = false
+                _eventNetworkError.value = true
             }
-        )
+        }
     }
 
     fun onCommentPostedSuccessHandled() {

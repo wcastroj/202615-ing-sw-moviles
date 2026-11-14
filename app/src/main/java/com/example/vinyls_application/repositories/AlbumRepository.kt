@@ -6,12 +6,11 @@ import com.example.vinyls_application.models.Album
 import com.example.vinyls_application.network.NetworkServiceAdapter
 
 class AlbumRepository(val application: Application) {
-    fun getAlbums(callback: (List<Album>) -> Unit, onError: (VolleyError) -> Unit) {
-        NetworkServiceAdapter.getInstance(application).getAlbums(
-            {
-                callback(it)
-            }, {
-                onError(it)
-            })
-    }
+
+    /**
+     * Devuelve los álbumes ya parseados. El adapter parsea fuera del hilo principal.
+     * Si la petición falla lanza la [VolleyError], que el ViewModel atrapa.
+     */
+    suspend fun getAlbums(): List<Album> =
+        NetworkServiceAdapter.getInstance(application).getAlbums()
 }

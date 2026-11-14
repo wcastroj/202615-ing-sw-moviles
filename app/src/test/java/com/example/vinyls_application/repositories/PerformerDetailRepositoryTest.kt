@@ -14,6 +14,11 @@ import com.example.vinyls_application.models.Musician
 import com.example.vinyls_application.models.PerformerBase
 import com.example.vinyls_application.models.PerformerType
 import com.example.vinyls_application.network.NetworkServiceAdapter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -25,6 +30,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class PerformerDetailRepositoryTest {
 
     private val musicianJson = """
@@ -82,6 +88,8 @@ class PerformerDetailRepositoryTest {
         }
     """.trimIndent()
 
+    // Corre las corrutinas de inmediato en el hilo de la prueba (ver MainDispatcherRule)
+    private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var requestQueue: RequestQueue
     private lateinit var repository: PerformerDetailRepository
     private var result: PerformerBase? = null
@@ -91,7 +99,7 @@ class PerformerDetailRepositoryTest {
     fun setUp() {
         val application = mock(Application::class.java)
         requestQueue = mock(RequestQueue::class.java)
-        NetworkServiceAdapter.instance = NetworkServiceAdapter(application, requestQueue)
+        NetworkServiceAdapter.instance = NetworkServiceAdapter(application, requestQueue, testDispatcher)
         repository = PerformerDetailRepository(application)
         result = null
         error = null
@@ -103,8 +111,8 @@ class PerformerDetailRepositoryTest {
     }
 
     @Test
-    fun pi010_getMusician_returns200_withMusicianDetail() {
-        repository.getPerformer(100, PerformerType.MUSICIAN, { result = it }, { error = it })
+    fun pi010_getMusician_returns200_withMusicianDetail() = runTest(testDispatcher) {
+        loadPerformer(100, PerformerType.MUSICIAN)
         val request = capturedRequest()
 
         deliverResponse(request, musicianJson)
@@ -124,8 +132,8 @@ class PerformerDetailRepositoryTest {
     }
 
     @Test
-    fun pi011_getBand_returns200_withBandDetail() {
-        repository.getPerformer(101, PerformerType.BAND, { result = it }, { error = it })
+    fun pi011_getBand_returns200_withBandDetail() = runTest(testDispatcher) {
+        loadPerformer(101, PerformerType.BAND)
         val request = capturedRequest()
 
         deliverResponse(request, bandJson)
@@ -145,8 +153,8 @@ class PerformerDetailRepositoryTest {
     }
 
     @Test
-    fun pi012_getArtist_returns404_deliversError() {
-        repository.getPerformer(999, PerformerType.MUSICIAN, { result = it }, { error = it })
+    fun pi012_getArtist_returns404_deliversError() = runTest(testDispatcher) {
+        loadPerformer(999, PerformerType.MUSICIAN)
         val request = capturedRequest()
 
         request.deliverError(ClientError(networkResponse(404)))
@@ -157,8 +165,8 @@ class PerformerDetailRepositoryTest {
     }
 
     @Test
-    fun pi013_getArtist_returns500_deliversError() {
-        repository.getPerformer(100, PerformerType.MUSICIAN, { result = it }, { error = it })
+    fun pi013_getArtist_returns500_deliversError() = runTest(testDispatcher) {
+        loadPerformer(100, PerformerType.MUSICIAN)
         val request = capturedRequest()
 
         request.deliverError(ServerError(networkResponse(500)))
@@ -169,14 +177,23 @@ class PerformerDetailRepositoryTest {
     }
 
     @Test
-    fun pi013_noNetwork_deliversError() {
-        repository.getPerformer(100, PerformerType.MUSICIAN, { result = it }, { error = it })
+    fun pi013_noNetwork_deliversError() = runTest(testDispatcher) {
+        loadPerformer(100, PerformerType.MUSICIAN)
         val request = capturedRequest()
 
         request.deliverError(NoConnectionError())
 
         assertTrue(error is NoConnectionError)
         assertNull(result)
+    }
+
+    /** Lanza getPerformer(id, type) en una corrutina que queda esperando la respuesta de Volley. */
+    private fun CoroutineScope.loadPerformer(id: Int, type: PerformerType) = launch {
+        try {
+            result = repository.getPerformer(id, type)
+        } catch (e: VolleyError) {
+            error = e
+        }
     }
 
     private fun capturedRequest(): StringRequest {
