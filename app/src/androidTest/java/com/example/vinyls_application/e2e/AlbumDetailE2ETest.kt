@@ -280,7 +280,7 @@ class AlbumDetailE2ETest {
         // Paso 1: entrar como coleccionista
         launchApp()
         onView(withId(R.id.cardCollector)).check(matches(isDisplayed()))
-        onView(withId(R.id.cardCollector)).perform(click())
+        onView(withId(R.id.cardCollector)).perform(scrollTo(),click())
 
         // Paso 2: la lista de álbumes se ve y tiene al menos uno
         onView(withId(R.id.albumsRv)).check(matches(allOf(isDisplayed(), hasMinimumChildCount(1))))

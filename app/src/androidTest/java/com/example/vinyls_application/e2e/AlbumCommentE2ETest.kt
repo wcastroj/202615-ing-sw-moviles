@@ -220,7 +220,7 @@ class AlbumCommentE2ETest {
     /** Entra como coleccionista, espera la lista de álbumes, guarda el id del primero y lo abre. */
     private fun openFirstAlbumAsCollector() {
         onView(withId(R.id.cardCollector)).check(matches(isDisplayed()))
-        onView(withId(R.id.cardCollector)).perform(click())
+        onView(withId(R.id.cardCollector)).perform(scrollTo(),click())
         onView(withId(R.id.albumsRv)).check(matches(hasMinimumChildCount(1)))
         firstAlbumId = readFirstAlbumId()
         onView(withId(R.id.albumsRv))
