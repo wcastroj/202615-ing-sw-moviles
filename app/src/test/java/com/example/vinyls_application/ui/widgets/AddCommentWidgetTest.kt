@@ -36,7 +36,7 @@ class AddCommentWidgetTest {
     @Test
     fun test_validation_failsWhenNoRatingSelected() {
         val etComment = widget.findViewById<EditText>(R.id.etComment)
-        etComment.setText("Un comentario válido")
+        etComment.setText("Un comentario válido de prueba")
 
         val isValid = widget.validateInputs()
 
@@ -48,7 +48,7 @@ class AddCommentWidgetTest {
         val rbRating5 = widget.findViewById<RadioButton>(R.id.rbRating5)
         rbRating5.isChecked = true
         val etComment = widget.findViewById<EditText>(R.id.etComment)
-        etComment.setText("A")
+        etComment.setText("A") // Menor al límite de 2 caracteres
 
         val isValid = widget.validateInputs()
 
@@ -56,18 +56,19 @@ class AddCommentWidgetTest {
         assertEquals(5, widget.getSelectedRating())
     }
 
+
     @Test
     fun test_validation_passesWhenValidInputs() {
         val rbRating4 = widget.findViewById<RadioButton>(R.id.rbRating4)
         rbRating4.isChecked = true
         val etComment = widget.findViewById<EditText>(R.id.etComment)
-        etComment.setText("Excelente producción sonora.")
+        etComment.setText("Excelente producción sonora y mezcla.")
 
         val isValid = widget.validateInputs()
 
         assertTrue(isValid)
         assertEquals(4, widget.getSelectedRating())
-        assertEquals("Excelente producción sonora.", widget.getCommentText())
+        assertEquals("Excelente producción sonora y mezcla.", widget.getCommentText())
     }
 
     @Test
@@ -96,7 +97,7 @@ class AddCommentWidgetTest {
         val rbRating2 = widget.findViewById<RadioButton>(R.id.rbRating2)
         rbRating2.isChecked = true
         val etComment = widget.findViewById<EditText>(R.id.etComment)
-        etComment.setText("Comentario de prueba")
+        etComment.setText("Comentario de prueba temporal")
 
         widget.clearForm()
 
