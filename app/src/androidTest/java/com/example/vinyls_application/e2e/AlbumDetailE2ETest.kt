@@ -22,16 +22,19 @@ import androidx.test.espresso.matcher.ViewMatchers.withParentIndex
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import com.android.volley.RequestQueue
 import com.android.volley.toolbox.Volley
 import com.example.vinyls_application.R
 import com.example.vinyls_application.models.AlbumDetail
 import com.example.vinyls_application.models.Comment
-import com.example.vinyls_application.models.Performer
+import com.example.vinyls_application.models.Band
+import com.example.vinyls_application.models.Musician
 import com.example.vinyls_application.models.Track
 import com.example.vinyls_application.network.NetworkServiceAdapter
 import com.example.vinyls_application.ui.MainActivity
 import com.example.vinyls_application.ui.widgets.CommentCardWidget
 import com.example.vinyls_application.utils.VolleyIdlingResource
+import kotlinx.coroutines.Dispatchers
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -44,6 +47,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.net.HttpURLConnection
 import java.net.URL
+import androidx.test.espresso.matcher.ViewMatchers.Visibility
+import androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility
 
 @LargeTest
 @RunWith(AndroidJUnit4::class)
@@ -51,6 +56,7 @@ import java.net.URL
 class AlbumDetailE2ETest {
 
     private lateinit var idlingResource: VolleyIdlingResource
+    private lateinit var queue: RequestQueue
     private lateinit var scenario: ActivityScenario<MainActivity>
     private lateinit var server: MockWebServer
     private lateinit var originalBaseUrl: String
@@ -81,25 +87,28 @@ class AlbumDetailE2ETest {
         }
         server.start()
 
-        // 2. Guardar la URL del backend real; pe004 y pe005 la usan tal cual
+        // 2. Guardar la URL del backend real; pe004, pe005 y los login_ la usan tal cual
         originalBaseUrl = NetworkServiceAdapter.BASE_URL
 
         // 3. Cola de Volley vigilada por el IdlingResource
         val context = ApplicationProvider.getApplicationContext<Context>()
         idlingResource = VolleyIdlingResource()
-        val queue = Volley.newRequestQueue(context)
+        queue = Volley.newRequestQueue(context)
         queue.addRequestEventListener(idlingResource)
-        NetworkServiceAdapter.instance = NetworkServiceAdapter(context, queue)
+        // Dispatchers.Main: el parseo pasa por la cola del hilo principal, que Espresso sí vigila.
+        // Con Dispatchers.Default el IdlingResource quedaría libre antes de que llegue el dato a la UI.
+        NetworkServiceAdapter.instance = NetworkServiceAdapter(context, queue, Dispatchers.Main)
         IdlingRegistry.getInstance().register(idlingResource)
 
-        // 4. Abrir la app
-        scenario = ActivityScenario.launch(MainActivity::class.java)
+        // La app se abre dentro de cada test con launchApp(), así pe006 la abre una sola vez
     }
 
     @After
     fun tearDown() {
         scenario.close()
         IdlingRegistry.getInstance().unregister(idlingResource)
+        // Se detiene la cola para no dejar sus hilos vivos entre tests
+        queue.stop()
         NetworkServiceAdapter.instance = null
         NetworkServiceAdapter.BASE_URL = originalBaseUrl
         server.shutdown()
@@ -107,6 +116,9 @@ class AlbumDetailE2ETest {
 
     @Test
     fun pe004_OpenAlbumDetailAndBackToList() {
+        launchApp()
+        onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
+        onView(withId(R.id.cardVisitor)).perform(click())
         // Paso 1: la lista de álbumes se ve
         onView(withId(R.id.albumsRv)).check(matches(isDisplayed()))
 
@@ -128,6 +140,9 @@ class AlbumDetailE2ETest {
 
     @Test
     fun pe005_AlbumDetailShowAllInformation() {
+        launchApp()
+        onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
+        onView(withId(R.id.cardVisitor)).perform(click())
         // Paso 1: la lista de álbumes se ve y tiene al menos una tarjeta
         onView(withId(R.id.albumsRv)).check(matches(allOf(isDisplayed(), hasMinimumChildCount(1))))
 
@@ -171,6 +186,16 @@ class AlbumDetailE2ETest {
     }
 
 
+    /**
+     * Abre la app. Con [useMockServer] la apunta antes al servidor falso; si no, usa el backend real.
+     */
+    private fun launchApp(useMockServer: Boolean = false) {
+        if (useMockServer) {
+            NetworkServiceAdapter.BASE_URL = server.url("/").toString()
+        }
+        scenario = ActivityScenario.launch(MainActivity::class.java)
+    }
+
     private fun getFirstAlbumDetailFromBackend(): AlbumDetail {
         // 1. Leer el id del primer álbum desde el tag de su tarjeta
         var albumId = 0
@@ -209,7 +234,13 @@ class AlbumDetailE2ETest {
             },
             performers = (0 until performersJson.length()).map { i ->
                 val p = performersJson.getJSONObject(i)
-                Performer(id = p.getInt("id"), name = p.getString("name"), image = p.getString("image"), description = p.getString("description"))
+                if (p.has("birthDate")) {
+                    Musician(id = p.getInt("id"), name = p.getString("name"), image = p.getString("image"), description = p.getString("description"),
+                        albums = emptyList(), performerPrizes = emptyList(), birthDate = p.getString("birthDate"))
+                } else {
+                    Band(id = p.getInt("id"), name = p.getString("name"), image = p.getString("image"), description = p.getString("description"),
+                        albums = emptyList(), performerPrizes = emptyList(), creationDate = p.optString("creationDate"))
+                }
             },
             comments = (0 until commentsJson.length()).map { i ->
                 val c = commentsJson.getJSONObject(i)
@@ -220,10 +251,10 @@ class AlbumDetailE2ETest {
 
     @Test
     fun pe006_AlbumDetailErrorShowsMessageAndReturnsToList() {
-        // Paso 1: apuntar la app al servidor falso (lista OK, detalle 500) y volver a abrirla
-        NetworkServiceAdapter.BASE_URL = server.url("/").toString()
-        scenario.close()
-        scenario = ActivityScenario.launch(MainActivity::class.java)
+        // Paso 1: abrir la app apuntando al servidor falso (lista OK, detalle 500)
+        launchApp(useMockServer = true)
+        onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
+        onView(withId(R.id.cardVisitor)).perform(click())
 
         // Paso 2: la lista muestra el álbum del servidor falso
         onView(withText("Buscando América")).check(matches(isDisplayed()))
@@ -242,5 +273,46 @@ class AlbumDetailE2ETest {
         // Paso 6: se vuelve a la lista
         onView(withId(R.id.albumsRv)).check(matches(isDisplayed()))
         onView(withText("Buscando América")).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun login_AlbumDetailShowsElementsAsACollector() {
+        // Paso 1: entrar como coleccionista
+        launchApp()
+        onView(withId(R.id.cardCollector)).check(matches(isDisplayed()))
+        onView(withId(R.id.cardCollector)).perform(scrollTo(),click())
+
+        // Paso 2: la lista de álbumes se ve y tiene al menos uno
+        onView(withId(R.id.albumsRv)).check(matches(allOf(isDisplayed(), hasMinimumChildCount(1))))
+
+        // Paso 3: abrir el primer álbum
+        onView(withId(R.id.albumsRv))
+            .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
+        onView(withId(R.id.detail_card)).check(matches(isDisplayed()))
+
+        // Paso 4: los elementos de coleccionista se ven
+        onView(withId(R.id.buttonAssociateTrack)).perform(scrollTo()).check(matches(isDisplayed()))
+        onView(withId(R.id.titleComment)).perform(scrollTo()).check(matches(isDisplayed()))
+        onView(withId(R.id.addCommentWidget)).perform(scrollTo()).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun login_AlbumDetailDoesNotShowCollectorElements() {
+        // Paso 1: entrar como visitante
+        launchApp()
+        onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
+        onView(withId(R.id.cardVisitor)).perform(click())
+
+        // Paso 2: la lista de álbumes se ve y tiene al menos uno
+        onView(withId(R.id.albumsRv)).check(matches(allOf(isDisplayed(), hasMinimumChildCount(1))))
+
+        // Paso 3: abrir el primer álbum
+        onView(withId(R.id.albumsRv))
+            .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
+        onView(withId(R.id.detail_card)).check(matches(isDisplayed()))
+
+        // Paso 4: los elementos de coleccionista están ocultos (GONE)
+        onView(withId(R.id.buttonAssociateTrack)).check(matches(withEffectiveVisibility(Visibility.GONE)))
+        onView(withId(R.id.addCommentWidget)).check(matches(withEffectiveVisibility(Visibility.GONE)))
     }
 }

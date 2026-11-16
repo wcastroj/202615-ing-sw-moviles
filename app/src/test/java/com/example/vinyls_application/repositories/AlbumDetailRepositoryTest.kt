@@ -8,11 +8,19 @@ import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.ServerError
 import com.android.volley.VolleyError
+import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.example.vinyls_application.models.AlbumDetail
 import com.example.vinyls_application.network.NetworkServiceAdapter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
+import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -21,6 +29,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class AlbumDetailRepositoryTest {
 
     private val albumDetailJson = """
@@ -42,6 +51,8 @@ class AlbumDetailRepositoryTest {
         }
     """.trimIndent()
 
+    // Corre las corrutinas de inmediato en el hilo de la prueba (ver MainDispatcherRule)
+    private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var requestQueue: RequestQueue
     private lateinit var repository: AlbumDetailRepository
     private var result: AlbumDetail? = null
@@ -51,7 +62,7 @@ class AlbumDetailRepositoryTest {
     fun setUp() {
         val application = mock(Application::class.java)
         requestQueue = mock(RequestQueue::class.java)
-        NetworkServiceAdapter.instance = NetworkServiceAdapter(application, requestQueue)
+        NetworkServiceAdapter.instance = NetworkServiceAdapter(application, requestQueue, testDispatcher)
         repository = AlbumDetailRepository(application)
         result = null
         error = null
@@ -64,9 +75,9 @@ class AlbumDetailRepositoryTest {
 
     // PI-004: GET /albums/{id} responde 200 y el repositorio entrega el detalle
     @Test
-    fun pi004_get_album_responde_200_y_el_repositorio_entrega_el_detalle() {
+    fun pi004_get_album_responde_200_y_el_repositorio_entrega_el_detalle() = runTest(testDispatcher) {
         // Arrange
-        repository.refreshData(100, { result = it }, { error = it })
+        loadAlbumDetail(100)
         val request = capturedRequest()
 
         // Act
@@ -84,9 +95,9 @@ class AlbumDetailRepositoryTest {
 
     // PI-005: GET /albums/{id} responde 404
     @Test
-    fun pi005_get_album_responde_404_y_el_repositorio_entrega_error() {
+    fun pi005_get_album_responde_404_y_el_repositorio_entrega_error() = runTest(testDispatcher) {
         // Arrange
-        repository.refreshData(100, { result = it }, { error = it })
+        loadAlbumDetail(100)
         val request = capturedRequest()
 
         // Act
@@ -100,9 +111,9 @@ class AlbumDetailRepositoryTest {
 
     // PI-006: GET /albums/{id} responde 500 o no hay red (caso 500)
     @Test
-    fun pi006_get_album_responde_500_y_el_repositorio_entrega_error() {
+    fun pi006_get_album_responde_500_y_el_repositorio_entrega_error() = runTest(testDispatcher) {
         // Arrange
-        repository.refreshData(100, { result = it }, { error = it })
+        loadAlbumDetail(100)
         val request = capturedRequest()
 
         // Act
@@ -116,9 +127,9 @@ class AlbumDetailRepositoryTest {
 
     // PI-006: GET /albums/{id} responde 500 o no hay red (caso sin red)
     @Test
-    fun pi006_sin_red_el_repositorio_entrega_error() {
+    fun pi006_sin_red_el_repositorio_entrega_error() = runTest(testDispatcher) {
         // Arrange
-        repository.refreshData(100, { result = it }, { error = it })
+        loadAlbumDetail(100)
         val request = capturedRequest()
 
         // Act
@@ -127,6 +138,62 @@ class AlbumDetailRepositoryTest {
         // Assert
         assertTrue(error is NoConnectionError)
         assertNull(result)
+    }
+
+    @Test
+    fun post_comment_responde_200_y_termina_sin_error() = runTest(testDispatcher) {
+        var completed = false
+        launch {
+            try {
+                repository.postComment(100, "Excelente álbum", 5)
+                completed = true
+            } catch (e: VolleyError) {
+                error = e
+            }
+        }
+
+        val captor = ArgumentCaptor.forClass(JsonObjectRequest::class.java)
+        verify(requestQueue).add(captor.capture())
+        val request = captor.value
+
+        assertEquals(Request.Method.POST, request.method)
+        assertEquals(NetworkServiceAdapter.BASE_URL + "albums/100/comments", request.url)
+
+        deliverJsonResponse(request, JSONObject("""{"id": 1, "description": "Excelente álbum", "rating": "5"}"""))
+
+        assertTrue(completed)
+        assertNull(error)
+    }
+
+    @Test
+    fun post_comment_responde_error_y_entrega_error() = runTest(testDispatcher) {
+        var completed = false
+        launch {
+            try {
+                repository.postComment(100, "Excelente álbum", 5)
+                completed = true
+            } catch (e: VolleyError) {
+                error = e
+            }
+        }
+
+        val captor = ArgumentCaptor.forClass(JsonObjectRequest::class.java)
+        verify(requestQueue).add(captor.capture())
+        val request = captor.value
+
+        request.deliverError(ServerError(networkResponse(500)))
+
+        assertTrue(error is ServerError)
+        assertFalse(completed)
+    }
+
+    /** Lanza refreshData(id) en una corrutina que queda esperando la respuesta de Volley. */
+    private fun CoroutineScope.loadAlbumDetail(id: Int) = launch {
+        try {
+            result = repository.refreshData(id)
+        } catch (e: VolleyError) {
+            error = e
+        }
     }
 
     private fun capturedRequest(): StringRequest {
@@ -140,6 +207,19 @@ class AlbumDetailRepositoryTest {
         StringRequest::class.java.getDeclaredMethod("deliverResponse", String::class.java)
             .apply { isAccessible = true }
             .invoke(request, response)
+    }
+
+    private fun deliverJsonResponse(request: JsonObjectRequest, response: JSONObject) {
+        var clazz: Class<*>? = request.javaClass
+        while (clazz != null) {
+            val method = clazz.declaredMethods.firstOrNull { it.name == "deliverResponse" }
+            if (method != null) {
+                method.isAccessible = true
+                method.invoke(request, response)
+                return
+            }
+            clazz = clazz.superclass
+        }
     }
 
     private fun networkResponse(statusCode: Int) =

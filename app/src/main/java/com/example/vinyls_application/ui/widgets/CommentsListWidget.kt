@@ -20,39 +20,39 @@ class CommentsListWidget @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) : LinearLayout(context, attrs) {
+    private val container = LinearLayout(context)
 
     private val title = TextView(context)
     private val container = LinearLayout(context)
 
     init {
         orientation = VERTICAL
-
-        // Título "Comentarios"
-        title.text = context.getString(R.string.comments_title)
-        title.setTextColor("#1C1B1F".toColorInt())
-        title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
-        title.setTypeface(title.typeface, Typeface.BOLD)
-        addView(title)
-
-        // Contenedor donde van las tarjetas
         container.orientation = VERTICAL
         addView(container, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
     }
 
     fun setComments(comments: List<CommentItem>) {
-        container.removeAllViews()
-        title.isVisible = comments.isNotEmpty()
-
+        val currentChildCount = container.childCount
+        val newCount = comments.size
         val spacing = (12 * resources.displayMetrics.density).toInt()
 
-        for (item in comments) {
-            val card = CommentCardWidget(context)
+        for (i in 0 until newCount) {
+            val item = comments[i]
+            val card = if (i < currentChildCount) {
+                container.getChildAt(i) as CommentCardWidget
+            } else {
+                CommentCardWidget(context).also {
+                    val params = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply {
+                        topMargin = spacing
+                    }
+                    container.addView(it, params)
+                }
+            }
             card.setContent(rating = item.rating, comment = item.comment)
+        }
 
-            val params = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
-            params.topMargin = spacing
-
-            container.addView(card, params)
+        if (currentChildCount > newCount) {
+            container.removeViews(newCount, currentChildCount - newCount)
         }
     }
 }

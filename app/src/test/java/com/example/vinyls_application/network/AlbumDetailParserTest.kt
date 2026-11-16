@@ -1,5 +1,7 @@
 package com.example.vinyls_application.network
 
+import com.example.vinyls_application.models.Band
+import com.example.vinyls_application.models.Musician
 import org.json.JSONException
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -92,14 +94,14 @@ class AlbumDetailParserTest {
         // Artista con fecha de nacimiento (birthDate)
         assertEquals(1, performers[0].id)
         assertEquals("Rubén Blades", performers[0].name)
-        assertEquals("1948-07-16T00:00:00.000Z", performers[0].birthDate)
-        assertNull(performers[0].creationDate)
+        assertTrue(performers[0] is Musician)
+        assertEquals("1948-07-16T00:00:00.000Z", (performers[0] as Musician).birthDate)
 
         // Artista/Agrupación con fecha de creación (creationDate)
         assertEquals(2, performers[1].id)
         assertEquals("Grupo Niche", performers[1].name)
-        assertEquals("1978-01-01T00:00:00.000Z", performers[1].creationDate)
-        assertNull(performers[1].birthDate)
+        assertTrue(performers[1] is Band)
+        assertEquals("1978-01-01T00:00:00.000Z", (performers[1] as Band).creationDate)
     }
 
     // PU-009: Álbum sin canciones ni comentarios (negativa / robustez de datos).
