@@ -1,5 +1,6 @@
 package com.example.vinyls_application.ui.widgets
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -25,6 +26,7 @@ class CommentCardWidget @JvmOverloads constructor(
 
     }
 
+    @SuppressLint("SetTextI18n")
     fun setContent(
         rating: Int,
         comment: String? = null

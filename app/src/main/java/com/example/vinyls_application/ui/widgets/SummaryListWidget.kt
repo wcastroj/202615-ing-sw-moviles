@@ -15,16 +15,25 @@ class SummaryListWidget @JvmOverloads constructor(
     }
 
     fun setItems(items: List<SummaryItem>) {
-        removeAllViews()
-        for (item in items) {
-            val cardWidget = SummaryCardWidget(context).apply {
-                setContent(
-                    id = item.id,
-                    title = item.title,
-                    subtitle = item.subtitle
-                )
+        val currentChildCount = childCount
+        val newCount = items.size
+
+        for (i in 0 until newCount) {
+            val item = items[i]
+            val cardWidget = if (i < currentChildCount) {
+                getChildAt(i) as SummaryCardWidget
+            } else {
+                SummaryCardWidget(context).also { addView(it) }
             }
-            addView(cardWidget)
+            cardWidget.setContent(
+                id = item.id,
+                title = item.title,
+                subtitle = item.subtitle
+            )
+        }
+
+        if (currentChildCount > newCount) {
+            removeViews(newCount, currentChildCount - newCount)
         }
     }
 }
