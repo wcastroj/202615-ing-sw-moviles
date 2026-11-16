@@ -15,6 +15,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Hotfix KAPT sealed interface stub bug
+        run: |
+          python3 -c "
+          p_path = 'app/src/main/java/com/example/vinyls_application/models/Performer.kt'
+          with open(p_path, 'r') as f:
+              c = f.read()
+          c = c.replace('sealed interface Performer', 'sealed class Performer')
+          for prop in ['id: Int', 'name: String', 'image: String', 'description: String', 'albums: List<Album>', 'performerPrizes: List<PerformerPrize>']:
+              c = c.replace(f'    val {prop}', f'    abstract val {prop}')
+          with open(p_path, 'w') as f:
+              f.write(c)
+          for model in ['Band.kt', 'Musician.kt']:
+              m_path = f'app/src/main/java/com/example/vinyls_application/models/{model}'
+              with open(m_path, 'r') as f:
+                  c = f.read()
+              c = c.replace(': Performer', ': Performer()')
+              with open(m_path, 'w') as f:
+                  f.write(c)
+          "
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
