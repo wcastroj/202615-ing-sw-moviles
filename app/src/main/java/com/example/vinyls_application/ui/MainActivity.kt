@@ -3,7 +3,6 @@ package com.example.vinyls_application.ui
 import android.content.ComponentCallbacks2
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import androidx.core.view.isVisible
