@@ -196,7 +196,7 @@ class AssociateAlbumE2ETest {
         if (existingAlbums.length() > 0) {
             val associatedAlbumName = existingAlbums.getJSONObject(0).getString("name")
             onView(withId(R.id.autoCompleteTextView)).perform(click())
-            onView(withText(associatedAlbumName)).inRoot(isPlatformPopup()).check(doesNotExist())
+            onView(withText(associatedAlbumName)).check(doesNotExist())
         } else {
             onView(withId(R.id.dropdownAlbums)).check(matches(isDisplayed()))
         }
