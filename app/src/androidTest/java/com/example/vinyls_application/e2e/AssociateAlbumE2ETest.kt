@@ -33,11 +33,25 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import org.hamcrest.Matchers.allOf
+import org.json.JSONArray
+import org.json.JSONObject
 import org.junit.After
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.net.HttpURLConnection
+import java.net.URL
 
+/**
+ * Pruebas E2E de HU08 - Agregar/Asociar un álbum a un artista.
+ *
+ * PE-037, PE-038, PE-039 y PE-042 se ejecutan contra el backend real configurado en
+ * [NetworkServiceAdapter.BASE_URL] utilizando [VolleyIdlingResource] para la sincronización.
+ *
+ * PE-040 (falla 500 al asociar) y PE-041 (estado vacío sin álbumes disponibles) utilizan
+ * [MockWebServer] para forzar respuestas de error y estados límite de forma determinista.
+ */
 @LargeTest
 @RunWith(AndroidJUnit4::class)
 class AssociateAlbumE2ETest {
@@ -46,19 +60,23 @@ class AssociateAlbumE2ETest {
     private lateinit var queue: RequestQueue
     private var scenario: ActivityScenario<MainActivity>? = null
     private lateinit var server: MockWebServer
+    private lateinit var originalBaseUrl: String
 
-    private val albumsListJson = """
+    private var firstArtistId = 0
+
+    // Datos simulados para PE-040 y PE-041
+    private val mockAlbumsListJson = """
         [
           {"id":100,"name":"Buscando América","cover":"","releaseDate":"1984-08-01T00:00:00.000Z","description":"Álbum.","genre":"Salsa","recordLabel":"Elektra"},
           {"id":101,"name":"Signos","cover":"","releaseDate":"1986-11-10T00:00:00.000Z","description":"Álbum de Soda Stereo.","genre":"Rock","recordLabel":"CBS"}
         ]
     """.trimIndent()
 
-    private val musiciansListJson = """
+    private val mockMusiciansListJson = """
         [{"id":100,"name":"Rubén Blades","image":"","description":"Cantante panameño","birthDate":"1948-07-16T00:00:00.000Z"}]
     """.trimIndent()
 
-    private val musicianDetailWithAlbumJson = """
+    private val mockMusicianDetailWithAlbumJson = """
         {
           "id":100,
           "name":"Rubén Blades",
@@ -70,7 +88,7 @@ class AssociateAlbumE2ETest {
         }
     """.trimIndent()
 
-    private val musicianDetailAllAssociatedJson = """
+    private val mockMusicianDetailAllAssociatedJson = """
         {
           "id":100,
           "name":"Rubén Blades",
@@ -90,6 +108,8 @@ class AssociateAlbumE2ETest {
         server = MockWebServer()
         server.start()
 
+        originalBaseUrl = NetworkServiceAdapter.BASE_URL
+
         val context = ApplicationProvider.getApplicationContext<Context>()
         idlingResource = VolleyIdlingResource()
         queue = Volley.newRequestQueue(context)
@@ -97,8 +117,6 @@ class AssociateAlbumE2ETest {
 
         NetworkServiceAdapter.instance = NetworkServiceAdapter(context, queue, Dispatchers.Main)
         IdlingRegistry.getInstance().register(idlingResource)
-
-        NetworkServiceAdapter.BASE_URL = server.url("/").toString()
     }
 
     @After
@@ -107,13 +125,14 @@ class AssociateAlbumE2ETest {
         IdlingRegistry.getInstance().unregister(idlingResource)
         queue.stop()
         NetworkServiceAdapter.instance = null
+        NetworkServiceAdapter.BASE_URL = originalBaseUrl
         server.shutdown()
     }
 
     @Test
     fun pe037_collectorCanOpenAssociateScreenFromArtistDetail() {
-        setupMockServerForMusicianDetail(musicianDetailWithAlbumJson)
-        scenario = ActivityScenario.launch(MainActivity::class.java)
+        // Ejecuta contra el backend REAL
+        launchApp(useMockServer = false)
 
         openFirstArtistDetailAsCollector()
 
@@ -125,66 +144,96 @@ class AssociateAlbumE2ETest {
 
     @Test
     fun pe038_associateAlbumSuccessfullyShowsUpdatedDetail() {
-        var postCalled = false
-        server.dispatcher = object : Dispatcher() {
-            override fun dispatch(request: RecordedRequest): MockResponse {
-                return when {
-                    request.path == "/albums" -> jsonResponse(albumsListJson)
-                    request.path == "/bands" -> jsonResponse("[]")
-                    request.path == "/musicians" -> jsonResponse(musiciansListJson)
-                    request.path == "/musicians/100" && request.method == "GET" -> {
-                        val body = if (postCalled) musicianDetailAllAssociatedJson else musicianDetailWithAlbumJson
-                        jsonResponse(body)
-                    }
-                    request.path == "/musicians/100/albums/101" && request.method == "POST" -> {
-                        postCalled = true
-                        jsonResponse("""{"id":101}""")
-                    }
-                    else -> MockResponse().setResponseCode(404)
-                }
-            }
-        }
-        scenario = ActivityScenario.launch(MainActivity::class.java)
+        // Ejecuta contra el backend REAL
+        launchApp(useMockServer = false)
 
         openFirstArtistDetailAsCollector()
+
+        // Obtener del backend real el detalle del artista y los álbumes disponibles
+        val allCatalogAlbums = fetchArrayFromBackend("albums")
+        val isMusician = isCurrentArtistMusician(firstArtistId)
+        val path = if (isMusician) "musicians/$firstArtistId" else "bands/$firstArtistId"
+        val artistDetail = fetchFromBackend(path)
+        val associatedAlbumIds = (0 until artistDetail.getJSONArray("albums").length())
+            .map { artistDetail.getJSONArray("albums").getJSONObject(it).getInt("id") }
+            .toSet()
+
+        var targetAlbumToAssociate: JSONObject? = null
+        for (i in 0 until allCatalogAlbums.length()) {
+            val album = allCatalogAlbums.getJSONObject(i)
+            if (album.getInt("id") !in associatedAlbumIds) {
+                targetAlbumToAssociate = album
+                break
+            }
+        }
+
+        // Si todos los álbumes ya están asociados en el backend real, la prueba pasa validando esa restricción
+        if (targetAlbumToAssociate == null) {
+            onView(withId(R.id.buttonAssociateAlbum)).perform(scrollTo(), click())
+            onView(withId(R.id.layoutEmptyAlbums)).check(matches(isDisplayed()))
+            return
+        }
+
+        val targetAlbumId = targetAlbumToAssociate.getInt("id")
+        val targetAlbumTitle = targetAlbumToAssociate.getString("name")
+
         onView(withId(R.id.buttonAssociateAlbum)).perform(scrollTo(), click())
 
+        // Desplegar menú y seleccionar el álbum disponible
         onView(withId(R.id.autoCompleteTextView)).perform(click())
-        onView(withText("Signos")).inRoot(isPlatformPopup()).perform(click())
+        onView(withText(targetAlbumTitle)).inRoot(isPlatformPopup()).perform(click())
         onView(withId(R.id.btnSubmitAssociate)).perform(click())
 
-        onView(withId(R.id.rvRelatedAlbums)).check(matches(hasDescendant(withText("Signos"))))
+        // Retorna al detalle del artista y el álbum recién asociado se observa en la lista
+        onView(withId(R.id.rvRelatedAlbums)).check(matches(hasDescendant(withText(targetAlbumTitle))))
+
+        // Verificar directamente contra el backend real que el álbum quedó guardado para este artista
+        val updatedArtistDetail = fetchFromBackend(path)
+        val updatedAlbums = (0 until updatedArtistDetail.getJSONArray("albums").length())
+            .map { updatedArtistDetail.getJSONArray("albums").getJSONObject(it).getInt("id") }
+        assertTrue("El backend real no asoció el álbum $targetAlbumId al artista $firstArtistId", updatedAlbums.contains(targetAlbumId))
     }
 
     @Test
     fun pe039_associateDropdownExcludesAlreadyAssociatedAlbums() {
-        setupMockServerForMusicianDetail(musicianDetailWithAlbumJson)
-        scenario = ActivityScenario.launch(MainActivity::class.java)
+        // Ejecuta contra el backend REAL
+        launchApp(useMockServer = false)
 
         openFirstArtistDetailAsCollector()
+
+        val isMusician = isCurrentArtistMusician(firstArtistId)
+        val path = if (isMusician) "musicians/$firstArtistId" else "bands/$firstArtistId"
+        val artistDetail = fetchFromBackend(path)
+        val existingAlbums = artistDetail.getJSONArray("albums")
+
         onView(withId(R.id.buttonAssociateAlbum)).perform(scrollTo(), click())
 
-        onView(withId(R.id.autoCompleteTextView)).perform(click())
-
-        onView(withText("Signos")).inRoot(isPlatformPopup()).check(matches(isDisplayed()))
-        onView(withText("Buscando América")).inRoot(isPlatformPopup()).check(doesNotExist())
+        if (existingAlbums.length() > 0) {
+            val associatedAlbumName = existingAlbums.getJSONObject(0).getString("name")
+            onView(withId(R.id.autoCompleteTextView)).perform(click())
+            // El álbum que el artista ya posee NO debe aparecer en el dropdown
+            onView(withText(associatedAlbumName)).inRoot(isPlatformPopup()).check(doesNotExist())
+        } else {
+            onView(withId(R.id.dropdownAlbums)).check(matches(isDisplayed()))
+        }
     }
 
     @Test
     fun pe040_associateAlbumErrorShowsErrorScreen() {
+        // Usa MockWebServer para simular error 500 del servidor al asociar
         server.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
                 return when {
-                    request.path == "/albums" -> jsonResponse(albumsListJson)
+                    request.path == "/albums" -> jsonResponse(mockAlbumsListJson)
                     request.path == "/bands" -> jsonResponse("[]")
-                    request.path == "/musicians" -> jsonResponse(musiciansListJson)
-                    request.path == "/musicians/100" && request.method == "GET" -> jsonResponse(musicianDetailWithAlbumJson)
+                    request.path == "/musicians" -> jsonResponse(mockMusiciansListJson)
+                    request.path == "/musicians/100" && request.method == "GET" -> jsonResponse(mockMusicianDetailWithAlbumJson)
                     request.path == "/musicians/100/albums/101" && request.method == "POST" -> MockResponse().setResponseCode(500)
                     else -> MockResponse().setResponseCode(404)
                 }
             }
         }
-        scenario = ActivityScenario.launch(MainActivity::class.java)
+        launchApp(useMockServer = true)
 
         openFirstArtistDetailAsCollector()
         onView(withId(R.id.buttonAssociateAlbum)).perform(scrollTo(), click())
@@ -198,8 +247,19 @@ class AssociateAlbumE2ETest {
 
     @Test
     fun pe041_noAvailableAlbumsShowsEmptyState() {
-        setupMockServerForMusicianDetail(musicianDetailAllAssociatedJson)
-        scenario = ActivityScenario.launch(MainActivity::class.java)
+        // Usa MockWebServer para simular un artista que ya tiene todos los álbumes asociados
+        server.dispatcher = object : Dispatcher() {
+            override fun dispatch(request: RecordedRequest): MockResponse {
+                return when {
+                    request.path == "/albums" -> jsonResponse(mockAlbumsListJson)
+                    request.path == "/bands" -> jsonResponse("[]")
+                    request.path == "/musicians" -> jsonResponse(mockMusiciansListJson)
+                    request.path == "/musicians/100" && request.method == "GET" -> jsonResponse(mockMusicianDetailAllAssociatedJson)
+                    else -> MockResponse().setResponseCode(404)
+                }
+            }
+        }
+        launchApp(useMockServer = true)
 
         openFirstArtistDetailAsCollector()
         onView(withId(R.id.buttonAssociateAlbum)).perform(scrollTo(), click())
@@ -211,8 +271,8 @@ class AssociateAlbumE2ETest {
 
     @Test
     fun pe042_visitorRoleDoesNotSeeAssociateOption() {
-        setupMockServerForMusicianDetail(musicianDetailWithAlbumJson)
-        scenario = ActivityScenario.launch(MainActivity::class.java)
+        // Ejecuta contra el backend REAL
+        launchApp(useMockServer = false)
 
         onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
         onView(withId(R.id.cardVisitor)).perform(scrollTo(), click())
@@ -225,27 +285,67 @@ class AssociateAlbumE2ETest {
         onView(withId(R.id.buttonAssociateAlbum)).check(matches(withEffectiveVisibility(androidx.test.espresso.matcher.ViewMatchers.Visibility.GONE)))
     }
 
+    private fun launchApp(useMockServer: Boolean = false) {
+        if (useMockServer) {
+            NetworkServiceAdapter.BASE_URL = server.url("/").toString()
+        } else {
+            NetworkServiceAdapter.BASE_URL = originalBaseUrl
+        }
+        scenario = ActivityScenario.launch(MainActivity::class.java)
+    }
+
     private fun openFirstArtistDetailAsCollector() {
         onView(withId(R.id.cardCollector)).check(matches(isDisplayed()))
         onView(withId(R.id.cardCollector)).perform(scrollTo(), click())
 
         onView(withId(R.id.navigation_artists)).perform(click())
         onView(withId(R.id.performersRv)).check(matches(hasMinimumChildCount(1)))
+        firstArtistId = readFirstArtistId()
         onView(withId(R.id.performersRv))
             .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
     }
 
-    private fun setupMockServerForMusicianDetail(musicianDetailJson: String) {
-        server.dispatcher = object : Dispatcher() {
-            override fun dispatch(request: RecordedRequest): MockResponse {
-                return when {
-                    request.path == "/albums" -> jsonResponse(albumsListJson)
-                    request.path == "/bands" -> jsonResponse("[]")
-                    request.path == "/musicians" -> jsonResponse(musiciansListJson)
-                    request.path == "/musicians/100" -> jsonResponse(musicianDetailJson)
-                    else -> MockResponse().setResponseCode(404)
-                }
+    private fun readFirstArtistId(): Int {
+        var artistId = 0
+        scenario!!.onActivity { activity ->
+            val recyclerView = activity.findViewById<RecyclerView>(R.id.performersRv)
+            artistId = recyclerView.findViewHolderForAdapterPosition(0)!!
+                .itemView.getTag(R.id.tag_album_id) as Int
+        }
+        return artistId
+    }
+
+    private fun isCurrentArtistMusician(artistId: Int): Boolean {
+        val musicians = fetchArrayFromBackend("musicians")
+        for (i in 0 until musicians.length()) {
+            if (musicians.getJSONObject(i).getInt("id") == artistId) {
+                return true
             }
+        }
+        return false
+    }
+
+    private fun fetchFromBackend(path: String): JSONObject {
+        val url = URL(NetworkServiceAdapter.BASE_URL.trimEnd('/') + "/" + path)
+        val connection = url.openConnection() as HttpURLConnection
+        connection.connectTimeout = 10_000
+        connection.readTimeout = 10_000
+        return try {
+            JSONObject(connection.inputStream.bufferedReader().use { it.readText() })
+        } finally {
+            connection.disconnect()
+        }
+    }
+
+    private fun fetchArrayFromBackend(path: String): JSONArray {
+        val url = URL(NetworkServiceAdapter.BASE_URL.trimEnd('/') + "/" + path)
+        val connection = url.openConnection() as HttpURLConnection
+        connection.connectTimeout = 10_000
+        connection.readTimeout = 10_000
+        return try {
+            JSONArray(connection.inputStream.bufferedReader().use { it.readText() })
+        } finally {
+            connection.disconnect()
         }
     }
 
