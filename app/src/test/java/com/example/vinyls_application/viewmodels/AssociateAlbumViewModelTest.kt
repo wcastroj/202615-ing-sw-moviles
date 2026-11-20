@@ -112,7 +112,7 @@ class AssociateAlbumViewModelTest {
         NetworkServiceAdapter.instance = null
     }
 
-    // PU-069: La lista para asociar excluye los álbumes ya asociados al artista
+    // PU-069:
     @Test
     fun pu069_loadAvailableAlbums_excludesAlreadyAssociatedAlbums() {
         viewModel = AssociateAlbumViewModel(application, 100, PerformerType.MUSICIAN)
@@ -127,7 +127,7 @@ class AssociateAlbumViewModelTest {
         assertFalse(viewModel.eventNetworkError.value!!)
     }
 
-    // PU-070: Asociación exitosa actualiza los álbumes del artista
+    // PU-070:
     @Test
     fun pu070_associateAlbum_whenSuccess_triggersSuccessState() {
         viewModel = AssociateAlbumViewModel(application, 100, PerformerType.MUSICIAN)
@@ -149,7 +149,7 @@ class AssociateAlbumViewModelTest {
         assertFalse(viewModel.eventNetworkError.value!!)
     }
 
-    // PU-071: Error de la API genera el estado de error
+    // PU-071:
     @Test
     fun pu071_associateAlbum_whenApiError_triggersNetworkError() {
         viewModel = AssociateAlbumViewModel(application, 100, PerformerType.MUSICIAN)
@@ -169,7 +169,7 @@ class AssociateAlbumViewModelTest {
         assertFalse(viewModel.associationSuccess.value!!)
     }
 
-    // PU-072: Sin álbumes disponibles genera el estado vacío
+    // PU-072:
     @Test
     fun pu072_loadAvailableAlbums_whenAllAlbumsAssociated_returnsEmptyList() {
         viewModel = AssociateAlbumViewModel(application, 100, PerformerType.MUSICIAN)
@@ -182,7 +182,7 @@ class AssociateAlbumViewModelTest {
         assertFalse(viewModel.eventNetworkError.value!!)
     }
 
-    // PU-073: Con rol Coleccionista se habilita la asociación
+    // PU-073:
     @Test
     fun pu073_collectorRole_enablesAssociationOption() {
         val sharedPref = application.getSharedPreferences(application.packageName, Context.MODE_PRIVATE)
@@ -192,7 +192,7 @@ class AssociateAlbumViewModelTest {
         assertTrue(isCollector)
     }
 
-    // PU-074: Con rol Visitante no se habilita la asociación
+    // PU-074:
     @Test
     fun pu074_visitorRole_disablesAssociationOption() {
         val sharedPref = application.getSharedPreferences(application.packageName, Context.MODE_PRIVATE)

@@ -33,17 +33,6 @@ import org.mockito.Mockito.verify
 @OptIn(ExperimentalCoroutinesApi::class)
 class AssociateAlbumIntegrationTest {
 
-    private val musicianWithoutAlbumJson = """
-        {
-          "id": 100,
-          "name": "Rubén Blades",
-          "image": "https://example.com/ruben.jpg",
-          "description": "Músico panameño",
-          "birthDate": "1948-07-16T00:00:00.000Z",
-          "albums": [],
-          "performerPrizes": []
-        }
-    """.trimIndent()
 
     private val musicianWithAssociatedAlbumJson = """
         {
@@ -90,7 +79,7 @@ class AssociateAlbumIntegrationTest {
         NetworkServiceAdapter.instance = null
     }
 
-    // PI-026: POST /musicians/{id}/albums/{albumId} asocia el álbum al músico
+    // PI-026:
     @Test
     fun pi026_postMusicianAlbum_associatesAlbumToMusician() = runTest(testDispatcher) {
         associateAlbum(100, 101, PerformerType.MUSICIAN)
@@ -108,7 +97,7 @@ class AssociateAlbumIntegrationTest {
         assertNull(error)
     }
 
-    // PI-027: POST /bands/{id}/albums/{albumId} asocia el álbum a la banda
+    // PI-027:
     @Test
     fun pi027_postBandAlbum_associatesAlbumToBand() = runTest(testDispatcher) {
         associateAlbum(101, 102, PerformerType.BAND)
@@ -126,7 +115,7 @@ class AssociateAlbumIntegrationTest {
         assertNull(error)
     }
 
-    // PI-028: El álbum asociado aparece luego en el GET del artista
+    // PI-028:
     @Test
     fun pi028_associatedAlbum_appearsInSubsequentArtistGet() = runTest(testDispatcher) {
         // 1. POST para asociar álbum
@@ -150,7 +139,7 @@ class AssociateAlbumIntegrationTest {
         assertEquals("Signos", result!!.albums[0].name)
     }
 
-    // PI-029: POST de asociación responde 404 porque el artista o el álbum no existe
+    // PI-029:
     @Test
     fun pi029_associateAlbum_returns404_deliversError() = runTest(testDispatcher) {
         associateAlbum(999, 999, PerformerType.MUSICIAN)
@@ -166,7 +155,7 @@ class AssociateAlbumIntegrationTest {
         assertFalse(postSuccess)
     }
 
-    // PI-030: POST de asociación responde 500 o no hay red
+    // PI-030:
     @Test
     fun pi030_associateAlbum_returns500OrNoNetwork_deliversError() = runTest(testDispatcher) {
         associateAlbum(100, 101, PerformerType.MUSICIAN)

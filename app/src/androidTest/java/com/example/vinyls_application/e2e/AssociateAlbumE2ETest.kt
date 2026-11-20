@@ -11,12 +11,13 @@ import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
+import androidx.test.espresso.matcher.RootMatchers.isPlatformPopup
 import androidx.test.espresso.matcher.ViewMatchers.hasDescendant
 import androidx.test.espresso.matcher.ViewMatchers.hasMinimumChildCount
+import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility
 import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
@@ -148,12 +149,10 @@ class AssociateAlbumE2ETest {
         openFirstArtistDetailAsCollector()
         onView(withId(R.id.buttonAssociateAlbum)).perform(scrollTo(), click())
 
-        // Seleccionar álbum del desplegable y asociar
         onView(withId(R.id.autoCompleteTextView)).perform(click())
-        onView(withText("Signos")).perform(click())
+        onView(withText("Signos")).inRoot(isPlatformPopup()).perform(click())
         onView(withId(R.id.btnSubmitAssociate)).perform(click())
 
-        // Retorna al detalle del artista y el álbum recién asociado "Signos" es visible
         onView(withId(R.id.rvRelatedAlbums)).check(matches(hasDescendant(withText("Signos"))))
     }
 
@@ -167,10 +166,8 @@ class AssociateAlbumE2ETest {
 
         onView(withId(R.id.autoCompleteTextView)).perform(click())
 
-        // "Signos" está disponible
-        onView(withText("Signos")).check(matches(isDisplayed()))
-        // "Buscando América" NO aparece porque ya está asociado
-        onView(withText("Buscando América")).check(doesNotExist())
+        onView(withText("Signos")).inRoot(isPlatformPopup()).check(matches(isDisplayed()))
+        onView(withText("Buscando América")).inRoot(isPlatformPopup()).check(doesNotExist())
     }
 
     @Test
@@ -193,10 +190,9 @@ class AssociateAlbumE2ETest {
         onView(withId(R.id.buttonAssociateAlbum)).perform(scrollTo(), click())
 
         onView(withId(R.id.autoCompleteTextView)).perform(click())
-        onView(withText("Signos")).perform(click())
+        onView(withText("Signos")).inRoot(isPlatformPopup()).perform(click())
         onView(withId(R.id.btnSubmitAssociate)).perform(click())
 
-        // Muestra la vista de error
         onView(withId(R.id.layoutError)).check(matches(isDisplayed()))
     }
 
@@ -208,7 +204,6 @@ class AssociateAlbumE2ETest {
         openFirstArtistDetailAsCollector()
         onView(withId(R.id.buttonAssociateAlbum)).perform(scrollTo(), click())
 
-        // Muestra el widget de estado vacío "Sin álbumes que asociar"
         onView(withId(R.id.layoutEmptyAlbums)).check(matches(isDisplayed()))
         onView(allOf(withId(R.id.title), isDescendantOfA(withId(R.id.emptyAlbumsInformationWidget))))
             .check(matches(withText(R.string.associate_no_albums_title)))
@@ -219,17 +214,14 @@ class AssociateAlbumE2ETest {
         setupMockServerForMusicianDetail(musicianDetailWithAlbumJson)
         scenario = ActivityScenario.launch(MainActivity::class.java)
 
-        // Entrar como Visitante
         onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))
         onView(withId(R.id.cardVisitor)).perform(scrollTo(), click())
 
-        // Navegar a Artistas
         onView(withId(R.id.navigation_artists)).perform(click())
         onView(withId(R.id.performersRv)).check(matches(hasMinimumChildCount(1)))
         onView(withId(R.id.performersRv))
             .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click()))
 
-        // El botón para asociar NO está visible
         onView(withId(R.id.buttonAssociateAlbum)).check(matches(withEffectiveVisibility(androidx.test.espresso.matcher.ViewMatchers.Visibility.GONE)))
     }
 
