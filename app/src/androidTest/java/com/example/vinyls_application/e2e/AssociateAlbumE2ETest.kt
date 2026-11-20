@@ -43,15 +43,6 @@ import org.junit.runner.RunWith
 import java.net.HttpURLConnection
 import java.net.URL
 
-/**
- * Pruebas E2E de HU08 - Agregar/Asociar un álbum a un artista.
- *
- * PE-037, PE-038, PE-039 y PE-042 se ejecutan contra el backend real configurado en
- * [NetworkServiceAdapter.BASE_URL] utilizando [VolleyIdlingResource] para la sincronización.
- *
- * PE-040 (falla 500 al asociar) y PE-041 (estado vacío sin álbumes disponibles) utilizan
- * [MockWebServer] para forzar respuestas de error y estados límite de forma determinista.
- */
 @LargeTest
 @RunWith(AndroidJUnit4::class)
 class AssociateAlbumE2ETest {
@@ -64,7 +55,6 @@ class AssociateAlbumE2ETest {
 
     private var firstArtistId = 0
 
-    // Datos simulados para PE-040 y PE-041
     private val mockAlbumsListJson = """
         [
           {"id":100,"name":"Buscando América","cover":"","releaseDate":"1984-08-01T00:00:00.000Z","description":"Álbum.","genre":"Salsa","recordLabel":"Elektra"},
@@ -131,7 +121,6 @@ class AssociateAlbumE2ETest {
 
     @Test
     fun pe037_collectorCanOpenAssociateScreenFromArtistDetail() {
-        // Ejecuta contra el backend REAL
         launchApp(useMockServer = false)
 
         openFirstArtistDetailAsCollector()
@@ -144,12 +133,10 @@ class AssociateAlbumE2ETest {
 
     @Test
     fun pe038_associateAlbumSuccessfullyShowsUpdatedDetail() {
-        // Ejecuta contra el backend REAL
         launchApp(useMockServer = false)
 
         openFirstArtistDetailAsCollector()
 
-        // Obtener del backend real el detalle del artista y los álbumes disponibles
         val allCatalogAlbums = fetchArrayFromBackend("albums")
         val isMusician = isCurrentArtistMusician(firstArtistId)
         val path = if (isMusician) "musicians/$firstArtistId" else "bands/$firstArtistId"
@@ -167,7 +154,6 @@ class AssociateAlbumE2ETest {
             }
         }
 
-        // Si todos los álbumes ya están asociados en el backend real, la prueba pasa validando esa restricción
         if (targetAlbumToAssociate == null) {
             onView(withId(R.id.buttonAssociateAlbum)).perform(scrollTo(), click())
             onView(withId(R.id.layoutEmptyAlbums)).check(matches(isDisplayed()))
@@ -179,24 +165,23 @@ class AssociateAlbumE2ETest {
 
         onView(withId(R.id.buttonAssociateAlbum)).perform(scrollTo(), click())
 
-        // Desplegar menú y seleccionar el álbum disponible
         onView(withId(R.id.autoCompleteTextView)).perform(click())
         onView(withText(targetAlbumTitle)).inRoot(isPlatformPopup()).perform(click())
         onView(withId(R.id.btnSubmitAssociate)).perform(click())
 
-        // Retorna al detalle del artista y el álbum recién asociado se observa en la lista
+        onView(withId(R.id.rvRelatedAlbums)).perform(scrollTo()).check(matches(isDisplayed()))
+        onView(withId(R.id.rvRelatedAlbums))
+            .perform(RecyclerViewActions.scrollTo<RecyclerView.ViewHolder>(hasDescendant(withText(targetAlbumTitle))))
         onView(withId(R.id.rvRelatedAlbums)).check(matches(hasDescendant(withText(targetAlbumTitle))))
 
-        // Verificar directamente contra el backend real que el álbum quedó guardado para este artista
         val updatedArtistDetail = fetchFromBackend(path)
         val updatedAlbums = (0 until updatedArtistDetail.getJSONArray("albums").length())
             .map { updatedArtistDetail.getJSONArray("albums").getJSONObject(it).getInt("id") }
-        assertTrue("El backend real no asoció el álbum $targetAlbumId al artista $firstArtistId", updatedAlbums.contains(targetAlbumId))
+        assertTrue("No asoció el álbum $targetAlbumId al artista $firstArtistId", updatedAlbums.contains(targetAlbumId))
     }
 
     @Test
     fun pe039_associateDropdownExcludesAlreadyAssociatedAlbums() {
-        // Ejecuta contra el backend REAL
         launchApp(useMockServer = false)
 
         openFirstArtistDetailAsCollector()
@@ -211,7 +196,6 @@ class AssociateAlbumE2ETest {
         if (existingAlbums.length() > 0) {
             val associatedAlbumName = existingAlbums.getJSONObject(0).getString("name")
             onView(withId(R.id.autoCompleteTextView)).perform(click())
-            // El álbum que el artista ya posee NO debe aparecer en el dropdown
             onView(withText(associatedAlbumName)).inRoot(isPlatformPopup()).check(doesNotExist())
         } else {
             onView(withId(R.id.dropdownAlbums)).check(matches(isDisplayed()))
@@ -220,7 +204,6 @@ class AssociateAlbumE2ETest {
 
     @Test
     fun pe040_associateAlbumErrorShowsErrorScreen() {
-        // Usa MockWebServer para simular error 500 del servidor al asociar
         server.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
                 return when {
@@ -247,7 +230,6 @@ class AssociateAlbumE2ETest {
 
     @Test
     fun pe041_noAvailableAlbumsShowsEmptyState() {
-        // Usa MockWebServer para simular un artista que ya tiene todos los álbumes asociados
         server.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
                 return when {
@@ -271,7 +253,6 @@ class AssociateAlbumE2ETest {
 
     @Test
     fun pe042_visitorRoleDoesNotSeeAssociateOption() {
-        // Ejecuta contra el backend REAL
         launchApp(useMockServer = false)
 
         onView(withId(R.id.cardVisitor)).check(matches(isDisplayed()))

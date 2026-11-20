@@ -118,6 +118,13 @@ class PerformerDetailFragment : Fragment(), ComponentCallbacks2 {
         })
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (::viewModel.isInitialized && viewModel.performer.value != null) {
+            viewModel.getPerformerDetail()
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
