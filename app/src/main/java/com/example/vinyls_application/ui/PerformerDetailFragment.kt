@@ -1,23 +1,29 @@
 package com.example.vinyls_application.ui
 
+import android.content.ComponentCallbacks2
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.example.vinyls_application.R
 import com.example.vinyls_application.databinding.PerformerDetailFragmentBinding
 import com.example.vinyls_application.models.Performer
 import com.example.vinyls_application.models.PerformerType
+import com.example.vinyls_application.ui.LoginFragment.Companion.KEY_IS_COLLECTOR
 import com.example.vinyls_application.ui.adapters.RelatedAlbumsAdapter
 import com.example.vinyls_application.viewmodels.PerformerDetailViewModel
 
-class PerformerDetailFragment : Fragment() {
+class PerformerDetailFragment : Fragment(), ComponentCallbacks2 {
 
     private var _binding: PerformerDetailFragmentBinding? = null
     private val binding get() = _binding!!
@@ -39,6 +45,10 @@ class PerformerDetailFragment : Fragment() {
 
         val id = args.id
         val type = args.type
+
+        val sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE)
+        val isCollector = sharedPref.getBoolean(KEY_IS_COLLECTOR, false)
+        binding.buttonAssociateAlbum.isVisible = isCollector
 
         viewModel = ViewModelProvider(
             this,
@@ -65,6 +75,16 @@ class PerformerDetailFragment : Fragment() {
             binding.layoutError.visibility = View.GONE
             binding.layoutContent.visibility = View.VISIBLE
             viewModel.getPerformerDetail()
+        }
+
+        binding.buttonAssociateAlbum.setOnClick {
+            val performerName = viewModel.performer.value?.name ?: ""
+            val action = PerformerDetailFragmentDirections.actionPerformerDetailFragmentToAssociateAlbumFragment(
+                id = id,
+                name = performerName,
+                type = type
+            )
+            findNavController().navigate(action)
         }
 
         viewModel.performer.observe(viewLifecycleOwner, Observer<Performer> { performer ->
@@ -101,6 +121,21 @@ class PerformerDetailFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onTrimMemory(level: Int) {
+        context?.let { ctx ->
+            if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) {
+                Glide.get(ctx).clearMemory()
+            } else {
+                Glide.get(ctx).trimMemory(level)
+            }
+        }
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        context?.let { Glide.get(it).clearMemory() }
     }
 
     private fun onNetworkError() {
