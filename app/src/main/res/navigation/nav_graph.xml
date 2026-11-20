@@ -23,7 +23,16 @@
         <action
             android:id="@+id/action_albumFragment_to_detailFragment"
             app:destination="@id/albumDetailFragment" />
+        <action
+            android:id="@+id/action_albumFragment_to_albumCreateFragment"
+            app:destination="@id/albumCreateFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/albumCreateFragment"
+        android:name="com.example.vinyls_application.ui.AlbumCreateFragment"
+        android:label="@string/album_create_title"
+        tools:layout="@layout/album_create_fragment" />
 
 
 

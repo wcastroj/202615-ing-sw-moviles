@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:theme="@style/ThemeOverlay.Vinyls.AlbumForm">
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/layoutContent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingTop="12dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="20dp">
+
+            <TextView
+                android:id="@+id/labelCover"
+                style="@style/AlbumFormLabel"
+                android:text="@string/album_create_cover_label" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilCover"
+                style="@style/AlbumFormField">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etCover"
+                    style="@style/AlbumFormInput"
+                    android:hint="@string/album_create_cover_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="textUri" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/labelName"
+                style="@style/AlbumFormLabel"
+                android:text="@string/album_create_name_label" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilName"
+                style="@style/AlbumFormField"
+                app:counterEnabled="true"
+                app:counterMaxLength="50">
+
+                <!-- Sin maxLength: el usuario debe poder pasarse para ver el mensaje de error -->
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etName"
+                    style="@style/AlbumFormInput"
+                    android:hint="@string/album_create_name_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="textCapSentences" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/labelRecordLabel"
+                style="@style/AlbumFormLabel"
+                android:text="@string/album_create_record_label_label" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilRecordLabel"
+                style="@style/AlbumFormField.Dropdown">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/actvRecordLabel"
+                    style="@style/AlbumFormInput"
+                    android:hint="@string/album_create_select_hint"
+                    android:inputType="none" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/labelGenre"
+                style="@style/AlbumFormLabel"
+                android:text="@string/album_create_genre_label" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilGenre"
+                style="@style/AlbumFormField.Dropdown">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/actvGenre"
+                    style="@style/AlbumFormInput"
+                    android:hint="@string/album_create_select_hint"
+                    android:inputType="none" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/labelReleaseDate"
+                style="@style/AlbumFormLabel"
+                android:text="@string/album_create_release_date_label" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilReleaseDate"
+                style="@style/AlbumFormField"
+                app:startIconContentDescription="@string/album_create_release_date_label"
+                app:startIconDrawable="@drawable/ic_calendar"
+                app:startIconTint="#7C3AED">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etReleaseDate"
+                    style="@style/AlbumFormInput"
+                    android:cursorVisible="false"
+                    android:focusable="false"
+                    android:hint="@string/album_create_release_date_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="none" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/labelDescription"
+                style="@style/AlbumFormLabel"
+                android:text="@string/album_create_description_label" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilDescription"
+                style="@style/AlbumFormField"
+                app:counterEnabled="true"
+                app:counterMaxLength="250">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etDescription"
+                    style="@style/AlbumFormInput"
+                    android:gravity="top"
+                    android:hint="@string/album_create_description_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:minLines="4" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <ProgressBar
+                android:id="@+id/progressSaving"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
+                android:visibility="gone" />
+
+            <com.example.vinyls_application.ui.widgets.ButtonWidget
+                android:id="@+id/btnSaveAlbum"
+                style="@style/ButtonPrimaryStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:customIcon="@drawable/ic_cloud_upload"
+                app:customText="@string/album_create_save"
+                app:hasIcon="true" />
+
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <com.example.vinyls_application.ui.widgets.InformationWidget
+        android:id="@+id/errorInformationWidget"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:padding="24dp"
+        android:visibility="gone" />
+
+    <com.example.vinyls_application.ui.widgets.InformationWidget
+        android:id="@+id/successInformationWidget"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:padding="24dp"
+        android:visibility="gone" />
+</FrameLayout>
