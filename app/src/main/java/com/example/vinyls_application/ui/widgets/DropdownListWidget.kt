@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.ArrayAdapter
 import android.widget.LinearLayout
+import androidx.core.content.withStyledAttributes
 import androidx.core.view.isVisible
 import com.example.vinyls_application.R
 import com.example.vinyls_application.databinding.DropdownListWidgetBinding
@@ -31,19 +32,19 @@ class DropdownListWidget @JvmOverloads constructor(
     init {
         orientation = VERTICAL
 
-        attrs?.let {
-            val typedArray = context.obtainStyledAttributes(it, R.styleable.DropdownListWidget, 0, 0)
-            val labelText = typedArray.getString(R.styleable.DropdownListWidget_dropdownLabel)
-            val hintText = typedArray.getString(R.styleable.DropdownListWidget_dropdownHint)
+        attrs?.let { attributeSet ->
+            context.withStyledAttributes(attributeSet, R.styleable.DropdownListWidget) {
+                val labelText = getString(R.styleable.DropdownListWidget_dropdownLabel)
+                val hintText = getString(R.styleable.DropdownListWidget_dropdownHint)
 
-            if (!labelText.isNullOrBlank()) {
-                binding.tvLabel.text = labelText
-                binding.tvLabel.isVisible = true
+                if (!labelText.isNullOrBlank()) {
+                    binding.tvLabel.text = labelText
+                    binding.tvLabel.isVisible = true
+                }
+                if (!hintText.isNullOrBlank()) {
+                    binding.autoCompleteTextView.hint = hintText
+                }
             }
-            if (!hintText.isNullOrBlank()) {
-                binding.autoCompleteTextView.hint = hintText
-            }
-            typedArray.recycle()
         }
 
         binding.autoCompleteTextView.setOnItemClickListener { _, _, position, _ ->
@@ -60,10 +61,15 @@ class DropdownListWidget @JvmOverloads constructor(
         selectedItem = null
         binding.autoCompleteTextView.setText("", false)
 
+        val titles = ArrayList<String>(itemList.size)
+        for (i in 0 until itemList.size) {
+            titles.add(itemList[i].title)
+        }
+
         val adapter = ArrayAdapter(
             context,
             android.R.layout.simple_dropdown_item_1line,
-            itemList.map { it.title }
+            titles
         )
         binding.autoCompleteTextView.setAdapter(adapter)
     }

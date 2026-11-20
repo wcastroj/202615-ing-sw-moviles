@@ -32,6 +32,7 @@
             android:id="@+id/autoCompleteTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:autofillHints="none"
             android:hint="@string/associate_album_dropdown_hint"
             android:inputType="none"
             android:padding="12dp"

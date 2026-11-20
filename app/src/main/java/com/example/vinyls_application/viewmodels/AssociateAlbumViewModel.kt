@@ -51,12 +51,13 @@ class AssociateAlbumViewModel(
                 val performer = performerRepository.getPerformer(performerId, performerType)
                 val allAlbums = albumRepository.getAlbums()
 
-                val associatedIds = HashSet<Int>(performer.albums.size)
-                for (i in 0 until performer.albums.size) {
-                    associatedIds.add(performer.albums[i].albumId)
-                }
-
+                // Filtrado y procesamiento pesado ejecutado en Dispatchers.Default fuera del hilo UI
                 val filteredAlbums = withContext(Dispatchers.Default) {
+                    val associatedIds = HashSet<Int>(performer.albums.size)
+                    for (i in 0 until performer.albums.size) {
+                        associatedIds.add(performer.albums[i].albumId)
+                    }
+
                     val result = ArrayList<Album>()
                     for (i in 0 until allAlbums.size) {
                         val album = allAlbums[i]
@@ -73,7 +74,7 @@ class AssociateAlbumViewModel(
                 _isNetworkErrorShown.value = false
             } catch (e: CancellationException) {
                 throw e
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 _isLoading.value = false
                 _eventNetworkError.value = true
             }
@@ -91,7 +92,7 @@ class AssociateAlbumViewModel(
                 _isNetworkErrorShown.value = false
             } catch (e: CancellationException) {
                 throw e
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 _isLoading.value = false
                 _eventNetworkError.value = true
             }

@@ -81,15 +81,12 @@ class AssociateAlbumFragment : Fragment(), ComponentCallbacks2 {
         }
 
         viewModel.availableAlbums.observe(viewLifecycleOwner, Observer { albums ->
-            if (albums.isNullOrEmpty()) {
-                binding.dropdownAlbums.setEnabledState(false)
-                binding.btnSubmitAssociate.isEnabled = false
-                binding.layoutEmptyAlbums.isVisible = true
-            } else {
-                binding.layoutEmptyAlbums.isVisible = false
-                binding.dropdownAlbums.setEnabledState(true)
-                binding.btnSubmitAssociate.isEnabled = true
+            val hasAlbums = !albums.isNullOrEmpty()
+            binding.layoutEmptyAlbums.isVisible = !hasAlbums
+            binding.dropdownAlbums.setEnabledState(hasAlbums)
+            binding.btnSubmitAssociate.isEnabled = hasAlbums
 
+            if (hasAlbums) {
                 val dropdownItems = ArrayList<DropdownItem>(albums.size)
                 for (i in 0 until albums.size) {
                     val album = albums[i]
@@ -101,7 +98,7 @@ class AssociateAlbumFragment : Fragment(), ComponentCallbacks2 {
 
         viewModel.isLoading.observe(viewLifecycleOwner, Observer { isLoading ->
             binding.progressBar.isVisible = isLoading
-            val hasAlbums = !viewModel.availableAlbums.value.isNullOrEmpty()
+            val hasAlbums = viewModel.availableAlbums.value.isNullOrEmpty().not()
             binding.btnSubmitAssociate.isEnabled = !isLoading && hasAlbums
             binding.dropdownAlbums.setEnabledState(!isLoading && hasAlbums)
         })
@@ -140,7 +137,7 @@ class AssociateAlbumFragment : Fragment(), ComponentCallbacks2 {
     }
 
     private fun onNetworkError() {
-        if (!viewModel.isNetworkErrorShown.value!!) {
+        if (viewModel.isNetworkErrorShown.value != true) {
             binding.layoutContent.visibility = View.GONE
             binding.layoutError.visibility = View.VISIBLE
             Toast.makeText(requireContext(), getString(R.string.network_error_toast), Toast.LENGTH_LONG).show()
