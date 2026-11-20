@@ -9,10 +9,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.vinyls_application.models.Album
 import com.example.vinyls_application.models.PerformerType
+import com.example.vinyls_application.network.NetworkServiceAdapter
 import com.example.vinyls_application.repositories.AlbumRepository
 import com.example.vinyls_application.repositories.PerformerDetailRepository
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -48,11 +48,11 @@ class AssociateAlbumViewModel(
         _isLoading.value = true
         viewModelScope.launch {
             try {
+                val adapter = NetworkServiceAdapter.getInstance(getApplication())
                 val performer = performerRepository.getPerformer(performerId, performerType)
                 val allAlbums = albumRepository.getAlbums()
 
-                // Filtrado y procesamiento pesado ejecutado en Dispatchers.Default fuera del hilo UI
-                val filteredAlbums = withContext(Dispatchers.Default) {
+                val filteredAlbums = withContext(adapter.dispatcher) {
                     val associatedIds = HashSet<Int>(performer.albums.size)
                     for (i in 0 until performer.albums.size) {
                         associatedIds.add(performer.albums[i].albumId)
