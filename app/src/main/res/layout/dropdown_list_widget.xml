@@ -49,6 +49,6 @@
         android:textColor="#B00020"
         android:textSize="12sp"
         android:visibility="gone"
-        tools:text="Por favor selecciona un álbum." />
+        tools:text="Por favor selecciona una opción." />
 
 </merge>

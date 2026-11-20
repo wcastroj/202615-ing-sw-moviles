@@ -32,31 +32,12 @@
                     android:orientation="vertical"
                     android:padding="20dp">
 
-                    <TextView
-                        android:id="@+id/tvTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="#1C1B1F"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        tools:text="Asociar un álbum a Juanes" />
-
-                    <TextView
-                        android:id="@+id/tvSubtitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/associate_album_subtitle"
-                        android:textColor="#49454F"
-                        android:textSize="14sp" />
-
                     <com.example.vinyls_application.ui.widgets.DropdownListWidget
                         android:id="@+id/dropdownAlbums"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        app:dropdownHint="@string/associate_album_dropdown_hint"
-                        app:dropdownLabel="@string/associate_album_dropdown_label" />
+                        app:dropdownLabel="Seleccionar Álbum:" />
 
                     <ProgressBar
                         android:id="@+id/progressBar"
