@@ -266,6 +266,15 @@ class NetworkServiceAdapter(
     suspend fun postComment(albumId: Int, comment: String, rating: Int): JSONObject =
         postJson("albums/$albumId/comments", commentBody(comment, rating))
 
+    suspend fun addAlbumToPerformer(performerId: Int, albumId: Int, type: PerformerType): JSONObject {
+        val path = if (type == PerformerType.BAND) {
+            "bands/$performerId/albums/$albumId"
+        } else {
+            "musicians/$performerId/albums/$albumId"
+        }
+        return postJson(path, JSONObject())
+    }
+
     /**
      * Convierte una petición GET de Volley (basada en callbacks) en una función suspend.
      *
