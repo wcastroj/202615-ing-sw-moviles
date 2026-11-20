@@ -36,4 +36,30 @@
     <string name="logo">Logo</string>
     <string name="login_title">Selecciona cómo deseas ingresar a la plataforma y sincroniza tus emociones.</string>
     <string name="login_main_title">Bienvenido a tu universo musical</string>
+
+    <string name="album_create_button">Crear álbum</string>
+    <string name="album_create_title">Agregar Álbum</string>
+    <string name="album_create_cover_label">Portada (Cover)</string>
+    <string name="album_create_cover_hint">Ej: https://…/portada.jpg</string>
+    <string name="album_create_name_label">Título (Name)</string>
+    <string name="album_create_name_hint">Ej: Ecos del Atardecer</string>
+    <string name="album_create_record_label_label">Disquera (Record label)</string>
+    <string name="album_create_genre_label">Género (Genre)</string>
+    <string name="album_create_select_hint">Selecciona una opción</string>
+    <string name="album_create_release_date_label">Fecha de Lanzamiento (Release date)</string>
+    <string name="album_create_release_date_hint">dd/mm/aaaa</string>
+    <string name="album_create_release_date_picker_title">Fecha de lanzamiento</string>
+    <string name="album_create_description_label">Descripción o Reseña (Description)</string>
+    <string name="album_create_description_hint">Escribe la historia o inspiración conceptual detrás de las composiciones…</string>
+    <string name="album_create_save">Guardar Álbum</string>
+    <string name="album_create_error_required">Este campo es obligatorio</string>
+    <string name="album_create_error_cover">Ingrese una URL válida que termine en .png, .jpg, .jpeg o .webp</string>
+    <string name="album_create_error_name_length">El nombre no puede superar 50 caracteres</string>
+    <string name="album_create_error_description_length">La descripción no puede superar 250 caracteres</string>
+    <string name="album_create_success_title">Álbum creado exitosamente</string>
+    <string name="album_create_success_description">Ahora puedes revisar tu nuevo álbum y agregar sus canciones</string>
+    <string name="album_create_success_button">Volver a Inicio</string>
+    <string name="album_create_error_title">¡Ups! Algo se desafinó en la señal</string>
+    <string name="album_create_save_error_description">No fue posible crear el álbum. Tus datos siguen en el formulario.</string>
+    <string name="album_create_back_to_form">Volver al formulario</string>
 </resources>
