@@ -47,12 +47,17 @@
                 android:layout_marginTop="16dp"
                 android:visibility="gone" />
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
             <com.example.vinyls_application.ui.widgets.ButtonWidget
                 android:id="@+id/btnSubmitAssociate"
                 style="@style/ButtonPrimaryStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="380dp"
+                android:layout_marginTop="24dp"
                 app:customText="@string/associate_album_button"
                 app:hasIcon="false" />
 

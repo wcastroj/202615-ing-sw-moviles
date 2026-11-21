@@ -173,7 +173,7 @@ class AssociateAlbumE2ETest {
         onView(allOf(withId(R.id.title), isDescendantOfA(withId(R.id.successInformationWidget))))
             .check(matches(withText(R.string.associate_album_success_title)))
 
-        onView(allOf(withId(R.id.btnAction), isDescendantOfA(withId(R.id.successInformationWidget))))
+        onView(allOf(withId(R.id.buttonPrimary), isDescendantOfA(withId(R.id.successInformationWidget))))
             .perform(click())
 
         onView(withId(R.id.rvRelatedAlbums)).perform(scrollTo()).check(matches(isDisplayed()))
