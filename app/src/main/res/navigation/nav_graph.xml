@@ -26,6 +26,9 @@
         <action
             android:id="@+id/action_albumFragment_to_albumCreateFragment"
             app:destination="@id/albumCreateFragment" />
+        <action
+            android:id="@+id/action_albumFragment_to_collectorFragment"
+            app:destination="@id/navigation_collectors" />
     </fragment>
 
     <fragment
@@ -48,6 +51,12 @@
             app:destination="@id/performerDetailFragment" />
 
     </fragment>
+
+    <fragment
+        android:id="@+id/navigation_collectors"
+        android:name="com.example.vinyls_application.ui.CollectorFragment"
+        android:label="@string/header_home"
+        tools:layout="@layout/collector_fragment" />
 
     <fragment
         android:id="@+id/albumDetailFragment"
