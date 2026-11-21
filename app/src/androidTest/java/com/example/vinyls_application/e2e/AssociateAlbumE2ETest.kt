@@ -232,7 +232,9 @@ class AssociateAlbumE2ETest {
         onView(withText("Signos")).inRoot(isPlatformPopup()).perform(click())
         onView(withId(R.id.btnSubmitAssociate)).perform(scrollTo(), click())
 
-        onView(withId(R.id.layoutError)).check(matches(isDisplayed()))
+        onView(withId(R.id.errorInformationWidget)).check(matches(isDisplayed()))
+        onView(allOf(withId(R.id.title), isDescendantOfA(withId(R.id.errorInformationWidget))))
+            .check(matches(withText(R.string.error_title_default)))
     }
 
     @Test
