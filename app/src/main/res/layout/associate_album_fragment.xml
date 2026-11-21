@@ -28,16 +28,7 @@
                 android:textColor="#1C1B1F"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                tools:text="Asociar un álbum a Juanes" />
-
-            <TextView
-                android:id="@+id/tvSubtitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="@string/associate_album_subtitle"
-                android:textColor="#49454F"
-                android:textSize="14sp" />
+                tools:text="Asociar Albúm" />
 
             <com.example.vinyls_application.ui.widgets.DropdownListWidget
                 android:id="@+id/dropdownAlbums"
@@ -84,20 +75,20 @@
 
     </androidx.core.widget.NestedScrollView>
 
-    <LinearLayout
-        android:id="@+id/layoutError"
+    <com.example.vinyls_application.ui.widgets.InformationWidget
+        android:id="@+id/errorInformationWidget"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:padding="24dp"
-        android:visibility="gone">
+        android:visibility="gone" />
 
-        <com.example.vinyls_application.ui.widgets.InformationWidget
-            android:id="@+id/errorInformationWidget"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-    </LinearLayout>
+    <com.example.vinyls_application.ui.widgets.InformationWidget
+        android:id="@+id/successInformationWidget"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:padding="24dp"
+        android:visibility="gone" />
 
 </FrameLayout>

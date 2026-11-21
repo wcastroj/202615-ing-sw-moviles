@@ -169,6 +169,15 @@ class AssociateAlbumE2ETest {
         onView(withText(targetAlbumTitle)).inRoot(isPlatformPopup()).perform(click())
         onView(withId(R.id.btnSubmitAssociate)).perform(click())
 
+        // Muestra la vista de éxito con "¡Álbum asociado!"
+        onView(withId(R.id.successInformationWidget)).check(matches(isDisplayed()))
+        onView(allOf(withId(R.id.title), isDescendantOfA(withId(R.id.successInformationWidget))))
+            .check(matches(withText(R.string.associate_album_success_title)))
+
+        // Clic en "Volver al Detalle" para retornar a la pantalla del artista
+        onView(allOf(withId(R.id.btnAction), isDescendantOfA(withId(R.id.successInformationWidget))))
+            .perform(click())
+
         onView(withId(R.id.rvRelatedAlbums)).perform(scrollTo()).check(matches(isDisplayed()))
         onView(withId(R.id.rvRelatedAlbums))
             .perform(RecyclerViewActions.scrollTo<RecyclerView.ViewHolder>(hasDescendant(withText(targetAlbumTitle))))

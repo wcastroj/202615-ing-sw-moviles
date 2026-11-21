@@ -59,10 +59,19 @@ class AssociateAlbumFragment : Fragment(), ComponentCallbacks2 {
         )
 
         binding.errorInformationWidget.setOnClickListener {
-            binding.layoutError.visibility = View.GONE
+            binding.errorInformationWidget.visibility = View.GONE
+            binding.successInformationWidget.visibility = View.GONE
             binding.layoutContent.visibility = View.VISIBLE
             viewModel.retry()
         }
+
+        binding.successInformationWidget.setContent(
+            title = getString(R.string.associate_album_success_title),
+            description = getString(R.string.associate_album_success_description),
+            iconRes = R.drawable.ic_album_created,
+            buttonText = getString(R.string.associate_album_success_button),
+            onButtonClick = ::returnToPerformerDetail
+        )
 
         binding.emptyAlbumsInformationWidget.setContent(
             title = getString(R.string.associate_no_albums_title),
@@ -105,15 +114,20 @@ class AssociateAlbumFragment : Fragment(), ComponentCallbacks2 {
 
         viewModel.associationSuccess.observe(viewLifecycleOwner, Observer { isSuccess ->
             if (isSuccess) {
-                Toast.makeText(requireContext(), getString(R.string.associate_album_success), Toast.LENGTH_SHORT).show()
-                viewModel.onAssociationSuccessHandled()
-                findNavController().navigateUp()
+                binding.layoutContent.isVisible = false
+                binding.errorInformationWidget.isVisible = false
+                binding.successInformationWidget.isVisible = true
             }
         })
 
         viewModel.eventNetworkError.observe(viewLifecycleOwner, Observer { isNetworkError ->
             if (isNetworkError) onNetworkError()
         })
+    }
+
+    private fun returnToPerformerDetail() {
+        viewModel.onAssociationSuccessHandled()
+        findNavController().navigateUp()
     }
 
     override fun onViewStateRestored(savedInstanceState: Bundle?) {
@@ -144,7 +158,7 @@ class AssociateAlbumFragment : Fragment(), ComponentCallbacks2 {
     private fun onNetworkError() {
         if (viewModel.isNetworkErrorShown.value != true) {
             binding.layoutContent.visibility = View.GONE
-            binding.layoutError.visibility = View.VISIBLE
+            binding.errorInformationWidget.visibility = View.VISIBLE
             Toast.makeText(requireContext(), getString(R.string.network_error_toast), Toast.LENGTH_LONG).show()
             viewModel.onNetworkErrorShown()
         }
