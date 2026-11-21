@@ -36,6 +36,59 @@
         <item name="android:paddingRight">12dp</item>
     </style>
   
+    <style name="ThemeOverlay.Vinyls.AlbumForm" parent="">
+        <item name="colorPrimary">#7C3AED</item>
+        <item name="colorOnSurface">#1C1B1F</item>
+    </style>
+
+    <style name="ThemeOverlay.Vinyls.DatePicker" parent="ThemeOverlay.MaterialComponents.MaterialCalendar">
+        <item name="colorPrimary">#7C3AED</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+    </style>
+
+    <style name="AlbumFormLabel">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">6dp</item>
+        <item name="android:layout_marginBottom">6dp</item>
+        <item name="android:textColor">#1C1B1F</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="AlbumFormInput">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">#1C1B1F</item>
+        <item name="android:textColorHint">#938F96</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <!-- errorEnabled reserva el espacio del mensaje: el formulario no salta al aparecer un error -->
+    <style name="AlbumFormField" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="boxBackgroundColor">#FFFFFF</item>
+        <item name="boxCornerRadiusTopStart">16dp</item>
+        <item name="boxCornerRadiusTopEnd">16dp</item>
+        <item name="boxCornerRadiusBottomStart">16dp</item>
+        <item name="boxCornerRadiusBottomEnd">16dp</item>
+        <item name="errorEnabled">true</item>
+        <item name="hintEnabled">false</item>
+    </style>
+
+    <style name="AlbumFormField.Dropdown" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="boxBackgroundColor">#FFFFFF</item>
+        <item name="boxCornerRadiusTopStart">16dp</item>
+        <item name="boxCornerRadiusTopEnd">16dp</item>
+        <item name="boxCornerRadiusBottomStart">16dp</item>
+        <item name="boxCornerRadiusBottomEnd">16dp</item>
+        <item name="errorEnabled">true</item>
+        <item name="hintEnabled">false</item>
+    </style>
+
     <style name="NavigationWidget.Text" parent="TextAppearance.MaterialComponents.Caption">
         <item name="android:textSize">12sp</item>
     </style>

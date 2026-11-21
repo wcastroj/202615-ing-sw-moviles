@@ -50,6 +50,7 @@ class AssociateAlbumFragment : Fragment(), ComponentCallbacks2 {
             )
         )[AssociateAlbumViewModel::class.java]
 
+        binding.tvTitle.text = getString(R.string.associate_album_title_format, performerName)
 
         binding.errorInformationWidget.setContent(
             title = getString(R.string.error_title_default),
@@ -113,6 +114,11 @@ class AssociateAlbumFragment : Fragment(), ComponentCallbacks2 {
         viewModel.eventNetworkError.observe(viewLifecycleOwner, Observer { isNetworkError ->
             if (isNetworkError) onNetworkError()
         })
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+        binding.dropdownAlbums.restoreAdapter()
     }
 
     override fun onDestroyView() {

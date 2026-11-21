@@ -50,7 +50,7 @@ class DropdownListWidget @JvmOverloads constructor(
         binding.autoCompleteTextView.setOnItemClickListener { _, _, position, _ ->
             if (position in itemList.indices) {
                 selectedItem = itemList[position]
-                binding.tvError.isVisible = false
+                hideError()
                 selectedItem?.let { onItemSelectedListener?.invoke(it) }
             }
         }
@@ -68,10 +68,25 @@ class DropdownListWidget @JvmOverloads constructor(
 
         val adapter = ArrayAdapter(
             context,
-            android.R.layout.simple_dropdown_item_1line,
+            android.R.layout.simple_list_item_1,
             titles
         )
         binding.autoCompleteTextView.setAdapter(adapter)
+    }
+
+    fun restoreAdapter() {
+        if (itemList.isNotEmpty()) {
+            val titles = ArrayList<String>(itemList.size)
+            for (i in 0 until itemList.size) {
+                titles.add(itemList[i].title)
+            }
+            val adapter = ArrayAdapter(
+                context,
+                android.R.layout.simple_list_item_1,
+                titles
+            )
+            binding.autoCompleteTextView.setAdapter(adapter)
+        }
     }
 
     fun getSelectedItem(): DropdownItem? = selectedItem
@@ -86,11 +101,13 @@ class DropdownListWidget @JvmOverloads constructor(
     }
 
     fun showError(error: String) {
+        binding.textInputLayout.error = error
         binding.tvError.text = error
         binding.tvError.isVisible = true
     }
 
     fun hideError() {
+        binding.textInputLayout.error = null
         binding.tvError.isVisible = false
     }
 

@@ -4,62 +4,66 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/transparent">
+    android:theme="@style/ThemeOverlay.Vinyls.AlbumForm">
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/layoutContent"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
         <LinearLayout
-            android:id="@+id/layoutContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingStart="20dp"
+            android:paddingTop="12dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="20dp">
 
-            <com.google.android.material.card.MaterialCardView
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#1C1B1F"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                tools:text="Asociar un álbum a Juanes" />
+
+            <TextView
+                android:id="@+id/tvSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/associate_album_subtitle"
+                android:textColor="#49454F"
+                android:textSize="14sp" />
+
+            <com.example.vinyls_application.ui.widgets.DropdownListWidget
+                android:id="@+id/dropdownAlbums"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="#FFFFFF"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:strokeColor="#F0EBFA"
-                app:strokeWidth="1dp">
+                android:layout_marginTop="16dp"
+                app:dropdownHint="@string/associate_album_dropdown_hint"
+                app:dropdownLabel="@string/associate_album_dropdown_label" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:visibility="gone" />
 
-                    <com.example.vinyls_application.ui.widgets.DropdownListWidget
-                        android:id="@+id/dropdownAlbums"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        app:dropdownLabel="Seleccionar Álbum:" />
-
-                    <ProgressBar
-                        android:id="@+id/progressBar"
-                        style="?android:attr/progressBarStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginTop="16dp"
-                        android:visibility="gone" />
-
-                    <com.example.vinyls_application.ui.widgets.ButtonWidget
-                        android:id="@+id/btnSubmitAssociate"
-                        style="@style/ButtonPrimaryStyle"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        app:customText="@string/associate_album_button"
-                        app:hasIcon="false" />
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
+            <com.example.vinyls_application.ui.widgets.ButtonWidget
+                android:id="@+id/btnSubmitAssociate"
+                style="@style/ButtonPrimaryStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                app:customText="@string/associate_album_button"
+                app:hasIcon="false" />
 
             <LinearLayout
                 android:id="@+id/layoutEmptyAlbums"
