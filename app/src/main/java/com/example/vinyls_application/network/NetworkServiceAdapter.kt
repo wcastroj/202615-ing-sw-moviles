@@ -267,6 +267,15 @@ class NetworkServiceAdapter(
     suspend fun postComment(albumId: Int, comment: String, rating: Int): JSONObject =
         postJson("albums/$albumId/comments", commentBody(comment, rating))
 
+    suspend fun addAlbumToPerformer(performerId: Int, albumId: Int, type: PerformerType): JSONObject {
+        val path = if (type == PerformerType.BAND) {
+            "bands/$performerId/albums/$albumId"
+        } else {
+            "musicians/$performerId/albums/$albumId"
+        }
+        return postJson(path, JSONObject())
+    }
+
     /**
      * Crea el álbum. No se reintenta: si el servidor lo guardó pero la respuesta tardó, repetir el
      * POST crearía un álbum duplicado. La respuesta no se usa porque la lista se vuelve a pedir.

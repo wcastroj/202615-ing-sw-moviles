@@ -72,6 +72,27 @@
         <argument
             android:name="type"
             app:argType="com.example.vinyls_application.models.PerformerType" />
+
+        <action
+            android:id="@+id/action_performerDetailFragment_to_associateAlbumFragment"
+            app:destination="@id/associateAlbumFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/associateAlbumFragment"
+        android:name="com.example.vinyls_application.ui.AssociateAlbumFragment"
+        android:label="Asociar Álbum"
+        tools:layout="@layout/associate_album_fragment">
+
+        <argument
+            android:name="id"
+            app:argType="integer" />
+        <argument
+            android:name="name"
+            app:argType="string" />
+        <argument
+            android:name="type"
+            app:argType="com.example.vinyls_application.models.PerformerType" />
     </fragment>
 
 </navigation>
