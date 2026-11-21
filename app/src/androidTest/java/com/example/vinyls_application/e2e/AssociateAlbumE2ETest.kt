@@ -128,7 +128,7 @@ class AssociateAlbumE2ETest {
         onView(withId(R.id.buttonAssociateAlbum)).perform(scrollTo(), click())
 
         onView(withId(R.id.dropdownAlbums)).check(matches(isDisplayed()))
-        onView(withId(R.id.btnSubmitAssociate)).check(matches(isDisplayed()))
+        onView(withId(R.id.btnSubmitAssociate)).perform(scrollTo()).check(matches(isDisplayed()))
     }
 
     @Test
@@ -156,7 +156,7 @@ class AssociateAlbumE2ETest {
 
         if (targetAlbumToAssociate == null) {
             onView(withId(R.id.buttonAssociateAlbum)).perform(scrollTo(), click())
-            onView(withId(R.id.layoutEmptyAlbums)).check(matches(isDisplayed()))
+            onView(withId(R.id.layoutEmptyAlbums)).perform(scrollTo()).check(matches(isDisplayed()))
             return
         }
 
@@ -167,14 +167,12 @@ class AssociateAlbumE2ETest {
 
         onView(withId(R.id.autoCompleteTextView)).perform(click())
         onView(withText(targetAlbumTitle)).inRoot(isPlatformPopup()).perform(click())
-        onView(withId(R.id.btnSubmitAssociate)).perform(click())
+        onView(withId(R.id.btnSubmitAssociate)).perform(scrollTo(), click())
 
-        // Muestra la vista de éxito con "¡Álbum asociado!"
         onView(withId(R.id.successInformationWidget)).check(matches(isDisplayed()))
         onView(allOf(withId(R.id.title), isDescendantOfA(withId(R.id.successInformationWidget))))
             .check(matches(withText(R.string.associate_album_success_title)))
 
-        // Clic en "Volver al Detalle" para retornar a la pantalla del artista
         onView(allOf(withId(R.id.btnAction), isDescendantOfA(withId(R.id.successInformationWidget))))
             .perform(click())
 
@@ -232,7 +230,7 @@ class AssociateAlbumE2ETest {
 
         onView(withId(R.id.autoCompleteTextView)).perform(click())
         onView(withText("Signos")).inRoot(isPlatformPopup()).perform(click())
-        onView(withId(R.id.btnSubmitAssociate)).perform(click())
+        onView(withId(R.id.btnSubmitAssociate)).perform(scrollTo(), click())
 
         onView(withId(R.id.layoutError)).check(matches(isDisplayed()))
     }
@@ -255,8 +253,9 @@ class AssociateAlbumE2ETest {
         openFirstArtistDetailAsCollector()
         onView(withId(R.id.buttonAssociateAlbum)).perform(scrollTo(), click())
 
-        onView(withId(R.id.layoutEmptyAlbums)).check(matches(isDisplayed()))
+        onView(withId(R.id.layoutEmptyAlbums)).perform(scrollTo()).check(matches(isDisplayed()))
         onView(allOf(withId(R.id.title), isDescendantOfA(withId(R.id.emptyAlbumsInformationWidget))))
+            .perform(scrollTo())
             .check(matches(withText(R.string.associate_no_albums_title)))
     }
 
