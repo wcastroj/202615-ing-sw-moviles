@@ -9,6 +9,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.vinyls_application.models.Track
 import com.example.vinyls_application.repositories.TrackRepository
+import com.example.vinyls_application.utils.TrackFieldError
+import com.example.vinyls_application.utils.TrackFormValidator
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
@@ -25,13 +27,38 @@ class AssociateTrackViewModel(
     val state: LiveData<AssociateTrackState>
         get() = _state
 
+    private val _nameError = MutableLiveData(TrackFieldError.NONE)
+    val nameError: LiveData<TrackFieldError>
+        get() = _nameError
+
+    fun onNameChanged(value: CharSequence) {
+        val error = TrackFormValidator.validateName(value)
+        if (_nameError.value != error) _nameError.value = error
+    }
+
+    private val _durationError = MutableLiveData(TrackFieldError.NONE)
+    val durationError: LiveData<TrackFieldError>
+        get() = _durationError
+
+    fun onDurationChanged(value: CharSequence) {
+        val error = TrackFormValidator.validateDuration(value)
+        if (_durationError.value != error) _durationError.value = error
+    }
+
     /**
-     * Asocia la canción al álbum.
+     * Valida el formulario y, si es correcto, asocia la canción al álbum.
      *
-     * @return false si ya se está guardando; así un doble toque no crea la canción dos veces.
+     * @return false si hay errores o si ya se está guardando; así un doble toque no crea la
+     * canción dos veces.
      */
     fun associate(track: Track): Boolean {
         if (_state.value != AssociateTrackState.EDITING) return false
+
+        val nameError = TrackFormValidator.validateName(track.name)
+        if (_nameError.value != nameError) _nameError.value = nameError
+        val durationError = TrackFormValidator.validateDuration(track.duration)
+        if (_durationError.value != durationError) _durationError.value = durationError
+        if (nameError != TrackFieldError.NONE || durationError != TrackFieldError.NONE) return false
 
         _state.value = AssociateTrackState.SAVING
         viewModelScope.launch {

@@ -58,6 +58,16 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
+        <!-- Se ve solo mientras se envía la canción (estado SAVING) -->
+        <ProgressBar
+            android:id="@+id/progressSaving"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone" />
+
         <!-- BOTÓN -->
         <com.example.vinyls_application.ui.widgets.ButtonWidget
             android:id="@+id/btnAssociateTrack"

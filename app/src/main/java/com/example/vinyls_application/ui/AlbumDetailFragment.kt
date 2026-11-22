@@ -69,6 +69,16 @@ class AlbumDetailFragment : Fragment(), ComponentCallbacks2 {
         }
         binding.addCommentWidget.isVisible = isCollector
 
+        // Este ViewModel sobrevive mientras se asocia una canción: hay que pedir el álbum de nuevo
+        val savedState = findNavController().getBackStackEntry(R.id.albumDetailFragment).savedStateHandle
+        savedState.getLiveData(AssociateTrackFragment.KEY_TRACK_ASSOCIATED, false)
+            .observe(viewLifecycleOwner) { associated ->
+                if (associated) {
+                    savedState[AssociateTrackFragment.KEY_TRACK_ASSOCIATED] = false
+                    viewModel.refreshDataFromNetwork()
+                }
+            }
+
         viewModel.album.observe(viewLifecycleOwner, Observer<AlbumDetail> { albumDetail ->
             albumDetail.apply {
 
