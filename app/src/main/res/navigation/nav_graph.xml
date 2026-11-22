@@ -23,7 +23,19 @@
         <action
             android:id="@+id/action_albumFragment_to_detailFragment"
             app:destination="@id/albumDetailFragment" />
+        <action
+            android:id="@+id/action_albumFragment_to_albumCreateFragment"
+            app:destination="@id/albumCreateFragment" />
+        <action
+            android:id="@+id/action_albumFragment_to_collectorFragment"
+            app:destination="@id/navigation_collectors" />
     </fragment>
+
+    <fragment
+        android:id="@+id/albumCreateFragment"
+        android:name="com.example.vinyls_application.ui.AlbumCreateFragment"
+        android:label="@string/album_create_title"
+        tools:layout="@layout/album_create_fragment" />
 
 
 
@@ -39,6 +51,12 @@
             app:destination="@id/performerDetailFragment" />
 
     </fragment>
+
+    <fragment
+        android:id="@+id/navigation_collectors"
+        android:name="com.example.vinyls_application.ui.CollectorFragment"
+        android:label="@string/header_home"
+        tools:layout="@layout/collector_fragment" />
 
     <fragment
         android:id="@+id/albumDetailFragment"

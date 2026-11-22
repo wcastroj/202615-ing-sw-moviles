@@ -21,7 +21,14 @@ class MainActivity : AppCompatActivity() {
     private val topLevelDestinations = setOf(
         R.id.loginFragment,
         R.id.navigation_albums,
-        R.id.navigation_artists
+        R.id.navigation_artists,
+        R.id.navigation_collectors
+    )
+
+    // Destinations that take the whole screen: they don't show the NavigationWidget
+    private val destinationsWithoutNavigation = setOf(
+        R.id.loginFragment,
+        R.id.albumCreateFragment
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,14 +47,15 @@ class MainActivity : AppCompatActivity() {
         // Make sure actions in the ActionBar get propagated to the NavController
         Log.d("act", navController.toString())
         // Keep the HeaderWidget in sync with the current destination
-        binding.headerWidget.setOnReturnClickListener { navController.navigateUp() }
+        // Goes through the dispatcher so a screen can block leaving (e.g. while saving an album)
+        binding.headerWidget.setOnReturnClickListener { onBackPressedDispatcher.onBackPressed() }
         navController.addOnDestinationChangedListener { _, destination, _ ->
             binding.headerWidget.setContent(
                 header = destination.label?.toString(),
                 hasReturn = destination.id !in topLevelDestinations,
                 hasLogo = destination.id == R.id.loginFragment
             )
-            binding.navigationWidget.isVisible = destination.id != R.id.loginFragment
+            binding.navigationWidget.isVisible = destination.id !in destinationsWithoutNavigation
         }
         // Bind the bottom NavigationWidget to the NavController
         binding.navigationWidget.setupWithNavController(navController)
