@@ -13,12 +13,6 @@
         <attr name="customIcon" />
     </declare-styleable>
 
-    <attr name="selectHint" format="string" />
-
-    <declare-styleable name="SelectFieldWidget">
-        <attr name="selectHint" />
-    </declare-styleable>
-
     <declare-styleable name="RoleCardWidget">
         <attr name="customIcon" />
         <attr name="roleTitle" />

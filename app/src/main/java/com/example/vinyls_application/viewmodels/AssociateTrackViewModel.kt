@@ -47,6 +47,13 @@ class AssociateTrackViewModel(
         return true
     }
 
+    /** Al cerrar la pantalla de error se vuelve al formulario con los datos que ya tenía. */
+    fun onSaveErrorDismissed() {
+        if (_state.value == AssociateTrackState.SAVE_FAILED) {
+            _state.value = AssociateTrackState.EDITING
+        }
+    }
+
     class Factory(val app: Application, val albumId: Int) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(AssociateTrackViewModel::class.java)) {
