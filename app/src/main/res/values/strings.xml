@@ -77,4 +77,23 @@
     <string name="album_create_error_title">¡Ups! Algo se desafinó en la señal</string>
     <string name="album_create_save_error_description">No fue posible crear el álbum. Tus datos siguen en el formulario.</string>
     <string name="album_create_back_to_form">Volver al formulario</string>
+
+    <!-- Asociar canción -->
+    <string name="associate_track_title">Asociar Canción</string>
+    <string name="associate_track_name_label">Nombre de la canción</string>
+    <string name="associate_track_name_hint">Ej: Pedro Navaja</string>
+    <string name="associate_track_duration_label">Duración</string>
+    <string name="associate_track_duration_hint">mm:ss</string>
+    <string name="associate_track_button">Asociar Canción</string>
+    <string name="associate_track_success_title">¡Canción asociada!</string>
+    <string name="associate_track_success_description">Ahora puedes ver la canción en el álbum</string>
+    <string name="associate_track_success_button">Volver al Detalle</string>
+    <string name="associate_track_error_name_length">Máximo 50 caracteres</string>
+    <string name="associate_track_error_name_characters">El nombre tiene caracteres no permitidos</string>
+    <string name="associate_track_error_name_only_symbols">El nombre debe tener al menos una letra o un número</string>
+    <string name="associate_track_error_duration_format">Usa el formato mm:ss (ej: 04:35)</string>
+    <string name="associate_track_error_duration_zero">La duración debe ser mayor a 00:00</string>
+    <string name="associate_track_success_toast">Canción asociada</string>
+    <string name="associate_track_error_toast">No fue posible asociar la canción</string>
+    <string name="associate_track_save_error_description">No fue posible asociar la canción. Tus datos siguen en el formulario.</string>
 </resources>
