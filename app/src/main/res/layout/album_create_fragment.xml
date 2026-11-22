@@ -23,16 +23,16 @@
 
             <TextView
                 android:id="@+id/labelCover"
-                style="@style/AlbumFormLabel"
+                style="@style/FormLabel"
                 android:text="@string/album_create_cover_label" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilCover"
-                style="@style/AlbumFormField">
+                style="@style/FormField">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etCover"
-                    style="@style/AlbumFormInput"
+                    style="@style/FormInput"
                     android:hint="@string/album_create_cover_hint"
                     android:importantForAutofill="no"
                     android:inputType="textUri" />
@@ -40,19 +40,19 @@
 
             <TextView
                 android:id="@+id/labelName"
-                style="@style/AlbumFormLabel"
+                style="@style/FormLabel"
                 android:text="@string/album_create_name_label" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilName"
-                style="@style/AlbumFormField"
+                style="@style/FormField"
                 app:counterEnabled="true"
                 app:counterMaxLength="50">
 
                 <!-- Sin maxLength: el usuario debe poder pasarse para ver el mensaje de error -->
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etName"
-                    style="@style/AlbumFormInput"
+                    style="@style/FormInput"
                     android:hint="@string/album_create_name_hint"
                     android:importantForAutofill="no"
                     android:inputType="textCapSentences" />
@@ -60,51 +60,51 @@
 
             <TextView
                 android:id="@+id/labelRecordLabel"
-                style="@style/AlbumFormLabel"
+                style="@style/FormLabel"
                 android:text="@string/album_create_record_label_label" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilRecordLabel"
-                style="@style/AlbumFormField.Dropdown">
+                style="@style/FormField.Dropdown">
 
                 <com.google.android.material.textfield.MaterialAutoCompleteTextView
                     android:id="@+id/actvRecordLabel"
-                    style="@style/AlbumFormInput"
+                    style="@style/FormInput"
                     android:hint="@string/album_create_select_hint"
                     android:inputType="none" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
                 android:id="@+id/labelGenre"
-                style="@style/AlbumFormLabel"
+                style="@style/FormLabel"
                 android:text="@string/album_create_genre_label" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilGenre"
-                style="@style/AlbumFormField.Dropdown">
+                style="@style/FormField.Dropdown">
 
                 <com.google.android.material.textfield.MaterialAutoCompleteTextView
                     android:id="@+id/actvGenre"
-                    style="@style/AlbumFormInput"
+                    style="@style/FormInput"
                     android:hint="@string/album_create_select_hint"
                     android:inputType="none" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
                 android:id="@+id/labelReleaseDate"
-                style="@style/AlbumFormLabel"
+                style="@style/FormLabel"
                 android:text="@string/album_create_release_date_label" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilReleaseDate"
-                style="@style/AlbumFormField"
+                style="@style/FormField"
                 app:startIconContentDescription="@string/album_create_release_date_label"
                 app:startIconDrawable="@drawable/ic_calendar"
                 app:startIconTint="#7C3AED">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etReleaseDate"
-                    style="@style/AlbumFormInput"
+                    style="@style/FormInput"
                     android:cursorVisible="false"
                     android:focusable="false"
                     android:hint="@string/album_create_release_date_hint"
@@ -114,18 +114,18 @@
 
             <TextView
                 android:id="@+id/labelDescription"
-                style="@style/AlbumFormLabel"
+                style="@style/FormLabel"
                 android:text="@string/album_create_description_label" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilDescription"
-                style="@style/AlbumFormField"
+                style="@style/FormField"
                 app:counterEnabled="true"
                 app:counterMaxLength="250">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etDescription"
-                    style="@style/AlbumFormInput"
+                    style="@style/FormInput"
                     android:gravity="top"
                     android:hint="@string/album_create_description_hint"
                     android:importantForAutofill="no"

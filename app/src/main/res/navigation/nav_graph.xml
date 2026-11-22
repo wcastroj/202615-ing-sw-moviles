@@ -58,6 +58,20 @@
         <argument
             android:name="albumId"
             app:argType="integer" />
+        <action
+            android:id="@+id/action_albumDetailFragment_to_associateTrackFragment"
+            app:destination="@id/associateTrackFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/associateTrackFragment"
+        android:name="com.example.vinyls_application.ui.AssociateTrackFragment"
+        android:label="@string/associate_track_title"
+        tools:layout="@layout/associate_track_fragment">
+
+        <argument
+            android:name="albumId"
+            app:argType="integer" />
     </fragment>
 
     <fragment

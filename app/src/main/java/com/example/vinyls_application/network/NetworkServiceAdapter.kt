@@ -276,6 +276,14 @@ class NetworkServiceAdapter(
     }
 
     /**
+     * Asocia una canción nueva al álbum. No se reintenta, igual que [createAlbum]: repetir el POST
+     * crearía la canción dos veces. El `trackId` de [track] no se envía, lo asigna el backend.
+     */
+    suspend fun associateTrack(albumId: Int, track: Track) {
+        postJson("albums/$albumId/tracks", trackBody(track), maxRetries = 0)
+    }
+
+    /**
      * Convierte una petición GET de Volley (basada en callbacks) en una función suspend.
      *
      * - suspendCancellableCoroutine pausa la corrutina sin bloquear el hilo.
@@ -331,6 +339,10 @@ class NetworkServiceAdapter(
         .put("description", album.description)
         .put("genre", album.genre)
         .put("recordLabel", album.recordLabel)
+
+    private fun trackBody(track: Track) = JSONObject()
+        .put("name", track.name)
+        .put("duration", track.duration)
 
     private fun getRequest(path:String, responseListener: Response.Listener<String>, errorListener: Response.ErrorListener): StringRequest {
         return StringRequest(Request.Method.GET, BASE_URL+path, responseListener,errorListener)

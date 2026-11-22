@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Lista desplegable reutilizable (SelectFieldWidget).
+    Une el widget de hu008 (reutilizable) con el estilo del formulario de crear álbum
+    (FormField.Dropdown, MaterialAutoCompleteTextView y errores de Material).
+    El error se muestra con textInputLayout.error, no con un TextView aparte.
+    No incluye etiqueta: cada fragment pone la suya (por ejemplo, un TextView con FormLabel).
+-->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <!-- CAMPO DESPLEGABLE: el overlay da el morado del foco aunque la pantalla no lo aplique -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout"
+        style="@style/FormField.Dropdown"
+        android:theme="@style/ThemeOverlay.Vinyls.AlbumForm">
+
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            android:id="@+id/autoCompleteTextView"
+            style="@style/FormInput"
+            android:hint="@string/album_create_select_hint"
+            android:importantForAutofill="no"
+            android:inputType="none" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+</merge>

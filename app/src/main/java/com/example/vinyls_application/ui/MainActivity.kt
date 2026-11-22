@@ -26,7 +26,8 @@ class MainActivity : AppCompatActivity() {
     // Destinations that take the whole screen: they don't show the NavigationWidget
     private val destinationsWithoutNavigation = setOf(
         R.id.loginFragment,
-        R.id.albumCreateFragment
+        R.id.albumCreateFragment,
+        R.id.associateTrackFragment
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {

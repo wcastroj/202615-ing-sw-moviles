@@ -11,6 +11,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.example.vinyls_application.R
@@ -61,6 +62,11 @@ class AlbumDetailFragment : Fragment(), ComponentCallbacks2 {
         }
 
         binding.buttonAssociateTrack.isVisible = isCollector
+        binding.buttonAssociateTrack.setOnClick {
+            findNavController().navigate(
+                AlbumDetailFragmentDirections.actionAlbumDetailFragmentToAssociateTrackFragment(albumId)
+            )
+        }
         binding.addCommentWidget.isVisible = isCollector
 
         viewModel.album.observe(viewLifecycleOwner, Observer<AlbumDetail> { albumDetail ->

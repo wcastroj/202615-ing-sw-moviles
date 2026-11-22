@@ -62,4 +62,12 @@
     <string name="album_create_error_title">¡Ups! Algo se desafinó en la señal</string>
     <string name="album_create_save_error_description">No fue posible crear el álbum. Tus datos siguen en el formulario.</string>
     <string name="album_create_back_to_form">Volver al formulario</string>
+
+    <!-- Asociar canción -->
+    <string name="associate_track_title">Asociar Canción</string>
+    <string name="associate_track_name_label">Nombre de la canción</string>
+    <string name="associate_track_name_hint">Ej: Pedro Navaja</string>
+    <string name="associate_track_duration_label">Duración</string>
+    <string name="associate_track_duration_hint">mm:ss</string>
+    <string name="associate_track_button">Asociar Canción</string>
 </resources>
