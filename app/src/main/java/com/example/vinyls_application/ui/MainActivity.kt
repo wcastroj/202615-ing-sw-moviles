@@ -27,7 +27,8 @@ class MainActivity : AppCompatActivity() {
     private val destinationsWithoutNavigation = setOf(
         R.id.loginFragment,
         R.id.albumCreateFragment,
-        R.id.associateTrackFragment
+        R.id.associateTrackFragment,
+        R.id.associateAlbumFragment
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {

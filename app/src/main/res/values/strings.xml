@@ -37,6 +37,21 @@
     <string name="login_title">Selecciona cómo deseas ingresar a la plataforma y sincroniza tus emociones.</string>
     <string name="login_main_title">Bienvenido a tu universo musical</string>
 
+    <string name="associate_album_button">Asociar álbum</string>
+    <string name="associate_album_subtitle">Selecciona un álbum del catálogo disponible para este artista.</string>
+    <string name="associate_album_dropdown_label">Selecciona el álbum:</string>
+    <string name="associate_album_dropdown_hint">Elige un álbum de la lista</string>
+    <string name="associate_album_select_error">Por favor selecciona un álbum de la lista.</string>
+    <string name="associate_album_success">Álbum asociado exitosamente</string>
+    <string name="associate_album_success_title">¡Álbum asociado!</string>
+    <string name="associate_album_success_description">Ahora puedes ver el álbum asociado al artista</string>
+    <string name="associate_album_success_button">Volver al Detalle</string>
+    <string name="associate_no_albums_title">Sin álbumes que asociar</string>
+    <string name="associate_no_albums_description">Todos los álbumes del catálogo ya están asociados a este artista o no hay álbumes disponibles.</string>
+    <string name="error_title_default">¡Ups! Algo se\ndesafinó en la señal</string>
+    <string name="error_description_default">Algo inesperado ha ocurrido.\nIntenta más tarde.</string>
+    <string name="network_error_toast">Error de red</string>
+
     <string name="album_create_button">Crear álbum</string>
     <string name="album_create_title">Agregar Álbum</string>
     <string name="album_create_cover_label">Portada (Cover)</string>
