@@ -13,9 +13,4 @@ class AlbumRepository(val application: Application) {
      */
     suspend fun getAlbums(): List<Album> =
         NetworkServiceAdapter.getInstance(application).getAlbums()
-
-    /** Si la función termina sin lanzar, el álbum se creó. */
-    suspend fun createAlbum(album: Album) {
-        NetworkServiceAdapter.getInstance(application).createAlbum(album)
-    }
 }
