@@ -49,13 +49,6 @@ class AlbumViewModel(application: Application, private val albumsRepository: Alb
         }
     }
 
-    /** Vuelve a pedir la lista, por ejemplo después de crear un álbum. */
-    fun refreshAlbums() {
-        _eventNetworkError.value = false
-        _isNetworkErrorShown.value = false
-        getAlbumsFromNetwork()
-    }
-
     fun onNetworkErrorShown() {
         _isNetworkErrorShown.value = true
     }

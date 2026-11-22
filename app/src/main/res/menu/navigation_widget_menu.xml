@@ -13,8 +13,4 @@
         android:id="@+id/navigation_artists"
         android:icon="@drawable/ic_explore"
         android:title="@string/navigation_artists" />
-    <item
-        android:id="@+id/navigation_collectors"
-        android:icon="@drawable/ic_collector"
-        android:title="@string/navigation_collectors" />
 </menu>

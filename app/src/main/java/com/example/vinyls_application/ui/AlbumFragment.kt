@@ -1,13 +1,11 @@
 package com.example.vinyls_application.ui
 
 import android.content.ComponentCallbacks2
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -16,7 +14,6 @@ import com.bumptech.glide.Glide
 import com.example.vinyls_application.R
 import com.example.vinyls_application.databinding.AlbumFragmentBinding
 import com.example.vinyls_application.models.Album
-import com.example.vinyls_application.ui.LoginFragment.Companion.KEY_IS_COLLECTOR
 import com.example.vinyls_application.ui.widgets.CatalogItem
 import com.example.vinyls_application.viewmodels.AlbumViewModel
 
@@ -45,14 +42,6 @@ class AlbumFragment : Fragment(), ComponentCallbacks2 {
             findNavController().navigate(action)
         }
 
-        // Solo el coleccionista puede crear álbumes
-        binding.btnCreateAlbum.isVisible = requireActivity()
-            .getPreferences(Context.MODE_PRIVATE)
-            .getBoolean(KEY_IS_COLLECTOR, false)
-        binding.btnCreateAlbum.setOnClick {
-            findNavController().navigate(AlbumFragmentDirections.actionAlbumFragmentToAlbumCreateFragment())
-        }
-
         binding.errorInformationWidget.setContent(
             title = "¡Ups! Algo se\ndesafinó en la señal",
             description = "Algo inesperado ha ocurrido.\nIntenta más tarde.",
@@ -76,16 +65,6 @@ class AlbumFragment : Fragment(), ComponentCallbacks2 {
         activity.actionBar?.title = getString(R.string.title_albums)
 
         viewModel = ViewModelProvider(this, AlbumViewModel.Factory(activity.application))[AlbumViewModel::class.java]
-
-        // Este ViewModel sobrevive mientras se crea un álbum: hay que pedirle la lista de nuevo
-        val savedState = findNavController().getBackStackEntry(R.id.albumFragment).savedStateHandle
-        savedState.getLiveData(AlbumCreateFragment.KEY_ALBUM_CREATED, false)
-            .observe(viewLifecycleOwner, Observer<Boolean> { albumCreated ->
-                if (albumCreated) {
-                    savedState[AlbumCreateFragment.KEY_ALBUM_CREATED] = false
-                    viewModel.refreshAlbums()
-                }
-            })
 
         viewModel.albums.observe(viewLifecycleOwner, Observer<List<Album>> { list ->
             val items = ArrayList<CatalogItem>(list.size)

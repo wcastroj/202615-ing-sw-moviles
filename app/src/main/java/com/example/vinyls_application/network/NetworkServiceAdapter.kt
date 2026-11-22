@@ -14,7 +14,6 @@ import org.json.JSONObject
 import com.example.vinyls_application.models.Album
 import com.example.vinyls_application.models.AlbumDetail
 import com.example.vinyls_application.models.Band
-import com.example.vinyls_application.models.Collector
 import com.example.vinyls_application.models.Comment
 import com.example.vinyls_application.models.Musician
 import com.example.vinyls_application.models.Performer
@@ -52,7 +51,6 @@ class NetworkServiceAdapter(
          * con un backend o un dispositivo lento: la petición se abandona y la app muestra error.
          */
         const val REQUEST_TIMEOUT_MS = 10_000
-        private const val DEFAULT_MAX_RETRIES = 1
 
         var instance: NetworkServiceAdapter? = null
         fun getInstance(context: Context) =
@@ -98,23 +96,6 @@ class NetworkServiceAdapter(
         fun parseMusicians(response: String): List<Musician> {
             val resp = JSONArray(response)
             return (0 until resp.length()).map { parseMusician(resp.getJSONObject(it)) }
-        }
-
-        fun parseCollectors(response: String): List<Collector> {
-            val resp = JSONArray(response)
-            val collectors = mutableListOf<Collector>()
-            for (i in 0 until resp.length()) {
-                val item = resp.getJSONObject(i)
-                collectors.add(
-                    Collector(
-                        collectorId = item.getInt("id"),
-                        name = item.getString("name"),
-                        telephone = item.getString("telephone"),
-                        email = item.getString("email")
-                    )
-                )
-            }
-            return collectors
         }
 
         fun parseAlbumDetail(response: String): AlbumDetail {
@@ -281,21 +262,9 @@ class NetworkServiceAdapter(
         parsePerformer(getString(performerPath(id, type)))
     }
 
-    suspend fun getCollectors(): List<Collector> = withContext(dispatcher) {
-        parseCollectors(getString("collectors"))
-    }
-
     /** La respuesta del POST no se parsea a un modelo, así que no hace falta cambiar de hilo. */
     suspend fun postComment(albumId: Int, comment: String, rating: Int): JSONObject =
         postJson("albums/$albumId/comments", commentBody(comment, rating))
-
-    /**
-     * Crea el álbum. No se reintenta: si el servidor lo guardó pero la respuesta tardó, repetir el
-     * POST crearía un álbum duplicado. La respuesta no se usa porque la lista se vuelve a pedir.
-     */
-    suspend fun createAlbum(album: Album) {
-        postJson("albums", albumBody(album), maxRetries = 0)
-    }
 
     /**
      * Convierte una petición GET de Volley (basada en callbacks) en una función suspend.
@@ -316,16 +285,11 @@ class NetworkServiceAdapter(
     }
 
     /** Igual que [getString], pero para un POST con cuerpo JSON. */
-    private suspend fun postJson(
-        path: String,
-        body: JSONObject,
-        maxRetries: Int = DEFAULT_MAX_RETRIES
-    ): JSONObject =
+    private suspend fun postJson(path: String, body: JSONObject): JSONObject =
         suspendCancellableCoroutine { cont ->
             val request = postRequest(
                 path,
                 body,
-                maxRetries,
                 { response -> cont.resume(response) },
                 { error -> cont.resumeWithException(error) }
             )
@@ -346,14 +310,6 @@ class NetworkServiceAdapter(
         return postParams
     }
 
-    private fun albumBody(album: Album) = JSONObject()
-        .put("name", album.name)
-        .put("cover", album.cover)
-        .put("releaseDate", album.releaseDate)
-        .put("description", album.description)
-        .put("genre", album.genre)
-        .put("recordLabel", album.recordLabel)
-
     private fun getRequest(path:String, responseListener: Response.Listener<String>, errorListener: Response.ErrorListener): StringRequest {
         return StringRequest(Request.Method.GET, BASE_URL+path, responseListener,errorListener)
             .apply { retryPolicy = DefaultRetryPolicy(REQUEST_TIMEOUT_MS, 1, 1f) }
@@ -362,11 +318,10 @@ class NetworkServiceAdapter(
     private fun postRequest(
         path: String,
         body: JSONObject,
-        maxRetries: Int,
         responseListener: Response.Listener<JSONObject>,
         errorListener: Response.ErrorListener
     ): JsonObjectRequest {
         return JsonObjectRequest(Request.Method.POST, BASE_URL + path, body, responseListener, errorListener)
-            .apply { retryPolicy = DefaultRetryPolicy(REQUEST_TIMEOUT_MS, maxRetries, 1f) }
+            .apply { retryPolicy = DefaultRetryPolicy(REQUEST_TIMEOUT_MS, 1, 1f) }
     }
 }
