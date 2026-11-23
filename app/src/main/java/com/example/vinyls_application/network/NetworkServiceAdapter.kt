@@ -51,6 +51,7 @@ class NetworkServiceAdapter(
          * con un backend o un dispositivo lento: la petición se abandona y la app muestra error.
          */
         const val REQUEST_TIMEOUT_MS = 10_000
+        private const val DEFAULT_MAX_RETRIES = 1
 
         var instance: NetworkServiceAdapter? = null
         fun getInstance(context: Context) =
@@ -266,6 +267,31 @@ class NetworkServiceAdapter(
     suspend fun postComment(albumId: Int, comment: String, rating: Int): JSONObject =
         postJson("albums/$albumId/comments", commentBody(comment, rating))
 
+    suspend fun addAlbumToPerformer(performerId: Int, albumId: Int, type: PerformerType): JSONObject {
+        val path = if (type == PerformerType.BAND) {
+            "bands/$performerId/albums/$albumId"
+        } else {
+            "musicians/$performerId/albums/$albumId"
+        }
+        return postJson(path, JSONObject())
+    }
+
+    /**
+     * Crea el álbum. No se reintenta: si el servidor lo guardó pero la respuesta tardó, repetir el
+     * POST crearía un álbum duplicado. La respuesta no se usa porque la lista se vuelve a pedir.
+     */
+    suspend fun createAlbum(album: Album) {
+        postJson("albums", albumBody(album), maxRetries = 0)
+    }
+
+    /**
+     * Asocia una canción nueva al álbum. No se reintenta, igual que [createAlbum]: repetir el POST
+     * crearía la canción dos veces. El `trackId` de [track] no se envía, lo asigna el backend.
+     */
+    suspend fun associateTrack(albumId: Int, track: Track) {
+        postJson("albums/$albumId/tracks", trackBody(track), maxRetries = 0)
+    }
+
     /**
      * Convierte una petición GET de Volley (basada en callbacks) en una función suspend.
      *
@@ -285,11 +311,16 @@ class NetworkServiceAdapter(
     }
 
     /** Igual que [getString], pero para un POST con cuerpo JSON. */
-    private suspend fun postJson(path: String, body: JSONObject): JSONObject =
+    private suspend fun postJson(
+        path: String,
+        body: JSONObject,
+        maxRetries: Int = DEFAULT_MAX_RETRIES
+    ): JSONObject =
         suspendCancellableCoroutine { cont ->
             val request = postRequest(
                 path,
                 body,
+                maxRetries,
                 { response -> cont.resume(response) },
                 { error -> cont.resumeWithException(error) }
             )
@@ -310,6 +341,18 @@ class NetworkServiceAdapter(
         return postParams
     }
 
+    private fun albumBody(album: Album) = JSONObject()
+        .put("name", album.name)
+        .put("cover", album.cover)
+        .put("releaseDate", album.releaseDate)
+        .put("description", album.description)
+        .put("genre", album.genre)
+        .put("recordLabel", album.recordLabel)
+
+    private fun trackBody(track: Track) = JSONObject()
+        .put("name", track.name)
+        .put("duration", track.duration)
+
     private fun getRequest(path:String, responseListener: Response.Listener<String>, errorListener: Response.ErrorListener): StringRequest {
         return StringRequest(Request.Method.GET, BASE_URL+path, responseListener,errorListener)
             .apply { retryPolicy = DefaultRetryPolicy(REQUEST_TIMEOUT_MS, 1, 1f) }
@@ -318,10 +361,11 @@ class NetworkServiceAdapter(
     private fun postRequest(
         path: String,
         body: JSONObject,
+        maxRetries: Int,
         responseListener: Response.Listener<JSONObject>,
         errorListener: Response.ErrorListener
     ): JsonObjectRequest {
         return JsonObjectRequest(Request.Method.POST, BASE_URL + path, body, responseListener, errorListener)
-            .apply { retryPolicy = DefaultRetryPolicy(REQUEST_TIMEOUT_MS, 1, 1f) }
+            .apply { retryPolicy = DefaultRetryPolicy(REQUEST_TIMEOUT_MS, maxRetries, 1f) }
     }
 }
