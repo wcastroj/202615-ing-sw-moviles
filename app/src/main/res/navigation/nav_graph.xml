@@ -23,7 +23,16 @@
         <action
             android:id="@+id/action_albumFragment_to_detailFragment"
             app:destination="@id/albumDetailFragment" />
+        <action
+            android:id="@+id/action_albumFragment_to_albumCreateFragment"
+            app:destination="@id/albumCreateFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/albumCreateFragment"
+        android:name="com.example.vinyls_application.ui.AlbumCreateFragment"
+        android:label="@string/album_create_title"
+        tools:layout="@layout/album_create_fragment" />
 
 
 
@@ -49,6 +58,20 @@
         <argument
             android:name="albumId"
             app:argType="integer" />
+        <action
+            android:id="@+id/action_albumDetailFragment_to_associateTrackFragment"
+            app:destination="@id/associateTrackFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/associateTrackFragment"
+        android:name="com.example.vinyls_application.ui.AssociateTrackFragment"
+        android:label="@string/associate_track_title"
+        tools:layout="@layout/associate_track_fragment">
+
+        <argument
+            android:name="albumId"
+            app:argType="integer" />
     </fragment>
 
     <fragment
@@ -60,6 +83,27 @@
         <argument
             android:name="id"
             app:argType="integer" />
+        <argument
+            android:name="type"
+            app:argType="com.example.vinyls_application.models.PerformerType" />
+
+        <action
+            android:id="@+id/action_performerDetailFragment_to_associateAlbumFragment"
+            app:destination="@id/associateAlbumFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/associateAlbumFragment"
+        android:name="com.example.vinyls_application.ui.AssociateAlbumFragment"
+        android:label="Asociar Álbum"
+        tools:layout="@layout/associate_album_fragment">
+
+        <argument
+            android:name="id"
+            app:argType="integer" />
+        <argument
+            android:name="name"
+            app:argType="string" />
         <argument
             android:name="type"
             app:argType="com.example.vinyls_application.models.PerformerType" />

@@ -20,4 +20,12 @@
         <attr name="customText" />
         <attr name="isPrimary" />
     </declare-styleable>
+
+    <attr name="dropdownLabel" format="string" />
+    <attr name="dropdownHint" format="string" />
+
+    <declare-styleable name="DropdownListWidget">
+        <attr name="dropdownLabel" />
+        <attr name="dropdownHint" />
+    </declare-styleable>
 </resources>
