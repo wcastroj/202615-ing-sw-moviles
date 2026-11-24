@@ -289,12 +289,29 @@ class NetworkServiceAdapter(
     suspend fun postComment(albumId: Int, comment: String, rating: Int): JSONObject =
         postJson("albums/$albumId/comments", commentBody(comment, rating))
 
+    suspend fun addAlbumToPerformer(performerId: Int, albumId: Int, type: PerformerType): JSONObject {
+        val path = if (type == PerformerType.BAND) {
+            "bands/$performerId/albums/$albumId"
+        } else {
+            "musicians/$performerId/albums/$albumId"
+        }
+        return postJson(path, JSONObject())
+    }
+
     /**
      * Crea el álbum. No se reintenta: si el servidor lo guardó pero la respuesta tardó, repetir el
      * POST crearía un álbum duplicado. La respuesta no se usa porque la lista se vuelve a pedir.
      */
     suspend fun createAlbum(album: Album) {
         postJson("albums", albumBody(album), maxRetries = 0)
+    }
+
+    /**
+     * Asocia una canción nueva al álbum. No se reintenta, igual que [createAlbum]: repetir el POST
+     * crearía la canción dos veces. El `trackId` de [track] no se envía, lo asigna el backend.
+     */
+    suspend fun associateTrack(albumId: Int, track: Track) {
+        postJson("albums/$albumId/tracks", trackBody(track), maxRetries = 0)
     }
 
     /**
@@ -353,6 +370,10 @@ class NetworkServiceAdapter(
         .put("description", album.description)
         .put("genre", album.genre)
         .put("recordLabel", album.recordLabel)
+
+    private fun trackBody(track: Track) = JSONObject()
+        .put("name", track.name)
+        .put("duration", track.duration)
 
     private fun getRequest(path:String, responseListener: Response.Listener<String>, errorListener: Response.ErrorListener): StringRequest {
         return StringRequest(Request.Method.GET, BASE_URL+path, responseListener,errorListener)
