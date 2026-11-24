@@ -41,6 +41,21 @@
     <string name="login_title">Selecciona cómo deseas ingresar a la plataforma y sincroniza tus emociones.</string>
     <string name="login_main_title">Bienvenido a tu universo musical</string>
 
+    <string name="associate_album_button">Asociar álbum</string>
+    <string name="associate_album_subtitle">Selecciona un álbum del catálogo disponible para este artista.</string>
+    <string name="associate_album_dropdown_label">Selecciona el álbum:</string>
+    <string name="associate_album_dropdown_hint">Elige un álbum de la lista</string>
+    <string name="associate_album_select_error">Por favor selecciona un álbum de la lista.</string>
+    <string name="associate_album_success">Álbum asociado exitosamente</string>
+    <string name="associate_album_success_title">¡Álbum asociado!</string>
+    <string name="associate_album_success_description">Ahora puedes ver el álbum asociado al artista</string>
+    <string name="associate_album_success_button">Volver al Detalle</string>
+    <string name="associate_no_albums_title">Sin álbumes que asociar</string>
+    <string name="associate_no_albums_description">Todos los álbumes del catálogo ya están asociados a este artista o no hay álbumes disponibles.</string>
+    <string name="error_title_default">¡Ups! Algo se\ndesafinó en la señal</string>
+    <string name="error_description_default">Algo inesperado ha ocurrido.\nIntenta más tarde.</string>
+    <string name="network_error_toast">Error de red</string>
+
     <string name="album_create_button">Crear álbum</string>
     <string name="album_create_title">Agregar Álbum</string>
     <string name="album_create_cover_label">Portada (Cover)</string>
@@ -66,4 +81,23 @@
     <string name="album_create_error_title">¡Ups! Algo se desafinó en la señal</string>
     <string name="album_create_save_error_description">No fue posible crear el álbum. Tus datos siguen en el formulario.</string>
     <string name="album_create_back_to_form">Volver al formulario</string>
+
+    <!-- Asociar canción -->
+    <string name="associate_track_title">Asociar Canción</string>
+    <string name="associate_track_name_label">Nombre de la canción</string>
+    <string name="associate_track_name_hint">Ej: Pedro Navaja</string>
+    <string name="associate_track_duration_label">Duración</string>
+    <string name="associate_track_duration_hint">mm:ss</string>
+    <string name="associate_track_button">Asociar Canción</string>
+    <string name="associate_track_success_title">¡Canción asociada!</string>
+    <string name="associate_track_success_description">Ahora puedes ver la canción en el álbum</string>
+    <string name="associate_track_success_button">Volver al Detalle</string>
+    <string name="associate_track_error_name_length">Máximo 50 caracteres</string>
+    <string name="associate_track_error_name_characters">El nombre tiene caracteres no permitidos</string>
+    <string name="associate_track_error_name_only_symbols">El nombre debe tener al menos una letra o un número</string>
+    <string name="associate_track_error_duration_format">Usa el formato mm:ss (ej: 04:35)</string>
+    <string name="associate_track_error_duration_zero">La duración debe ser mayor a 00:00</string>
+    <string name="associate_track_success_toast">Canción asociada</string>
+    <string name="associate_track_error_toast">No fue posible asociar la canción</string>
+    <string name="associate_track_save_error_description">No fue posible asociar la canción. Tus datos siguen en el formulario.</string>
 </resources>

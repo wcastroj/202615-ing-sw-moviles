@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Asociar canción a un álbum. El header lo pone MainActivity según el label del nav_graph. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/layoutContent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingStart="20dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="20dp"
+        android:theme="@style/ThemeOverlay.Vinyls.AlbumForm">
+
+        <!-- NOMBRE DE LA CANCIÓN -->
+        <TextView
+            android:id="@+id/labelTrackName"
+            style="@style/FormLabel"
+            android:text="@string/associate_track_name_label" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilTrackName"
+            style="@style/FormField">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etTrackName"
+                style="@style/FormInput"
+                android:hint="@string/associate_track_name_hint"
+                android:importantForAutofill="no"
+                android:inputType="textCapSentences" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- DURACIÓN (mm:ss) -->
+        <TextView
+            android:id="@+id/labelTrackDuration"
+            style="@style/FormLabel"
+            android:text="@string/associate_track_duration_label" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilTrackDuration"
+            style="@style/FormField">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etTrackDuration"
+                style="@style/FormInput"
+                android:hint="@string/associate_track_duration_hint"
+                android:importantForAutofill="no"
+                android:inputType="time" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Empuja el botón al fondo de la pantalla -->
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- Se ve solo mientras se envía la canción (estado SAVING) -->
+        <ProgressBar
+            android:id="@+id/progressSaving"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone" />
+
+        <!-- BOTÓN -->
+        <com.example.vinyls_application.ui.widgets.ButtonWidget
+            android:id="@+id/btnAssociateTrack"
+            style="@style/ButtonPrimaryStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:customIcon="@drawable/ic_cloud_upload"
+            app:customText="@string/associate_track_button"
+            app:hasIcon="true" />
+
+    </LinearLayout>
+
+    <!-- PANTALLA DE ERROR: se muestra cuando el estado es SAVE_FAILED -->
+    <com.example.vinyls_application.ui.widgets.InformationWidget
+        android:id="@+id/errorInformationWidget"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:padding="24dp"
+        android:visibility="gone" />
+
+    <!-- PANTALLA DE ÉXITO: se muestra cuando el estado es ASSOCIATED -->
+    <com.example.vinyls_application.ui.widgets.InformationWidget
+        android:id="@+id/successInformationWidget"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:padding="24dp"
+        android:visibility="gone" />
+
+</FrameLayout>
