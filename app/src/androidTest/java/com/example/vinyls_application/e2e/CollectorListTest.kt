@@ -124,7 +124,7 @@ class CollectorListTest {
 
         onView(withId(R.id.layoutEmpty)).check(matches(isDisplayed()))
         onView(withText("No se encontraron coleccionistas")).check(matches(isDisplayed()))
-        onView(withText("Por ahora no hay coleccionistas  disponibles")).check(matches(isDisplayed()))
+        onView(withText("Por ahora no hay coleccionistas disponibles")).check(matches(isDisplayed()))
 
         onView(withId(R.id.layoutContent)).check(matches(withEffectiveVisibility(Visibility.GONE)))
         onView(withId(R.id.layoutError)).check(matches(withEffectiveVisibility(Visibility.GONE)))
