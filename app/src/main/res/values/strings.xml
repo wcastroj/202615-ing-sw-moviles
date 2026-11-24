@@ -9,6 +9,7 @@
     <string name="navigation_home">Inicio</string>
     <string name="navigation_albums">Álbumes</string>
     <string name="navigation_artists">Artistas</string>
+    <string name="navigation_collectors">Coleccionistas</string>
     <string name="header_home">Vivo Sonika</string>
     <string name="header_return">Volver</string>
     <string name="comments_title">Comentarios</string>
@@ -17,6 +18,9 @@
     <string name="performer_type_band">Banda</string>
     <string name="performers_empty_title">No se encontraron artistas</string>
     <string name="performers_empty_description">Por ahora no hay artistas disponibles</string>
+    <string name="title_collectors">Coleccionistas</string>
+    <string name="collectors_empty_title">No se encontraron coleccionistas</string>
+    <string name="collectors_empty_description">Por ahora no hay coleccionistas  disponibles</string>
     <string name="add_comment_rating_label">Tu Calificación:</string>
     <string name="add_comment_placeholder">Escribe tu opinión o reseña sobre este álbum…</string>
     <string name="add_comment_submit_button">Publicar Comentario</string>

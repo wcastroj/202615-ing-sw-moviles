@@ -35,14 +35,16 @@ class NavigationWidgetTest {
     fun test_NavigationWidget_MenuItems() {
         val menu = navigation.findViewById<BottomNavigationView>(R.id.bottomNavigation).menu
 
-        assertEquals(3, menu.size())
+        assertEquals(4, menu.size())
         assertEquals(R.id.albumFragment, menu.getItem(0).itemId)
         assertEquals(R.id.navigation_albums, menu.getItem(1).itemId)
         assertEquals(R.id.navigation_artists, menu.getItem(2).itemId)
+        assertEquals(R.id.navigation_collectors, menu.getItem(3).itemId)
 
         assertEquals(materialContext.getString(R.string.navigation_home), menu.getItem(0).title.toString())
         assertEquals(materialContext.getString(R.string.navigation_albums), menu.getItem(1).title.toString())
         assertEquals(materialContext.getString(R.string.navigation_artists), menu.getItem(2).title.toString())
+        assertEquals(materialContext.getString(R.string.navigation_collectors), menu.getItem(3).title.toString())
     }
 
     @Test

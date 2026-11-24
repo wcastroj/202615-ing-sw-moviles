@@ -20,7 +20,8 @@ class MainActivity : AppCompatActivity() {
     private val topLevelDestinations = setOf(
         R.id.loginFragment,
         R.id.navigation_albums,
-        R.id.navigation_artists
+        R.id.navigation_artists,
+        R.id.navigation_collectors
     )
 
     // Destinations that take the whole screen: they don't show the NavigationWidget
