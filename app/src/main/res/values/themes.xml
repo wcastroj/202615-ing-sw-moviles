@@ -13,10 +13,6 @@
         <item name="android:windowBackground">@drawable/bg_app_transversal</item>
     </style>
 
-    <style name="Theme.Vinyls_Jetpack_Application.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="Theme.Vinyls_Jetpack_Application.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
     <style name="RoundedImageView">
         <item name="cornerSize">16dp</item>
     </style>

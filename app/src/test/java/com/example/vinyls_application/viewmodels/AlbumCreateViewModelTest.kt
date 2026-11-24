@@ -99,7 +99,7 @@ class AlbumCreateViewModelTest {
     fun pu045_error_de_la_api_genera_estado_de_error() {
         viewModel.save(validAlbum)
 
-        posts().single().deliverError(ServerError(networkResponse(500)))
+        posts().single().deliverError(ServerError(serverErrorResponse()))
 
         assertEquals(AlbumCreateState.SAVE_FAILED, viewModel.state.value)
     }
@@ -124,6 +124,6 @@ class AlbumCreateViewModelTest {
         }
     }
 
-    private fun networkResponse(statusCode: Int) =
-        NetworkResponse(statusCode, ByteArray(0), false, 0, emptyList())
+    private fun serverErrorResponse() =
+        NetworkResponse(500, ByteArray(0), false, 0, emptyList())
 }

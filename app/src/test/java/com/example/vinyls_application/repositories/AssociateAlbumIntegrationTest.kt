@@ -125,7 +125,7 @@ class AssociateAlbumIntegrationTest {
         deliverJsonResponse(jsonCaptor.value, JSONObject("""{"id": 101}"""))
 
         // 2. GET posterior del detalle del artista
-        loadPerformer(100, PerformerType.MUSICIAN)
+        loadPerformer()
         val stringCaptor = ArgumentCaptor.forClass(StringRequest::class.java)
         verify(requestQueue).add(stringCaptor.capture())
         val getRequest = stringCaptor.value
@@ -180,9 +180,9 @@ class AssociateAlbumIntegrationTest {
         }
     }
 
-    private fun CoroutineScope.loadPerformer(id: Int, type: PerformerType) = launch {
+    private fun CoroutineScope.loadPerformer() = launch {
         try {
-            result = repository.getPerformer(id, type)
+            result = repository.getPerformer(100, PerformerType.MUSICIAN)
         } catch (e: VolleyError) {
             error = e
         }

@@ -93,7 +93,7 @@ class AlbumCommentRepositoryTest {
         """.trimIndent()
 
         // Arrange
-        launchLoadAlbumDetail(100)
+        launchLoadAlbumDetail()
         val request = capturedStringRequest()
 
         // Act
@@ -150,9 +150,9 @@ class AlbumCommentRepositoryTest {
         }
     }
 
-    private fun CoroutineScope.launchLoadAlbumDetail(albumId: Int) = launch {
+    private fun CoroutineScope.launchLoadAlbumDetail() = launch {
         try {
-            albumResult = repository.refreshData(albumId)
+            albumResult = repository.refreshData(100)
         } catch (e: VolleyError) {
             error = e
         }
@@ -168,12 +168,6 @@ class AlbumCommentRepositoryTest {
         val captor = ArgumentCaptor.forClass(StringRequest::class.java)
         verify(requestQueue).add(captor.capture())
         return captor.value
-    }
-
-    private fun deliverStringRequest(request: StringRequest, response: String) {
-        StringRequest::class.java.getDeclaredMethod("deliverResponse", String::class.java)
-            .apply { isAccessible = true }
-            .invoke(request, response)
     }
 
     private fun deliverStringResponse(request: StringRequest, response: String) {

@@ -56,6 +56,7 @@ class DropdownListWidget @JvmOverloads constructor(
         }
     }
 
+    @Suppress("ReplaceManualRangeWithIndicesCalls") // Ciclo sin iterador: optimización de memoria (#130)
     fun setItems(items: List<DropdownItem>) {
         itemList = items
         selectedItem = null
@@ -74,6 +75,7 @@ class DropdownListWidget @JvmOverloads constructor(
         binding.autoCompleteTextView.setAdapter(adapter)
     }
 
+    @Suppress("ReplaceManualRangeWithIndicesCalls") // Ciclo sin iterador: optimización de memoria (#130)
     fun restoreAdapter() {
         if (itemList.isNotEmpty()) {
             val titles = ArrayList<String>(itemList.size)
@@ -90,15 +92,6 @@ class DropdownListWidget @JvmOverloads constructor(
     }
 
     fun getSelectedItem(): DropdownItem? = selectedItem
-
-    fun setLabel(label: String) {
-        binding.tvLabel.text = label
-        binding.tvLabel.isVisible = label.isNotBlank()
-    }
-
-    fun setHint(hint: String) {
-        binding.autoCompleteTextView.hint = hint
-    }
 
     fun showError(error: String) {
         binding.textInputLayout.error = error
