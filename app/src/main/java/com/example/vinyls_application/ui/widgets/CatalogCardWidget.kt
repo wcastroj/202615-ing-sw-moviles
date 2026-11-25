@@ -42,10 +42,16 @@ class CatalogCardWidget @JvmOverloads constructor(
         binding.txtTitle.text = title
         binding.txtSubtitle.showOrHide(subtitle)
         binding.txtDetail.showOrHide(detail)
-        loadCover(coverUrl)
+        loadCover(coverUrl, title)
 
-        binding.btnAction.text =
+        val resolvedActionText =
             actionText ?: context.getString(R.string.catalog_card_action_default)
+        binding.btnAction.text = resolvedActionText
+        binding.btnAction.contentDescription = if (onAction != null) {
+            context.getString(R.string.catalog_card_action_description, resolvedActionText, title)
+        } else {
+            null
+        }
         binding.btnAction.setOnClickListener(onAction)
         binding.btnAction.visibility = if (onAction == null) GONE else VISIBLE
     }
@@ -53,12 +59,15 @@ class CatalogCardWidget @JvmOverloads constructor(
     fun clearCover() {
         Glide.with(this).clear(binding.imgCover)
         binding.imgCover.setImageDrawable(null)
+        binding.imgCover.contentDescription = null
     }
 
-    private fun loadCover(url: String?) {
+    private fun loadCover(url: String?, title: String) {
         if (url.isNullOrBlank()) {
             clearCover()
         } else {
+            binding.imgCover.contentDescription =
+                context.getString(R.string.catalog_card_cover_description, title)
             val format = MemoryUtils.getPreferredDecodeFormat(context)
             Glide.with(this)
                 .load(url)

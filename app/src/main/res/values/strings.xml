@@ -3,7 +3,9 @@
 
     <string name="title_albums">Albums</string>
     <string name="title_album_detail">Detalle del Álbum</string>
-    <string name="catalog_card_action_default">Explorar →</string>
+    <string name="catalog_card_action_default">Explorar</string>
+    <string name="catalog_card_action_description">%1$s %2$s</string>
+    <string name="catalog_card_cover_description">Portada de %1$s</string>
     <string name="navigation_home">Inicio</string>
     <string name="navigation_albums">Álbumes</string>
     <string name="navigation_artists">Artistas</string>
