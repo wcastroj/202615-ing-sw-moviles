@@ -7,6 +7,7 @@
     <TextView
         android:id="@+id/tvLabel"
         style="@style/FormLabel"
+        android:textSize="16sp"
         android:visibility="gone"
         tools:text="Álbum disponible:"
         tools:visibility="visible" />
