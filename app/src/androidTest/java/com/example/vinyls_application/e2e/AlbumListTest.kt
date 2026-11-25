@@ -92,7 +92,6 @@ class AlbumListTest {
      */
     @Test
     fun pe001_catalogShowsAlbumCardsWithCoverNameGenreAndDetailButton() {
-        // Primero se piden al backend real los datos esperados
         val albums = fetchAlbumsFromBackend()
         assertTrue("El backend no tiene álbumes en ${NetworkServiceAdapter.BASE_URL}", albums.length() > 0)
 

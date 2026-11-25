@@ -2,7 +2,6 @@ package com.example.vinyls_application.ui.widgets
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.View.OnClickListener
 import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncDifferConfig
 import androidx.recyclerview.widget.DiffUtil
@@ -58,19 +57,13 @@ class CatalogListWidget @JvmOverloads constructor(
             var clickListener: OnClickListener? = null
         }
 
-        var items: List<CatalogItem>
-            get() = currentList
-            set(value) {
-                submitList(value)
-            }
-
         var onItemClick: ((CatalogItem) -> Unit)? = null
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val card = CatalogCardWidget(parent.context).apply {
                 layoutParams = LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
+                    LayoutParams.MATCH_PARENT,
+                    LayoutParams.WRAP_CONTENT
                 )
             }
             val holder = ViewHolder(card)

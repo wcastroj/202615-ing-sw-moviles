@@ -77,7 +77,7 @@ class AlbumDetailRepositoryTest {
     @Test
     fun pi004_get_album_responde_200_y_el_repositorio_entrega_el_detalle() = runTest(testDispatcher) {
         // Arrange
-        loadAlbumDetail(100)
+        loadAlbumDetail()
         val request = capturedRequest()
 
         // Act
@@ -97,7 +97,7 @@ class AlbumDetailRepositoryTest {
     @Test
     fun pi005_get_album_responde_404_y_el_repositorio_entrega_error() = runTest(testDispatcher) {
         // Arrange
-        loadAlbumDetail(100)
+        loadAlbumDetail()
         val request = capturedRequest()
 
         // Act
@@ -113,7 +113,7 @@ class AlbumDetailRepositoryTest {
     @Test
     fun pi006_get_album_responde_500_y_el_repositorio_entrega_error() = runTest(testDispatcher) {
         // Arrange
-        loadAlbumDetail(100)
+        loadAlbumDetail()
         val request = capturedRequest()
 
         // Act
@@ -129,7 +129,7 @@ class AlbumDetailRepositoryTest {
     @Test
     fun pi006_sin_red_el_repositorio_entrega_error() = runTest(testDispatcher) {
         // Arrange
-        loadAlbumDetail(100)
+        loadAlbumDetail()
         val request = capturedRequest()
 
         // Act
@@ -187,10 +187,10 @@ class AlbumDetailRepositoryTest {
         assertFalse(completed)
     }
 
-    /** Lanza refreshData(id) en una corrutina que queda esperando la respuesta de Volley. */
-    private fun CoroutineScope.loadAlbumDetail(id: Int) = launch {
+    /** Lanza refreshData(100) en una corrutina que queda esperando la respuesta de Volley. */
+    private fun CoroutineScope.loadAlbumDetail() = launch {
         try {
-            result = repository.refreshData(id)
+            result = repository.refreshData(100)
         } catch (e: VolleyError) {
             error = e
         }

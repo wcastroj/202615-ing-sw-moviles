@@ -38,6 +38,7 @@ class AlbumDetailFragment : Fragment(), ComponentCallbacks2 {
         return binding.root
     }
 
+    @Suppress("ReplaceManualRangeWithIndicesCalls") // Ciclo sin iterador: optimización de memoria (#130)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE)
