@@ -28,6 +28,7 @@ class CollectorFragment : Fragment(), ComponentCallbacks2 {
         return binding.root
     }
 
+    @Suppress("ReplaceManualRangeWithIndicesCalls")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
