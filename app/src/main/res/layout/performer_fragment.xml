@@ -23,10 +23,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="12dp"
+                android:accessibilityHeading="true"
                 android:text="@string/title_performers"
                 android:textColor="#111111"
                 android:textSize="24sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:targetApi="28" />
 
             <!-- CatalogListWidget (cuadrícula de CatalogCardWidget, igual que el catálogo de álbumes) -->
             <com.example.vinyls_application.ui.widgets.CatalogListWidget
