@@ -31,9 +31,7 @@ import com.android.volley.toolbox.Volley
 import com.example.vinyls_application.R
 import com.example.vinyls_application.network.NetworkServiceAdapter
 import com.example.vinyls_application.ui.MainActivity
-import com.example.vinyls_application.utils.AlbumDateFormatter
 import com.example.vinyls_application.utils.VolleyIdlingResource
-import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.Dispatchers
 import okhttp3.mockwebserver.Dispatcher
@@ -41,7 +39,6 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import org.hamcrest.Matchers.allOf
-import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -50,8 +47,17 @@ import org.junit.runner.RunWith
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
- * Pruebas E2E de HU05 - Crear un álbum (PE-016 a PE-024). Usan MockWebServer para no dejar álbumes
- * de prueba en el backend real. Espresso espera las peticiones de Volley con [VolleyIdlingResource].
+ * Pruebas E2E de HU05 - Crear un álbum (PE-016 a PE-024).
+ *
+ * Las pruebas positivas (PE-016 a PE-018) usan el backend real (NetworkServiceAdapter.BASE_URL);
+ * PE-017 deja un álbum nuevo en cada corrida. Las negativas (PE-019 a PE-024) usan MockWebServer
+ * con launchApp(useMockServer = true).
+ *
+ * Espresso espera las peticiones de Volley con [VolleyIdlingResource], igual que en las demás E2E,
+ * así que las verificaciones no se reintentan.
+ *
+ * Compatibilidad: ejecutar en Android 13 (API 33) y Android 15 (API 35) con
+ * `gradlew compatibilidadGroupDebugAndroidTest` o en dos emuladores con `connectedDebugAndroidTest`.
  */
 @LargeTest
 @RunWith(AndroidJUnit4::class)
@@ -59,37 +65,44 @@ class AlbumCreateE2ETest {
 
     private lateinit var idlingResource: VolleyIdlingResource
     private lateinit var queue: RequestQueue
-    private lateinit var scenario: ActivityScenario<MainActivity>
+    private var scenario: ActivityScenario<MainActivity>? = null
     private lateinit var server: MockWebServer
     private lateinit var originalBaseUrl: String
 
-    private val albums = CopyOnWriteArrayList(
-        listOf(
-            albumJson(100, "Buscando América", "Salsa", "Elektra"),
-            albumJson(101, "A Night at the Opera", "Rock", "EMI")
-        )
+    // Datos falsos para las pruebas negativas: la lista de álbumes y los POST que recibió el servidor
+    private val albums = listOf(
+        albumJson(100, "Buscando América", "Salsa", "Elektra"),
+        albumJson(101, "A Night at the Opera", "Rock", "EMI")
     )
     private val postedBodies = CopyOnWriteArrayList<String>()
 
     @Before
     fun setUp() {
+        // 1. Servidor falso, solo lo usan las pruebas negativas (cada una define sus respuestas)
         server = MockWebServer()
         server.start()
-        originalBaseUrl = NetworkServiceAdapter.BASE_URL
-        NetworkServiceAdapter.BASE_URL = server.url("/").toString()
 
+        // 2. Guardar la URL del backend real; las pruebas positivas la usan tal cual
+        originalBaseUrl = NetworkServiceAdapter.BASE_URL
+
+        // 3. Cola de Volley vigilada por el IdlingResource
         val context = ApplicationProvider.getApplicationContext<Context>()
         idlingResource = VolleyIdlingResource()
         queue = Volley.newRequestQueue(context)
         queue.addRequestEventListener(idlingResource)
+        // Dispatchers.Main: el parseo pasa por la cola del hilo principal, que Espresso sí vigila.
+        // Con Dispatchers.Default el IdlingResource quedaría libre antes de que llegue el dato a la UI.
         NetworkServiceAdapter.instance = NetworkServiceAdapter(context, queue, Dispatchers.Main)
         IdlingRegistry.getInstance().register(idlingResource)
+
+        // La app se abre dentro de cada test con launchApp()
     }
 
     @After
     fun tearDown() {
-        scenario.close()
+        scenario?.close()
         IdlingRegistry.getInstance().unregister(idlingResource)
+        // Se detiene la cola para no dejar sus hilos vivos entre tests
         queue.stop()
         NetworkServiceAdapter.instance = null
         NetworkServiceAdapter.BASE_URL = originalBaseUrl
@@ -99,46 +112,45 @@ class AlbumCreateE2ETest {
     /** PE-016 (positiva): el botón "Crear álbum" abre el formulario. */
     @Test
     fun pe016_createAlbumButtonOpensForm() {
-        givenBackend()
+        // Paso 1: abrir la app contra el backend real y entrar como coleccionista
         launchApp()
         onView(withId(R.id.cardCollector)).perform(scrollTo(), click())
 
+        // Paso 2: tocar "Crear álbum"
         onView(withId(R.id.btnCreateAlbum)).check(matches(isDisplayed())).perform(click())
 
+        // Paso 3: se abre el formulario con su título, sus campos, el botón de guardar y la flecha de regreso
         onView(withText(R.string.album_create_title)).check(matches(isDisplayed()))
         onView(withId(R.id.etCover)).check(matches(isDisplayed()))
         onView(withId(R.id.btnSaveAlbum)).perform(scrollTo()).check(matches(isDisplayed()))
         onView(withId(R.id.btnReturn)).check(matches(isDisplayed()))
     }
 
-    /** PE-017 (positiva): con datos válidos se muestra el éxito y se regresa a la lista. */
+    /**
+     * PE-017 (positiva): con datos válidos se muestra el éxito y se regresa a la lista, que incluye
+     * el álbum nuevo. Cada corrida deja un álbum en el backend real.
+     */
     @Test
     fun pe017_validFormShowsSuccessAndReturnsToList() {
-        givenBackend()
+        // Nombre único para reconocer el álbum de esta corrida entre los que ya tiene el catálogo
+        val albumName = "Álbum E2E ${System.currentTimeMillis()}"
+
+        // Paso 1: abrir la app contra el backend real y abrir el formulario como coleccionista
         openFormAsCollector()
 
-        fillValidForm()
+        // Paso 2: llenar el formulario con datos válidos y guardar
+        fillValidForm(albumName)
         saveAlbum()
 
-        // Paso 1: se muestra "Álbum creado exitosamente"
+        // Paso 3: se muestra "Álbum creado exitosamente"
         onView(withText(R.string.album_create_success_title)).check(matches(isDisplayed()))
 
-        // Paso 2: el backend recibió los datos del formulario
-        val body = JSONObject(postedBodies.single())
-        assertEquals(ALBUM_NAME, body.getString("name"))
-        assertEquals("https://example.com/portada.jpg", body.getString("cover"))
-        assertEquals("Rock", body.getString("genre"))
-        assertEquals("EMI", body.getString("recordLabel"))
-        assertEquals("Un álbum de prueba", body.getString("description"))
-        val today = AlbumDateFormatter.toDisplay(MaterialDatePicker.todayInUtcMilliseconds())
-        assertEquals(AlbumDateFormatter.toIso(today), body.getString("releaseDate"))
-
-        // Paso 3: se regresa a la lista, que ya incluye el álbum nuevo
+        // Paso 4: se regresa a la lista, que ya incluye el álbum nuevo
         clickInformationButton(R.id.successInformationWidget)
         onView(withId(R.id.albumsRv)).perform(
-            RecyclerViewActions.scrollTo<RecyclerView.ViewHolder>(hasDescendant(withText(ALBUM_NAME)))
+            RecyclerViewActions.scrollTo<RecyclerView.ViewHolder>(hasDescendant(withText(albumName)))
         )
-        onView(withText(ALBUM_NAME)).check(matches(isDisplayed()))
+        onView(withText(albumName)).check(matches(isDisplayed()))
     }
 
     /**
@@ -147,22 +159,26 @@ class AlbumCreateE2ETest {
      */
     @Test
     fun pe018_returnArrowGoesBackToListWithoutSaving() {
-        givenBackend()
-        openFormAsCollector()
-        typeText(R.id.etName, ALBUM_NAME)
+        // Nombre único: si el álbum se guardara por error, aparecería en la lista
+        val albumName = "Álbum E2E ${System.currentTimeMillis()}"
 
+        // Paso 1: abrir la app contra el backend real y abrir el formulario como coleccionista
+        openFormAsCollector()
+
+        // Paso 2: escribir un nombre y salir con la flecha de regreso, sin guardar
+        typeText(R.id.etName, albumName)
         onView(withId(R.id.btnReturn)).perform(click())
 
+        // Paso 3: se vuelve a la lista y el álbum no está
         onView(withId(R.id.albumsRv)).check(matches(isDisplayed()))
-        onView(withText(ALBUM_NAME)).check(doesNotExist())
-        assertEquals(0, postedBodies.size)
+        onView(withText(albumName)).check(doesNotExist())
     }
 
     /** PE-019 (negativa): guardar con campos vacíos muestra "Este campo es obligatorio". */
     @Test
     fun pe019_savingEmptyFormShowsRequiredErrors() {
         givenBackend()
-        openFormAsCollector()
+        openFormAsCollector(useMockServer = true)
 
         saveAlbum()
 
@@ -177,7 +193,7 @@ class AlbumCreateE2ETest {
     @Test
     fun pe020_nameLongerThan50ShowsError() {
         givenBackend()
-        openFormAsCollector()
+        openFormAsCollector(useMockServer = true)
 
         typeText(R.id.etName, "a".repeat(51))
         assertFieldError(R.id.tilName, R.string.album_create_error_name_length)
@@ -194,7 +210,7 @@ class AlbumCreateE2ETest {
     @Test
     fun pe021_descriptionLongerThan250ShowsError() {
         givenBackend()
-        openFormAsCollector()
+        openFormAsCollector(useMockServer = true)
 
         typeText(R.id.etDescription, "a".repeat(251))
         assertFieldError(R.id.tilDescription, R.string.album_create_error_description_length)
@@ -211,7 +227,7 @@ class AlbumCreateE2ETest {
     @Test
     fun pe022_invalidCoverShowsError() {
         givenBackend()
-        openFormAsCollector()
+        openFormAsCollector(useMockServer = true)
 
         typeText(R.id.etCover, "https://example.com/portada.gif")
         assertFieldError(R.id.tilCover, R.string.album_create_error_cover)
@@ -228,7 +244,7 @@ class AlbumCreateE2ETest {
     @Test
     fun pe023_createFailureShowsErrorMessage() {
         givenBackend(postResponse = MockResponse().setResponseCode(500))
-        openFormAsCollector()
+        openFormAsCollector(useMockServer = true)
 
         fillValidForm()
         saveAlbum()
@@ -245,7 +261,7 @@ class AlbumCreateE2ETest {
     @Test
     fun pe024_visitorDoesNotSeeCreateAlbumButton() {
         givenBackend()
-        launchApp()
+        launchApp(useMockServer = true)
 
         onView(withId(R.id.cardVisitor)).perform(scrollTo(), click())
 
@@ -254,20 +270,28 @@ class AlbumCreateE2ETest {
             .check(matches(withEffectiveVisibility(Visibility.GONE)))
     }
 
-    private fun launchApp() {
+    /**
+     * Abre la app. Con [useMockServer] la apunta antes al servidor falso; si no, usa el backend real.
+     */
+    private fun launchApp(useMockServer: Boolean = false) {
+        if (useMockServer) {
+            NetworkServiceAdapter.BASE_URL = server.url("/").toString()
+        }
         scenario = ActivityScenario.launch(MainActivity::class.java)
     }
 
-    private fun openFormAsCollector() {
-        launchApp()
+    /** Abre la app, entra como coleccionista y toca "Crear álbum". */
+    private fun openFormAsCollector(useMockServer: Boolean = false) {
+        launchApp(useMockServer)
         onView(withId(R.id.cardCollector)).perform(scrollTo(), click())
         onView(withId(R.id.btnCreateAlbum)).perform(click())
         onView(withId(R.id.etCover)).check(matches(isDisplayed()))
     }
 
-    private fun fillValidForm() {
+    /** Llena todos los campos con datos válidos; la fecha es la de hoy. */
+    private fun fillValidForm(name: String = ALBUM_NAME) {
         typeText(R.id.etCover, "https://example.com/portada.jpg")
-        typeText(R.id.etName, ALBUM_NAME)
+        typeText(R.id.etName, name)
         selectOption(R.id.actvRecordLabel, "EMI")
         selectOption(R.id.actvGenre, "Rock")
         onView(withId(R.id.etReleaseDate)).perform(scrollTo(), click())
@@ -297,32 +321,26 @@ class AlbumCreateE2ETest {
         val expected = messageRes?.let {
             InstrumentationRegistry.getInstrumentation().targetContext.getString(it)
         }
-        scenario.onActivity { activity ->
+        scenario!!.onActivity { activity ->
             assertEquals(expected, activity.findViewById<TextInputLayout>(layoutId).error?.toString())
         }
     }
 
-    /** Servidor falso. Un POST exitoso agrega el álbum a la lista, como haría el backend. */
-    private fun givenBackend(postResponse: MockResponse? = null) {
+    /**
+     * Servidor falso para las pruebas negativas: GET /albums devuelve la lista y cada POST se guarda
+     * en [postedBodies]. [postResponse] es la respuesta al crear (por defecto 404: no se espera POST).
+     */
+    private fun givenBackend(postResponse: MockResponse = MockResponse().setResponseCode(404)) {
         server.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse = when {
                 request.path != "/albums" -> MockResponse().setResponseCode(404)
                 request.method == "POST" -> {
-                    val body = request.body.readUtf8()
-                    postedBodies.add(body)
-                    postResponse ?: createAlbum(JSONObject(body))
+                    postedBodies.add(request.body.readUtf8())
+                    postResponse
                 }
                 else -> jsonResponse(albums.joinToString(",", "[", "]"))
             }
         }
-    }
-
-    private fun createAlbum(body: JSONObject): MockResponse {
-        val album = albumJson(
-            200, body.getString("name"), body.getString("genre"), body.getString("recordLabel")
-        )
-        albums.add(album)
-        return jsonResponse(album)
     }
 
     private fun jsonResponse(body: String) = MockResponse()

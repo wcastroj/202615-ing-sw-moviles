@@ -58,8 +58,9 @@ class CollectorParserTest {
         ]
     """.trimIndent()
 
+    // PU-075: El JSON de un coleccionista se convierte con sus campos (positiva).
     @Test
-    fun test_parse_collector_json() {
+    fun pu075_test_parse_collector_json() {
         val collectors = NetworkServiceAdapter.parseCollectors(singleCollectorJson)
 
         assertEquals(1, collectors.size)
@@ -70,8 +71,9 @@ class CollectorParserTest {
         assertEquals("j.monsalve@gmail.com", collector.email)
     }
 
+    // PU-076: Se convierten varios coleccionistas (positiva).
     @Test
-    fun test_parse_multiple_collectors() {
+    fun pu076_test_parse_multiple_collectors() {
         val collectors = NetworkServiceAdapter.parseCollectors(multipleCollectorsJson)
 
         assertNotNull(collectors)
@@ -87,15 +89,17 @@ class CollectorParserTest {
         assertEquals("bellon@manolo.com", collectors[1].email)
     }
 
+    // PU-077: Lista vacía de coleccionistas devuelve una lista vacía (negativa).
     @Test
-    fun test_parse_empty_collectors_list() {
+    fun pu077_test_parse_empty_collectors_list() {
         val collectors = NetworkServiceAdapter.parseCollectors("[]")
         assertNotNull(collectors)
         assertTrue(collectors.isEmpty())
     }
 
+    // PU-078: JSON inválido lanza excepción (negativa).
     @Test(expected = JSONException::class)
-    fun test_parse_invalid_json_throws_exception() {
+    fun pu078_test_parse_invalid_json_throws_exception() {
         NetworkServiceAdapter.parseCollectors("not a json")
     }
 }
