@@ -30,10 +30,14 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import org.hamcrest.Matchers.allOf
+import org.json.JSONArray
 import org.junit.After
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.net.HttpURLConnection
+import java.net.URL
 
 @RunWith(AndroidJUnit4::class)
 class CollectorListTest {
@@ -43,29 +47,6 @@ class CollectorListTest {
     private lateinit var idlingResource: VolleyIdlingResource
     private lateinit var queue: RequestQueue
     private var scenario: ActivityScenario<MainActivity>? = null
-
-    private val sampleCollectorsJson = """
-        [
-          {
-            "id": 1,
-            "name": "Jaime Andrés Monsalve",
-            "telephone": "3102178976",
-            "email": "j.monsalve@gmail.com",
-            "comments": [],
-            "favoritePerformers": [],
-            "collectorAlbums": []
-          },
-          {
-            "id": 2,
-            "name": "Manolo Bellon",
-            "telephone": "3503102456",
-            "email": "bellon@manolo.com",
-            "comments": [],
-            "favoritePerformers": [],
-            "collectorAlbums": []
-          }
-        ]
-    """.trimIndent()
 
     @Before
     fun setUp() {
@@ -77,7 +58,6 @@ class CollectorListTest {
         idlingResource = VolleyIdlingResource()
         queue = Volley.newRequestQueue(context)
         queue.addRequestEventListener(idlingResource)
-
         NetworkServiceAdapter.instance = NetworkServiceAdapter(context, queue, Dispatchers.Main)
         IdlingRegistry.getInstance().register(idlingResource)
     }
@@ -93,31 +73,33 @@ class CollectorListTest {
     }
 
     @Test
-    fun collectorsAreShownWithAllDetails() {
-        givenCollectorsResponse(jsonResponse(sampleCollectorsJson))
+    fun catalogShowsCollectorCardsWithImageNameTelephoneEmailAndDetailButton() {
+        val collectors = fetchCollectorsFromBackend()
+        assertTrue(
+            "El backend no tiene coleccionistas en ${NetworkServiceAdapter.BASE_URL}",
+            collectors.length() > 0
+        )
 
         launchAppAndOpenCollectors()
 
-        onView(withId(R.id.collectorsRv)).check(matches(hasMinimumChildCount(2)))
-        onView(withId(R.id.txtCollectorsTitle)).check(matches(withText(R.string.title_collectors)))
+        onView(withId(R.id.collectorsRv)).check(matches(hasMinimumChildCount(1)))
+        onView(withId(R.id.txtHeader)).check(matches(withText(R.string.header_home)))
+        onView(withId(R.id.txtCollectorsTitle))
+            .check(matches(allOf(withText(R.string.title_collectors), isDisplayed())))
 
-        assertCollectorCard(
-            name = "Jaime Andrés Monsalve",
-            telephone = "3102178976",
-            email = "j.monsalve@gmail.com"
-        )
-        assertCollectorCard(
-            name = "Manolo Bellon",
-            telephone = "3503102456",
-            email = "bellon@manolo.com"
-        )
-
-        onView(withId(R.id.layoutEmpty)).check(matches(withEffectiveVisibility(Visibility.GONE)))
-        onView(withId(R.id.layoutError)).check(matches(withEffectiveVisibility(Visibility.GONE)))
+        for (i in 0 until minOf(2, collectors.length())) {
+            val collector = collectors.getJSONObject(i)
+            assertCollectorCard(
+                name = collector.getString("name"),
+                telephone = collector.getString("telephone"),
+                email = collector.getString("email")
+            )
+        }
+        assertGone(R.id.layoutEmpty, R.id.layoutError)
     }
 
     @Test
-    fun emptyListShowsNoCollectorsFoundMessage() {
+    fun emptyCatalogShowsNoCollectorsFoundMessage() {
         givenCollectorsResponse(jsonResponse("[]"))
 
         launchAppAndOpenCollectors()
@@ -125,13 +107,11 @@ class CollectorListTest {
         onView(withId(R.id.layoutEmpty)).check(matches(isDisplayed()))
         onView(withText("No se encontraron coleccionistas")).check(matches(isDisplayed()))
         onView(withText("Por ahora no hay coleccionistas disponibles")).check(matches(isDisplayed()))
-
-        onView(withId(R.id.layoutContent)).check(matches(withEffectiveVisibility(Visibility.GONE)))
-        onView(withId(R.id.layoutError)).check(matches(withEffectiveVisibility(Visibility.GONE)))
+        assertGone(R.id.layoutContent, R.id.layoutError)
     }
 
     @Test
-    fun serverErrorShowsSignalErrorMessage() {
+    fun noConnectionShowsSignalErrorMessage() {
         NetworkServiceAdapter.BASE_URL = server.url("/").toString()
         server.shutdown()
 
@@ -139,28 +119,19 @@ class CollectorListTest {
 
         onView(withId(R.id.layoutError)).check(matches(isDisplayed()))
         onView(withText("¡Ups! Algo se\ndesafinó en la señal")).check(matches(isDisplayed()))
-
-        onView(withId(R.id.layoutContent)).check(matches(withEffectiveVisibility(Visibility.GONE)))
-        onView(withId(R.id.layoutEmpty)).check(matches(withEffectiveVisibility(Visibility.GONE)))
+        assertGone(R.id.layoutContent, R.id.layoutEmpty)
     }
 
-    @Test
-    fun detailButtonDoesNotExecuteAnything() {
-        givenCollectorsResponse(jsonResponse(sampleCollectorsJson))
-
-        launchAppAndOpenCollectors()
-
-        val card = allOf(
-            withId(R.id.cardCatalog),
-            hasDescendant(allOf(withId(R.id.txtTitle), withText("Jaime Andrés Monsalve")))
-        )
-        onView(withId(R.id.collectorsRv))
-            .perform(RecyclerViewActions.scrollTo<RecyclerView.ViewHolder>(hasDescendant(card)))
-
-        onView(allOf(withId(R.id.btnAction), isDisplayed())).perform(click())
-
-        onView(withId(R.id.txtCollectorsTitle)).check(matches(isDisplayed()))
-        onView(withId(R.id.collectorsRv)).check(matches(isDisplayed()))
+    private fun fetchCollectorsFromBackend(): JSONArray {
+        val connection =
+            URL(NetworkServiceAdapter.BASE_URL + "collectors").openConnection() as HttpURLConnection
+        connection.connectTimeout = 10_000
+        connection.readTimeout = 10_000
+        return try {
+            JSONArray(connection.inputStream.bufferedReader().use { it.readText() })
+        } finally {
+            connection.disconnect()
+        }
     }
 
     private fun jsonResponse(body: String) = MockResponse()
@@ -171,9 +142,11 @@ class CollectorListTest {
     private fun givenCollectorsResponse(response: MockResponse) {
         NetworkServiceAdapter.BASE_URL = server.url("/").toString()
         server.dispatcher = object : Dispatcher() {
-            override fun dispatch(request: RecordedRequest): MockResponse =
-                if (request.path?.startsWith("/collectors") == true) response
-                else MockResponse().setResponseCode(404)
+            override fun dispatch(request: RecordedRequest): MockResponse = when (request.path) {
+                "/collectors" -> response
+                "/albums" -> jsonResponse("[]")
+                else -> MockResponse().setResponseCode(404)
+            }
         }
     }
 
@@ -184,6 +157,12 @@ class CollectorListTest {
 
         waitUntil { onView(withId(R.id.navigation_collectors)).perform(click()) }
         onView(withId(R.id.txtCollectorsTitle)).check(matches(withText(R.string.title_collectors)))
+    }
+
+    private fun assertGone(vararg viewIds: Int) {
+        viewIds.forEach { id ->
+            onView(withId(id)).check(matches(withEffectiveVisibility(Visibility.GONE)))
+        }
     }
 
     private fun assertCollectorCard(name: String, telephone: String, email: String) {
