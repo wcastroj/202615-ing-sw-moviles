@@ -72,8 +72,9 @@ class CollectorListTest {
         server.shutdown()
     }
 
+    /** PE-043 (positiva): el catálogo muestra las tarjetas de coleccionistas con imagen, nombre, teléfono, email y botón de detalle. */
     @Test
-    fun catalogShowsCollectorCardsWithImageNameTelephoneEmailAndDetailButton() {
+    fun pe043_catalogShowsCollectorCardsWithImageNameTelephoneEmailAndDetailButton() {
         val collectors = fetchCollectorsFromBackend()
         assertTrue(
             "El backend no tiene coleccionistas en ${NetworkServiceAdapter.BASE_URL}",
@@ -98,8 +99,9 @@ class CollectorListTest {
         assertGone(R.id.layoutEmpty, R.id.layoutError)
     }
 
+    /** PE-044 (negativa): sin coleccionistas se muestra "No se encontraron coleccionistas". */
     @Test
-    fun emptyCatalogShowsNoCollectorsFoundMessage() {
+    fun pe044_emptyCatalogShowsNoCollectorsFoundMessage() {
         givenCollectorsResponse(jsonResponse("[]"))
 
         launchAppAndOpenCollectors()
@@ -110,8 +112,9 @@ class CollectorListTest {
         assertGone(R.id.layoutContent, R.id.layoutError)
     }
 
+    /** PE-045 (negativa): sin conexión se muestra el mensaje de error de señal. */
     @Test
-    fun noConnectionShowsSignalErrorMessage() {
+    fun pe045_noConnectionShowsSignalErrorMessage() {
         NetworkServiceAdapter.BASE_URL = server.url("/").toString()
         server.shutdown()
 
