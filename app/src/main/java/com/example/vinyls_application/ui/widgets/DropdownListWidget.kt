@@ -40,9 +40,13 @@ class DropdownListWidget @JvmOverloads constructor(
                 if (!labelText.isNullOrBlank()) {
                     binding.tvLabel.text = labelText
                     binding.tvLabel.isVisible = true
+                    binding.autoCompleteTextView.contentDescription = labelText
                 }
                 if (!hintText.isNullOrBlank()) {
                     binding.autoCompleteTextView.hint = hintText
+                    if (binding.autoCompleteTextView.contentDescription.isNullOrBlank()) {
+                        binding.autoCompleteTextView.contentDescription = hintText
+                    }
                 }
             }
         }
