@@ -28,22 +28,23 @@ class AssociateAlbumViewModel(
     private val _availableAlbums = MutableLiveData<List<Album>>()
     val availableAlbums: LiveData<List<Album>> get() = _availableAlbums
 
-    private val _isLoading = MutableLiveData<Boolean>(false)
+    private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> get() = _isLoading
 
-    private val _eventNetworkError = MutableLiveData<Boolean>(false)
+    private val _eventNetworkError = MutableLiveData(false)
     val eventNetworkError: LiveData<Boolean> get() = _eventNetworkError
 
-    private val _associationSuccess = MutableLiveData<Boolean>(false)
+    private val _associationSuccess = MutableLiveData(false)
     val associationSuccess: LiveData<Boolean> get() = _associationSuccess
 
-    private val _isNetworkErrorShown = MutableLiveData<Boolean>(false)
+    private val _isNetworkErrorShown = MutableLiveData(false)
     val isNetworkErrorShown: LiveData<Boolean> get() = _isNetworkErrorShown
 
     init {
         loadAvailableAlbums()
     }
 
+    @Suppress("ReplaceManualRangeWithIndicesCalls") // Ciclo sin iterador: optimización de memoria (#130)
     fun loadAvailableAlbums() {
         _isLoading.value = true
         viewModelScope.launch {

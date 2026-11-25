@@ -34,11 +34,11 @@ class AssociateAlbumFragment : Fragment(), ComponentCallbacks2 {
         return binding.root
     }
 
+    @Suppress("ReplaceManualRangeWithIndicesCalls") // Ciclo sin iterador: optimización de memoria (#130)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val performerId = args.id
-        val performerName = args.name
         val performerType = args.type
 
         viewModel = ViewModelProvider(

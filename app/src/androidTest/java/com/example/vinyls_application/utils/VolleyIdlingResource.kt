@@ -13,7 +13,7 @@ class VolleyIdlingResource : IdlingResource , RequestQueue.RequestEventListener 
     private var resourceCallback : IdlingResource.ResourceCallback? = null
 
 
-    override fun getName(): String? {
+    override fun getName(): String {
         return "VolleyIdlingResource"
     }
 
