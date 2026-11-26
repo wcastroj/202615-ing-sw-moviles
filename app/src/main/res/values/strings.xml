@@ -86,7 +86,7 @@
     <string name="associate_track_name_hint">Ej: Pedro Navaja</string>
     <string name="associate_track_duration_label">Duración</string>
     <string name="associate_track_duration_hint">mm:ss</string>
-    <string name="associate_track_button">Asociar Canción</string>
+    <string name="associate_track_button">Guardar Canción</string>
     <string name="associate_track_success_title">¡Canción asociada!</string>
     <string name="associate_track_success_description">Ahora puedes ver la canción en el álbum</string>
     <string name="associate_track_success_button">Volver al Detalle</string>
