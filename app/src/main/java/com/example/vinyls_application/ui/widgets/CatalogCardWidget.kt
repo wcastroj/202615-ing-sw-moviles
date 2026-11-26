@@ -42,7 +42,7 @@ class CatalogCardWidget @JvmOverloads constructor(
         binding.txtTitle.text = title
         binding.txtSubtitle.showOrHide(subtitle)
         binding.txtDetail.showOrHide(detail)
-        loadCover(coverUrl, title)
+        loadCover(coverUrl)
 
         val resolvedActionText =
             actionText ?: context.getString(R.string.catalog_card_action_default)
@@ -59,15 +59,12 @@ class CatalogCardWidget @JvmOverloads constructor(
     fun clearCover() {
         Glide.with(this).clear(binding.imgCover)
         binding.imgCover.setImageDrawable(null)
-        binding.imgCover.contentDescription = null
     }
 
-    private fun loadCover(url: String?, title: String) {
+    private fun loadCover(url: String?) {
         if (url.isNullOrBlank()) {
             clearCover()
         } else {
-            binding.imgCover.contentDescription =
-                context.getString(R.string.catalog_card_cover_description, title)
             val format = MemoryUtils.getPreferredDecodeFormat(context)
             Glide.with(this)
                 .load(url)
