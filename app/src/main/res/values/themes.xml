@@ -70,6 +70,7 @@
         <item name="boxCornerRadiusTopEnd">16dp</item>
         <item name="boxCornerRadiusBottomStart">16dp</item>
         <item name="boxCornerRadiusBottomEnd">16dp</item>
+        <item name="boxStrokeColor">@color/form_box_stroke_color</item>
         <item name="boxStrokeErrorColor">@color/form_error</item>
         <item name="counterTextColor">@color/form_text_secondary</item>
         <item name="errorEnabled">true</item>
@@ -86,6 +87,7 @@
         <item name="boxCornerRadiusTopEnd">16dp</item>
         <item name="boxCornerRadiusBottomStart">16dp</item>
         <item name="boxCornerRadiusBottomEnd">16dp</item>
+        <item name="boxStrokeColor">@color/form_box_stroke_color</item>
         <item name="boxStrokeErrorColor">@color/form_error</item>
         <item name="endIconTint">@color/form_text_secondary</item>
         <item name="errorEnabled">true</item>
