@@ -90,7 +90,7 @@
             android:minLines="3"
             android:padding="12dp"
             android:textColor="#1C1B1F"
-            android:textColorHint="#938F96"
+            android:textColorHint="#5F5F6B"
             android:textSize="14sp" />
 
         <!-- Error -->
