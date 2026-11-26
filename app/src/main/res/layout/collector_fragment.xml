@@ -22,10 +22,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="12dp"
+                android:accessibilityHeading="true"
                 android:text="@string/title_collectors"
                 android:textColor="#111111"
                 android:textSize="24sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:targetApi="28" />
 
             <com.example.vinyls_application.ui.widgets.CatalogListWidget
                 android:id="@+id/collectorsRv"

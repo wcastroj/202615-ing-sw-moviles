@@ -44,8 +44,14 @@ class CatalogCardWidget @JvmOverloads constructor(
         binding.txtDetail.showOrHide(detail)
         loadCover(coverUrl)
 
-        binding.btnAction.text =
+        val resolvedActionText =
             actionText ?: context.getString(R.string.catalog_card_action_default)
+        binding.btnAction.text = resolvedActionText
+        binding.btnAction.contentDescription = if (onAction != null) {
+            context.getString(R.string.catalog_card_action_description, resolvedActionText, title)
+        } else {
+            null
+        }
         binding.btnAction.setOnClickListener(onAction)
         binding.btnAction.visibility = if (onAction == null) GONE else VISIBLE
     }
