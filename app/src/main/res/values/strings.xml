@@ -14,6 +14,8 @@
     <string name="header_home">Vivo Sonika</string>
     <string name="header_return">Volver</string>
     <string name="comments_title">Comentarios</string>
+    <string name="comment_card_rating_only_description">Calificación %1$d de 5</string>
+    <string name="comment_card_rating_description">Calificación %1$d de 5: %2$s</string>
     <string name="title_performers">Catálogo de Artistas</string>
     <string name="performer_type_musician">Músico</string>
     <string name="performer_type_band">Banda</string>
