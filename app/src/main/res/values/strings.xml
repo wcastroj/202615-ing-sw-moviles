@@ -57,7 +57,7 @@
     <string name="album_create_button">Crear álbum</string>
     <string name="album_create_title">Agregar Álbum</string>
     <string name="album_create_cover_label">Portada (Cover)</string>
-    <string name="album_create_cover_hint">Ej: https://…/portada.jpg</string>
+    <string name="album_create_cover_hint">Ej: https://ejemplo.com/portada.jpg</string>
     <string name="album_create_name_label">Título (Name)</string>
     <string name="album_create_name_hint">Ej: Ecos del Atardecer</string>
     <string name="album_create_record_label_label">Disquera (Record label)</string>
