@@ -66,8 +66,9 @@ class CollectorRepositoryTest {
         NetworkServiceAdapter.instance = null
     }
 
+    // PI-031: GET /collectors responde 200 y el repositorio entrega la lista de coleccionistas (positiva).
     @Test
-    fun getCollectors_whenResponseIs200_deliversCollectorList() = runTest(testDispatcher) {
+    fun pi031_getCollectors_whenResponseIs200_deliversCollectorList() = runTest(testDispatcher) {
         loadCollectors()
         val request = capturedRequest()
 
@@ -86,8 +87,9 @@ class CollectorRepositoryTest {
         assertNull(error)
     }
 
+    // PI-032: GET /collectors responde 200 con lista vacía y el repositorio entrega una lista vacía (negativa).
     @Test
-    fun getCollectors_whenResponseIs200WithEmptyList_deliversEmptyList() = runTest(testDispatcher) {
+    fun pi032_getCollectors_whenResponseIs200WithEmptyList_deliversEmptyList() = runTest(testDispatcher) {
         loadCollectors()
         val request = capturedRequest()
 
@@ -98,8 +100,9 @@ class CollectorRepositoryTest {
         assertNull(error)
     }
 
+    // PI-033: GET /collectors responde error del servidor y el repositorio entrega el error (negativa).
     @Test
-    fun getCollectors_whenResponseIsServerError_deliversError() = runTest(testDispatcher) {
+    fun pi033_getCollectors_whenResponseIsServerError_deliversError() = runTest(testDispatcher) {
         loadCollectors()
         val request = capturedRequest()
         val serverError = ServerError(network500Response())

@@ -62,7 +62,7 @@ class PerformerDetailTest {
 
     private lateinit var idlingResource: VolleyIdlingResource
     private lateinit var queue: RequestQueue
-    private lateinit var scenario: ActivityScenario<MainActivity>
+    private var scenario: ActivityScenario<MainActivity>? = null
     private lateinit var server: MockWebServer
     private lateinit var originalBaseUrl: String
 
@@ -129,7 +129,7 @@ class PerformerDetailTest {
 
     @After
     fun tearDown() {
-        scenario.close()
+        scenario?.close()
         IdlingRegistry.getInstance().unregister(idlingResource)
         // Se detiene la cola para no dejar sus hilos vivos entre tests
         queue.stop()
@@ -322,7 +322,7 @@ class PerformerDetailTest {
 
         // 2. Recorrer las posiciones hasta la primera tarjeta con ese tipo
         var position = -1
-        scenario.onActivity { activity ->
+        scenario!!.onActivity { activity ->
             val recyclerView = activity.findViewById<RecyclerView>(R.id.performersRv)
             position = (0 until recyclerView.adapter!!.itemCount).first { pos ->
                 recyclerView.findViewHolderForAdapterPosition(pos)?.itemView
@@ -341,20 +341,21 @@ class PerformerDetailTest {
         // 1. Leer el id y el tipo del artista desde su tarjeta
         var performerId = 0
         var typeLabel = ""
-        scenario.onActivity { activity ->
+        scenario!!.onActivity { activity ->
             val recyclerView = activity.findViewById<RecyclerView>(R.id.performersRv)
             val card = recyclerView.findViewHolderForAdapterPosition(position)!!.itemView
             performerId = card.getTag(R.id.tag_album_id) as Int
             typeLabel = card.findViewById<TextView>(R.id.txtSubtitle).text.toString()
         }
 
-        // 2. Pedir el artista al backend real
+        // 2. Pedir el artista al backend real. Timeout de 10 s: si el backend no responde, el
+        //    test falla rápido con un error claro
         val isBand = typeLabel == BAND_LABEL
         val path = if (isBand) "/bands/" else "/musicians/"
         val url = URL(NetworkServiceAdapter.BASE_URL.trimEnd('/') + path + performerId)
         val connection = url.openConnection() as HttpURLConnection
-        connection.connectTimeout = 30_000
-        connection.readTimeout = 30_000
+        connection.connectTimeout = 10_000
+        connection.readTimeout = 10_000
         val json = try {
             JSONObject(connection.inputStream.bufferedReader().use { it.readText() })
         } finally {

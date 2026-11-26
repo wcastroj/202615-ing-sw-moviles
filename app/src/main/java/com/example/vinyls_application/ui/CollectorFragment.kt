@@ -28,7 +28,7 @@ class CollectorFragment : Fragment(), ComponentCallbacks2 {
         return binding.root
     }
 
-    @Suppress("ReplaceManualRangeWithIndicesCalls") // Ciclo sin iterador: optimización de memoria (#130)
+    @Suppress("ReplaceManualRangeWithIndicesCalls")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

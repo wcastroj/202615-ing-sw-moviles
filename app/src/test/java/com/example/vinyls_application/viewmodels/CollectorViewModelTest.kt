@@ -66,8 +66,9 @@ class CollectorViewModelTest {
         NetworkServiceAdapter.instance = null
     }
 
+    // PU-079: Los coleccionistas se cargan correctamente (positiva).
     @Test
-    fun collectors_are_loaded_successfully() {
+    fun pu079_collectors_are_loaded_successfully() {
         deliverResponse(collectorsRequest(), collectorsJson)
         idleMainLooper()
 
@@ -81,8 +82,9 @@ class CollectorViewModelTest {
         assertFalse(viewModel.isNetworkErrorShown.value!!)
     }
 
+    // PU-080: Error de red activa el estado de error (negativa).
     @Test
-    fun network_error_sets_eventNetworkError() {
+    fun pu080_network_error_sets_eventNetworkError() {
         deliverError(collectorsRequest(), ServerError(network500Response()))
         idleMainLooper()
 
@@ -94,8 +96,9 @@ class CollectorViewModelTest {
         assertTrue(viewModel.isNetworkErrorShown.value!!)
     }
 
+    // PU-081: Refrescar la lista hace una nueva petición (positiva).
     @Test
-    fun refreshCollectors_triggers_new_request() {
+    fun pu081_refreshCollectors_triggers_new_request() {
         deliverResponse(collectorsRequest(), collectorsJson)
         idleMainLooper()
         assertEquals(2, viewModel.collectors.value?.size)
