@@ -83,6 +83,7 @@ class CollectorFragment : Fragment(), ComponentCallbacks2 {
     }
 
     override fun onDestroyView() {
+        _binding?.collectorsRv?.setOnItemClickListener(null)
         super.onDestroyView()
         _binding = null
     }

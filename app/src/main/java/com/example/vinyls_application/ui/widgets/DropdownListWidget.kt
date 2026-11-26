@@ -92,6 +92,11 @@ class DropdownListWidget @JvmOverloads constructor(
         }
     }
 
+    fun clearAdapter() {
+        binding.autoCompleteTextView.setAdapter(null)
+        selectedItem = null
+    }
+
     fun getSelectedItem(): DropdownItem? = selectedItem
 
     fun showError(error: String) {
