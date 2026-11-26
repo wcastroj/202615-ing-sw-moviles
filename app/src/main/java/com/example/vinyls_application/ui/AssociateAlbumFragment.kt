@@ -136,6 +136,7 @@ class AssociateAlbumFragment : Fragment(), ComponentCallbacks2 {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        _binding?.dropdownAlbums?.clearAdapter()
         _binding = null
     }
 
