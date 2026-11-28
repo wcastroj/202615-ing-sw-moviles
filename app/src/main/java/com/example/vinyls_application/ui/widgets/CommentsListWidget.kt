@@ -1,15 +1,8 @@
 package com.example.vinyls_application.ui.widgets
 
 import android.content.Context
-import android.graphics.Color
-import android.graphics.Typeface
 import android.util.AttributeSet
-import android.util.TypedValue
 import android.widget.LinearLayout
-import android.widget.TextView
-import androidx.core.view.isVisible
-import com.example.vinyls_application.R
-import androidx.core.graphics.toColorInt
 
 data class CommentItem(
     val rating: Int,
@@ -20,9 +13,6 @@ class CommentsListWidget @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) : LinearLayout(context, attrs) {
-    private val container = LinearLayout(context)
-
-    private val title = TextView(context)
     private val container = LinearLayout(context)
 
     init {
