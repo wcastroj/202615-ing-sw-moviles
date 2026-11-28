@@ -1,5 +1,6 @@
 package com.example.vinyls_application.ui
 
+import android.content.ComponentCallbacks2
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,7 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import com.example.vinyls_application.R
 import com.example.vinyls_application.databinding.AlbumCreateFragmentBinding
 import com.example.vinyls_application.models.Album
@@ -33,7 +35,7 @@ import com.google.android.material.textfield.TextInputLayout
  *
  * No muestra la portada a propósito: así el formulario no carga ningún bitmap en memoria.
  */
-class AlbumCreateFragment : Fragment() {
+class AlbumCreateFragment : Fragment(), ComponentCallbacks2 {
 
     private var _binding: AlbumCreateFragmentBinding? = null
     private val binding get() = _binding!!
@@ -103,8 +105,26 @@ class AlbumCreateFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         findDatePicker()?.clearOnPositiveButtonClickListeners()
+        blockBackWhileSaving.remove()
+        _binding?.actvGenre?.setAdapter(null)
+        _binding?.actvRecordLabel?.setAdapter(null)
         renderedErrors = null
         _binding = null
+    }
+
+    override fun onTrimMemory(level: Int) {
+        context?.let { ctx ->
+            if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) {
+                Glide.get(ctx).clearMemory()
+            } else {
+                Glide.get(ctx).trimMemory(level)
+            }
+        }
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        context?.let { Glide.get(it).clearMemory() }
     }
 
     private fun optionsAdapter(values: List<String>) =

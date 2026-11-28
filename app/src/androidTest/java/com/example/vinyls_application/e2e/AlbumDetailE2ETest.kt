@@ -57,7 +57,7 @@ class AlbumDetailE2ETest {
 
     private lateinit var idlingResource: VolleyIdlingResource
     private lateinit var queue: RequestQueue
-    private lateinit var scenario: ActivityScenario<MainActivity>
+    private var scenario: ActivityScenario<MainActivity>? = null
     private lateinit var server: MockWebServer
     private lateinit var originalBaseUrl: String
 
@@ -105,7 +105,7 @@ class AlbumDetailE2ETest {
 
     @After
     fun tearDown() {
-        scenario.close()
+        scenario?.close()
         IdlingRegistry.getInstance().unregister(idlingResource)
         // Se detiene la cola para no dejar sus hilos vivos entre tests
         queue.stop()
@@ -199,17 +199,18 @@ class AlbumDetailE2ETest {
     private fun getFirstAlbumDetailFromBackend(): AlbumDetail {
         // 1. Leer el id del primer álbum desde el tag de su tarjeta
         var albumId = 0
-        scenario.onActivity { activity ->
+        scenario!!.onActivity { activity ->
             val recyclerView = activity.findViewById<RecyclerView>(R.id.albumsRv)
             albumId = recyclerView.findViewHolderForAdapterPosition(0)!!
                 .itemView.getTag(R.id.tag_album_id) as Int
         }
 
-        // 2. Pedir el álbum al backend real (fuera del hilo principal)
+        // 2. Pedir el álbum al backend real (fuera del hilo principal). Timeout de 10 s: si el
+        //    backend no responde, el test falla rápido con un error claro
         val url = URL(NetworkServiceAdapter.BASE_URL.trimEnd('/') + "/albums/" + albumId)
         val connection = url.openConnection() as HttpURLConnection
-        connection.connectTimeout = 30_000
-        connection.readTimeout = 30_000
+        connection.connectTimeout = 10_000
+        connection.readTimeout = 10_000
         val json = try {
             JSONObject(connection.inputStream.bufferedReader().use { it.readText() })
         } finally {

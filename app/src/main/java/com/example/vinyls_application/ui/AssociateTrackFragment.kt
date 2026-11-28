@@ -1,5 +1,6 @@
 package com.example.vinyls_application.ui
 
+import android.content.ComponentCallbacks2
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,6 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.bumptech.glide.Glide
 import com.example.vinyls_application.R
 import com.example.vinyls_application.databinding.AssociateTrackFragmentBinding
 import com.example.vinyls_application.models.Track
@@ -23,7 +25,7 @@ import com.example.vinyls_application.utils.TrackFieldError
 import com.example.vinyls_application.viewmodels.AssociateTrackState
 import com.example.vinyls_application.viewmodels.AssociateTrackViewModel
 
-class AssociateTrackFragment : Fragment() {
+class AssociateTrackFragment : Fragment(), ComponentCallbacks2 {
 
     private var _binding: AssociateTrackFragmentBinding? = null
     private val binding get() = _binding!!
@@ -112,7 +114,23 @@ class AssociateTrackFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        blockBackWhileSaving.remove()
         _binding = null
+    }
+
+    override fun onTrimMemory(level: Int) {
+        context?.let { ctx ->
+            if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) {
+                Glide.get(ctx).clearMemory()
+            } else {
+                Glide.get(ctx).trimMemory(level)
+            }
+        }
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        context?.let { Glide.get(it).clearMemory() }
     }
 
     private fun showState(state: AssociateTrackState) {

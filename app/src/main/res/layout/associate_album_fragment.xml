@@ -34,7 +34,7 @@
                 android:id="@+id/dropdownAlbums"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="-40dp"
                 app:dropdownHint="@string/associate_album_dropdown_hint"
                 app:dropdownLabel="@string/associate_album_dropdown_label" />
 

@@ -34,10 +34,6 @@ class RelatedAlbumsAdapter : ListAdapter<Album, RelatedAlbumsAdapter.AlbumViewHo
         )
     }
 
-    override fun onViewRecycled(holder: AlbumViewHolder) {
-        super.onViewRecycled(holder)
-    }
-
     class AlbumViewHolder(val widget: SummaryCardWidget) : RecyclerView.ViewHolder(widget)
 
     private object AlbumDiffCallback : DiffUtil.ItemCallback<Album>() {

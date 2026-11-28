@@ -20,6 +20,7 @@
         <TextView
             android:id="@+id/labelTrackName"
             style="@style/FormLabel"
+            android:labelFor="@id/etTrackName"
             android:text="@string/associate_track_name_label" />
 
         <com.google.android.material.textfield.TextInputLayout
@@ -38,6 +39,7 @@
         <TextView
             android:id="@+id/labelTrackDuration"
             style="@style/FormLabel"
+            android:labelFor="@id/etTrackDuration"
             android:text="@string/associate_track_duration_label" />
 
         <com.google.android.material.textfield.TextInputLayout

@@ -3,7 +3,6 @@ package com.example.vinyls_application.ui.widgets
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.isVisible
@@ -45,10 +44,16 @@ class CatalogCardWidget @JvmOverloads constructor(
         binding.txtDetail.showOrHide(detail)
         loadCover(coverUrl)
 
-        binding.btnAction.text =
+        val resolvedActionText =
             actionText ?: context.getString(R.string.catalog_card_action_default)
+        binding.btnAction.text = resolvedActionText
+        binding.btnAction.contentDescription = if (onAction != null) {
+            context.getString(R.string.catalog_card_action_description, resolvedActionText, title)
+        } else {
+            null
+        }
         binding.btnAction.setOnClickListener(onAction)
-        binding.btnAction.visibility = if (onAction == null) View.GONE else View.VISIBLE
+        binding.btnAction.visibility = if (onAction == null) GONE else VISIBLE
     }
 
     fun clearCover() {
