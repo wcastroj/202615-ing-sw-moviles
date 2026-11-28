@@ -40,17 +40,6 @@
                 app:hasIcon="false"
                 tools:visibility="visible" />
 
-            <com.example.vinyls_application.ui.widgets.ButtonWidget
-                android:id="@+id/btnCreateAlbum"
-                style="@style/ButtonPrimaryStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:visibility="gone"
-                app:customText="@string/album_create_button"
-                app:hasIcon="false"
-                tools:visibility="visible" />
-
             <com.example.vinyls_application.ui.widgets.CatalogListWidget
                 android:id="@+id/albumsRv"
                 android:layout_width="match_parent"
