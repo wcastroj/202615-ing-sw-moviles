@@ -22,10 +22,23 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="12dp"
+                android:accessibilityHeading="true"
                 android:text="@string/catalogo_de_albumes"
                 android:textColor="#111111"
                 android:textSize="24sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:targetApi="28" />
+
+            <com.example.vinyls_application.ui.widgets.ButtonWidget
+                android:id="@+id/btnCreateAlbum"
+                style="@style/ButtonPrimaryStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:visibility="gone"
+                app:customText="@string/album_create_button"
+                app:hasIcon="false"
+                tools:visibility="visible" />
 
             <com.example.vinyls_application.ui.widgets.ButtonWidget
                 android:id="@+id/btnCreateAlbum"
@@ -43,6 +56,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
+                android:clipToPadding="false"
+                android:paddingBottom="16dp"
                 tools:listitem="@layout/catalog_card_widget"
                 tools:spanCount="2"
                 tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager" />

@@ -141,7 +141,7 @@ class PerformerListTest {
     /** PE-009 (negativa): sin artistas se muestra "No se encontraron artistas". */
     @Test
     fun pe009_emptyListShowsNoArtistsFoundMessage() {
-        givenPerformersResponses(bands = jsonResponse("[]"), musicians = jsonResponse("[]"))
+        givenNoPerformers()
 
         launchAppAndOpenArtists()
 
@@ -181,27 +181,28 @@ class PerformerListTest {
         }
     }
 
-    /** Apunta la app al servidor falso. /albums responde vacío porque la app abre en el catálogo. */
-    private fun givenPerformersResponses(bands: MockResponse, musicians: MockResponse) {
+    /**
+     * Apunta la app al servidor falso sin artistas. /albums también responde vacío porque la
+     * app abre en el catálogo.
+     */
+    private fun givenNoPerformers() {
         NetworkServiceAdapter.BASE_URL = server.url("/").toString()
         server.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse = when (request.path) {
-                "/bands" -> bands
-                "/musicians" -> musicians
-                "/albums" -> jsonResponse("[]")
+                "/bands", "/musicians", "/albums" -> emptyJsonArrayResponse()
                 else -> MockResponse().setResponseCode(404)
             }
         }
     }
 
     /**
-     * Respuesta 200 con JSON. Sin `charset=utf-8` Volley decodifica en ISO-8859-1 y los
-     * acentos llegan mal (p. ej. "Rubén" se vería "RubÃ©n"); el backend real sí lo envía.
+     * Respuesta 200 con una lista JSON vacía. Sin `charset=utf-8` Volley decodifica en
+     * ISO-8859-1 y los acentos llegarían mal; el backend real sí lo envía.
      */
-    private fun jsonResponse(body: String) = MockResponse()
+    private fun emptyJsonArrayResponse() = MockResponse()
         .setResponseCode(200)
         .addHeader("Content-Type", "application/json; charset=utf-8")
-        .setBody(body)
+        .setBody("[]")
 
     /** Abre la app (inicia en el catálogo) y toca "Artistas" en la barra inferior. */
     private fun launchAppAndOpenArtists() {
@@ -270,8 +271,8 @@ class PerformerListTest {
      * Reintenta la acción hasta que pase o se agote el tiempo. Solo se usa para el clic en
      * "Artistas"; las verificaciones esperan a Volley con el IdlingResource.
      */
-    private fun waitUntil(timeoutMs: Long = 10_000, assertion: () -> Unit) {
-        val deadline = SystemClock.elapsedRealtime() + timeoutMs
+    private fun waitUntil(assertion: () -> Unit) {
+        val deadline = SystemClock.elapsedRealtime() + 10_000
         while (true) {
             try {
                 assertion()

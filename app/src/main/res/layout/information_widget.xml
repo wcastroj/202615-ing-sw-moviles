@@ -48,7 +48,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="8dp"
         android:gravity="center"
-        android:textColor="#757575"
+        android:textColor="#5F5F6B"
         android:textSize="14sp"
         tools:text="Por ahora no hay álbumes disponibles" />
 

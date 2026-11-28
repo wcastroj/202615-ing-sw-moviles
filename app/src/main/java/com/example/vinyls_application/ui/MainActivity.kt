@@ -1,6 +1,5 @@
 package com.example.vinyls_application.ui
 
-import android.content.ComponentCallbacks2
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -20,7 +19,16 @@ class MainActivity : AppCompatActivity() {
     private val topLevelDestinations = setOf(
         R.id.loginFragment,
         R.id.navigation_albums,
-        R.id.navigation_artists
+        R.id.navigation_artists,
+        R.id.navigation_collectors
+    )
+
+    // Destinations that take the whole screen: they don't show the NavigationWidget
+    private val destinationsWithoutNavigation = setOf(
+        R.id.loginFragment,
+        R.id.albumCreateFragment,
+        R.id.associateTrackFragment,
+        R.id.associateAlbumFragment
     )
 
     // Destinations that take the whole screen: they don't show the NavigationWidget
@@ -67,7 +75,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
-        if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) {
+        if (level >= TRIM_MEMORY_RUNNING_LOW) {
             Glide.get(this).clearMemory()
             NetworkServiceAdapter.getInstance(this).clearCache()
         } else {

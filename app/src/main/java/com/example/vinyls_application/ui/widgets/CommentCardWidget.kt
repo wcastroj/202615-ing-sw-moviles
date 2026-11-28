@@ -32,6 +32,11 @@ class CommentCardWidget @JvmOverloads constructor(
         comment: String? = null
     ) {
         binding.title.text = "$rating/5"
+        binding.title.contentDescription = if (comment.isNullOrBlank()) {
+            context.getString(R.string.comment_card_rating_only_description, rating)
+        } else {
+            context.getString(R.string.comment_card_rating_description, rating, comment)
+        }
         binding.description.showOrHide(comment)
     }
 

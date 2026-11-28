@@ -14,6 +14,7 @@ import org.json.JSONObject
 import com.example.vinyls_application.models.Album
 import com.example.vinyls_application.models.AlbumDetail
 import com.example.vinyls_application.models.Band
+import com.example.vinyls_application.models.Collector
 import com.example.vinyls_application.models.Comment
 import com.example.vinyls_application.models.Musician
 import com.example.vinyls_application.models.Performer
@@ -97,6 +98,23 @@ class NetworkServiceAdapter(
         fun parseMusicians(response: String): List<Musician> {
             val resp = JSONArray(response)
             return (0 until resp.length()).map { parseMusician(resp.getJSONObject(it)) }
+        }
+
+        fun parseCollectors(response: String): List<Collector> {
+            val resp = JSONArray(response)
+            val collectors = mutableListOf<Collector>()
+            for (i in 0 until resp.length()) {
+                val item = resp.getJSONObject(i)
+                collectors.add(
+                    Collector(
+                        collectorId = item.getInt("id"),
+                        name = item.getString("name"),
+                        telephone = item.getString("telephone"),
+                        email = item.getString("email")
+                    )
+                )
+            }
+            return collectors
         }
 
         fun parseAlbumDetail(response: String): AlbumDetail {
@@ -261,6 +279,10 @@ class NetworkServiceAdapter(
 
     suspend fun getPerformer(id: Int, type: PerformerType): Performer = withContext(dispatcher) {
         parsePerformer(getString(performerPath(id, type)))
+    }
+
+    suspend fun getCollectors(): List<Collector> = withContext(dispatcher) {
+        parseCollectors(getString("collectors"))
     }
 
     /** La respuesta del POST no se parsea a un modelo, así que no hace falta cambiar de hilo. */

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:theme="@style/ThemeOverlay.Vinyls.AlbumForm">
@@ -24,6 +23,7 @@
             <TextView
                 android:id="@+id/labelCover"
                 style="@style/FormLabel"
+                android:labelFor="@id/etCover"
                 android:text="@string/album_create_cover_label" />
 
             <com.google.android.material.textfield.TextInputLayout
@@ -41,6 +41,7 @@
             <TextView
                 android:id="@+id/labelName"
                 style="@style/FormLabel"
+                android:labelFor="@id/etName"
                 android:text="@string/album_create_name_label" />
 
             <com.google.android.material.textfield.TextInputLayout
@@ -61,6 +62,7 @@
             <TextView
                 android:id="@+id/labelRecordLabel"
                 style="@style/FormLabel"
+                android:labelFor="@id/actvRecordLabel"
                 android:text="@string/album_create_record_label_label" />
 
             <com.google.android.material.textfield.TextInputLayout
@@ -77,6 +79,7 @@
             <TextView
                 android:id="@+id/labelGenre"
                 style="@style/FormLabel"
+                android:labelFor="@id/actvGenre"
                 android:text="@string/album_create_genre_label" />
 
             <com.google.android.material.textfield.TextInputLayout
@@ -93,6 +96,7 @@
             <TextView
                 android:id="@+id/labelReleaseDate"
                 style="@style/FormLabel"
+                android:labelFor="@id/etReleaseDate"
                 android:text="@string/album_create_release_date_label" />
 
             <com.google.android.material.textfield.TextInputLayout
@@ -115,6 +119,7 @@
             <TextView
                 android:id="@+id/labelDescription"
                 style="@style/FormLabel"
+                android:labelFor="@id/etDescription"
                 android:text="@string/album_create_description_label" />
 
             <com.google.android.material.textfield.TextInputLayout

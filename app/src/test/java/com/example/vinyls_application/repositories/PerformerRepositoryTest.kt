@@ -148,7 +148,7 @@ class PerformerRepositoryTest {
         loadPerformers()
 
         // Act
-        bandsRequest().deliverError(ServerError(networkResponse(500)))
+        bandsRequest().deliverError(ServerError(serverErrorResponse()))
 
         // Assert: falla y ni siquiera se piden los músicos
         assertTrue(error is ServerError)
@@ -165,7 +165,7 @@ class PerformerRepositoryTest {
         deliverResponse(bandsRequest(), bandsJson)
 
         // Act
-        musiciansRequest().deliverError(ServerError(networkResponse(500)))
+        musiciansRequest().deliverError(ServerError(serverErrorResponse()))
 
         // Assert: no se entrega una lista a medias solo con las bandas
         assertTrue(error is ServerError)
@@ -237,6 +237,6 @@ class PerformerRepositoryTest {
             .invoke(request, response)
     }
 
-    private fun networkResponse(statusCode: Int) =
-        NetworkResponse(statusCode, ByteArray(0), false, 0, emptyList())
+    private fun serverErrorResponse() =
+        NetworkResponse(500, ByteArray(0), false, 0, emptyList())
 }
